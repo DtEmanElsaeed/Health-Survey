@@ -1825,8 +1825,6 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uB
 
 // ---------- FULL 27+ QUESTIONS (COMPLETE) ----------
 const QUESTIONS=[
-  {id:'age', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'single', q:{en:'A note on your stage of life',ar:'مرحلة من مراحل عمرك'}, sub:{en:'A foundational note in the composition of your nutritional portrait.',ar:'لبنة أساسية في رسم بورتريهك الغذائي.'}, options:[{icon:'🌱',en:'Under 18',ar:'أقل من 18',val:'u18'},{icon:'🌿',en:'18 – 25',ar:'18 – 25',val:'18-25'},{icon:'🍃',en:'26 – 40',ar:'26 – 40',val:'26-40'},{icon:'🌳',en:'40 & above',ar:'40 فما فوق',val:'40+'}]},
-  {id:'gender', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'single', q:{en:'How you move through the world',ar:'هويتك وحضورك'}, options:[{icon:'○',en:'Male',ar:'ذكر',val:'male'},{icon:'○',en:'Female',ar:'أنثى',val:'female'},{icon:'○',en:'Prefer not to disclose',ar:'أفضّل عدم الإفصاح',val:'other'}]},
   {id:'measurements', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'dual-text', q:{en:'Your physical composition',ar:'تكوينك الجسدي'}, sub:{en:'Enables precise BMI calibration and caloric architecture.',ar:'يُتيح معايرةً دقيقة لمؤشر كتلة الجسم وهندسة السعرات.'}, fields:[{key:'height',label:{en:'Height (cm)',ar:'الطول (سم)'},placeholder:{en:'e.g. 170',ar:'مثلاً 170'}},{key:'weight',label:{en:'Weight (kg)',ar:'الوزن (كجم)'},placeholder:{en:'e.g. 70',ar:'مثلاً 70'}}]},
   {id:'diet', section:{en:'THE PHILOSOPHY',ar:'الفلسفة'}, checkpoint:{en:'Let us now explore the philosophy behind your plate.',ar:'دعنا نستكشف الفلسفة الكامنة وراء طبقك.'}, type:'single', q:{en:'The philosophy of your plate',ar:'فلسفة طبقك الغذائي'}, sub:{en:'Every palate is a distinct expression — no judgement, only considered curiosity.',ar:'كل ذوق هو تعبير فريد — لا أحكام، بل فضول راقٍ.'}, options:[{icon:'🥩',en:'Omnivore — the full table',ar:'عادي — المائدة الكاملة',val:'omnivore'},{icon:'🥗',en:'Vegetarian — plant-forward',ar:'نباتي — الأولوية للنبات',val:'vegetarian'},{icon:'🌱',en:'Vegan — entirely plant-based',ar:'نباتي بالكامل',val:'vegan'},{icon:'🥓',en:'Ketogenic — low-carb, high-fat',ar:'كيتو — قليل الكربوهيدرات',val:'keto'}]},
   {id:'activity', section:{en:'MOVEMENT & VITALITY',ar:'الحركة والحيوية'}, checkpoint:{en:'We turn now to the rhythm of your body in motion.',ar:'ننتقل الآن إلى إيقاع جسدك في حركته.'}, type:'single', q:{en:'The rhythm of your body in daily motion',ar:'إيقاع حركة جسدك في حياتك اليومية'}, sub:{en:'An honest account serves your portrait best.',ar:'الصدق في الإجابة يخدم بورتريهك على أفضل وجه.'}, options:[{icon:'🛋️',en:'Sedentary — primarily desk-bound',ar:'خامل — جلوس في الغالب',val:'sedentary'},{icon:'🚶',en:'Moderately active',ar:'نشاط حياتي متوسط',val:'moderate'},{icon:'🏋️',en:'Highly active — structured training',ar:'نشيط جداً — تدريب منتظم',val:'active'}]},
@@ -1853,8 +1851,8 @@ const QUESTIONS=[
   {id:'dislikes', section:{en:'THE PALATE',ar:'الحنك'}, checkpoint:{en:'Now, a careful study of your personal palate…',ar:'دراسة دقيقة لحنكك الشخصي…'}, type:'text',optional:true, q:{en:'Ingredients you choose to exclude from your table',ar:'مكوّنات تختار استبعادها من مائدتك'}, sub:{en:'Optional — helps us compose a plan that genuinely honours your taste.',ar:'اختياري — يساعدنا في صياغة خطة تحترم ذوقك حقاً.'}, placeholder:{en:'e.g. Offal, olives, mushrooms, bitter greens…',ar:'مثلاً: كبد، زيتون، فطر، خضروات مرّة…'}},
   {id:'weakness', section:{en:'AN ARTISANAL CONFESSION',ar:'اعتراف فني'}, fun:{en:'Every discerning palate harbours its cherished indulgence — this is a safe space.',ar:'كل ذوق راقٍ يُخفي متعته المفضّلة — هذا فضاء آمن.'}, type:'single', q:{en:'Your most celebrated culinary indulgence',ar:'متعتك الغذائية الأكثر احتفاءً'}, options:[{icon:'🍰',en:'Confections & fine pastries',ar:'الحلويات والمعجنات الراقية',val:'sweets'},{icon:'🍔',en:'Street food & fast service dining',ar:'الوجبات السريعة',val:'fastfood'},{icon:'🍟',en:'Artisanal salty snacks',ar:'الوجبات الخفيفة المالحة',val:'snacks'},{icon:'✦',en:'None — I am entirely disciplined',ar:'لا شيء — أنا منضبط تماماً',val:'disciplined'}]},
   {id:'fav_meal', section:{en:'AN ARTISANAL CONFESSION',ar:'اعتراف فني'}, type:'text', q:{en:'Your one definitive dish — if served at every meal',ar:'طبقك الأثير والنهائي — لو قُدِّم في كل وجبة'}, sub:{en:'This single answer reveals the most intimate layers of your culinary identity.',ar:'هذه الإجابة وحدها تكشف أعمق طبقات هويتك الغذائية.'}, placeholder:{en:'e.g. My grandmother\'s slow-cooked lamb with heritage grains…',ar:'مثلاً: يخنة لحم جدّتي البطيئة مع الحبوب الموروثة…'}},
-  {id:'pregnant', condition:()=>getAnswer('gender')?.val==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, checkpoint:{en:'A chapter composed exclusively for her.',ar:'فصل مُعدّ حصراً لها.'}, female:true, type:'single', q:{en:'Your current reproductive chapter',ar:'فصلك الإنجابي الحالي'}, options:[{icon:'✦',en:'None of the below',ar:'لا شيء مما يلي',val:'no'},{icon:'🤰',en:'Pregnant',ar:'حامل',val:'pregnant'},{icon:'🤱',en:'Breastfeeding',ar:'مرضعة',val:'breastfeeding'}]},
-  {id:'period', condition:()=>getAnswer('gender')?.val==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, female:true, type:'single', q:{en:'The regularity of your monthly cycle',ar:'انتظام دورتك الشهرية'}, options:[{icon:'✦',en:'Regular — a reliable, consistent cycle',ar:'منتظمة — دورة ثابتة وموثوقة',val:'yes'},{icon:'✦',en:'Irregular — a variable cycle',ar:'غير منتظمة — دورة متذبذبة',val:'no'}]},
+  {id:'pregnant', condition:()=>getCurrentGenderValue()==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, checkpoint:{en:'A chapter composed exclusively for her.',ar:'فصل مُعدّ حصراً لها.'}, female:true, type:'single', q:{en:'Your current reproductive chapter',ar:'فصلك الإنجابي الحالي'}, options:[{icon:'✦',en:'None of the below',ar:'لا شيء مما يلي',val:'no'},{icon:'🤰',en:'Pregnant',ar:'حامل',val:'pregnant'},{icon:'🤱',en:'Breastfeeding',ar:'مرضعة',val:'breastfeeding'}]},
+  {id:'period', condition:()=>getCurrentGenderValue()==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, female:true, type:'single', q:{en:'The regularity of your monthly cycle',ar:'انتظام دورتك الشهرية'}, options:[{icon:'✦',en:'Regular — a reliable, consistent cycle',ar:'منتظمة — دورة ثابتة وموثوقة',val:'yes'},{icon:'✦',en:'Irregular — a variable cycle',ar:'غير منتظمة — دورة متذبذبة',val:'no'}]},
   {id:'past_diet', section:{en:'FINAL OBSERVATIONS',ar:'الملاحظات الختامية'}, checkpoint:{en:'You have reached the final chapter of your nutritional portrait.',ar:'لقد وصلت إلى الفصل الأخير من بورتريهك الغذائي.'}, type:'text',optional:true, q:{en:'Previous dietary chapters — and what they taught you',ar:'فصول غذائية سابقة — وما علّمتكَ إيّاه'}, sub:{en:'Optional — regime type, duration, outcome, and the reason for discontinuation.',ar:'اختياري — نوع النظام، المدة، النتيجة، وسبب التوقف.'}, placeholder:{en:'e.g. Ketogenic for 3 months — effective but socially limiting…',ar:'مثلاً: كيتو لمدة 3 أشهر — فعّال لكن مقيّد اجتماعياً…'}},
   {id:'notes', section:{en:'FINAL OBSERVATIONS',ar:'الملاحظات الختامية'}, type:'text',optional:true, q:{en:'Any final observations for your nutritionist',ar:'ملاحظاتك الختامية لأخصائي التغذية'}, sub:{en:'Optional — symptoms, context, or anything that would enrich the portrait.',ar:'اختياري — أعراض أو سياق أو أي شيء يُثري البورتريه.'}, placeholder:{en:'Anything that would help your nutritionist craft a more precise plan…',ar:'أي شيء يساعد أخصائي التغذية على رسم خطة أكثر دقة…'}}
 ];
@@ -1938,6 +1936,8 @@ function getAnswer(id){const i=QUESTIONS.findIndex(q=>q.id===id);return i>=0?ans
 function isVisible(i){const q=QUESTIONS[i];return!q.condition||q.condition();}
 function totalVisible(){return QUESTIONS.filter((_,i)=>isVisible(i)).length;}
 function visibleIndex(){let c=0;for(let i=0;i<=step;i++)if(isVisible(i))c++;return c;}
+function getCurrentGenderValue(){return getAnswer('gender')?.val||userPersonalData?.gender||'';}
+function deriveAgeBandFromDob(dob){if(!dob)return'';const dt=new Date(dob);if(Number.isNaN(dt.getTime()))return'';const age=Math.floor((Date.now()-dt.getTime())/31557600000);return age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';}
 function buildSubmissionPayload(){
   const payload={language:lang};
   // ── Personal details from profile screen ──────────
@@ -1948,6 +1948,8 @@ function buildSubmissionPayload(){
     payload.dob        = userPersonalData.dob    || '';
     payload.gender_profile = userPersonalData.gender || '';
     payload.city       = userPersonalData.city   || '';
+    payload.gender     = userPersonalData.gender || '';
+    payload.age        = deriveAgeBandFromDob(userPersonalData.dob);
   }
   // ── Social login provider ─────────────────────────
   payload.login_via = userProfile ? userProfile.via : 'Guest';
@@ -2313,20 +2315,6 @@ function _proceedToSurvey(gender, dob) {
 
   document.getElementById('profile-screen').classList.add('hidden');
   document.getElementById('survey-screen').classList.remove('hidden');
-
-  const gIdx = QUESTIONS.findIndex(q => q.id === 'gender');
-  if (gIdx >= 0 && gender && !answers[gIdx]) {
-    answers[gIdx] = { val: gender, prefilled: true };
-  }
-
-  if (dob) {
-    const age = Math.floor((Date.now() - new Date(dob)) / 31557600000);
-    const ageVal = age < 18 ? 'u18' : age <= 25 ? '18-25' : age <= 40 ? '26-40' : '40+';
-    const aIdx = QUESTIONS.findIndex(q => q.id === 'age');
-    if (aIdx >= 0 && !answers[aIdx]) {
-      answers[aIdx] = { val: ageVal, prefilled: true };
-    }
-  }
 
   const storyName = document.getElementById('story-user-name');
   if (storyName && userPersonalData?.name) storyName.textContent = userPersonalData.name;
