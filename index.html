@@ -1247,8 +1247,9 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 }
 
 @media(max-width:520px){
+  html{height:auto;min-height:100%}
   html,body{overflow:auto}
-  body{min-height:100vh}
+  body{min-height:100vh;height:auto}
   body::before{opacity:0.18}
   .ambient{display:none}
   .card{
