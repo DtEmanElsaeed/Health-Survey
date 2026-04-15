@@ -343,6 +343,43 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
    INTERACTIVE ENHANCEMENTS
 ═══════════════════════════════════════ */
 
+/* ══════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════ */
+#login-screen{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;}
+.login-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 44px;}
+.login-ornament{font-size:40px;margin-bottom:18px;display:block;}
+.login-headline{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;font-style:italic;color:var(--charcoal);margin-bottom:8px;line-height:1.25;}
+.login-sub{font-size:12.5px;color:var(--stone);margin-bottom:30px;line-height:1.65;font-style:italic;max-width:340px;}
+.login-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+.login-social-btn{display:flex;align-items:center;gap:13px;padding:13px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--ivory);cursor:pointer;font-size:13px;font-weight:500;color:var(--charcoal);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);width:100%;position:relative;overflow:hidden;font-family:'Inter','Cairo',sans-serif;}
+.login-social-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(36,61,23,0.12);border-color:var(--sage);}
+.login-social-btn.fb-btn{background:#1877f2;color:#fff;border-color:#1877f2;}
+.login-social-btn.fb-btn:hover{background:#166fe5;box-shadow:0 8px 22px rgba(24,119,242,0.28);}
+.login-social-btn.apple-btn{background:#000;color:#fff;border-color:#000;}
+.login-social-btn.apple-btn:hover{background:#1a1a1a;box-shadow:0 8px 22px rgba(0,0,0,0.25);}
+.login-social-btn svg{width:20px;height:20px;flex-shrink:0;}
+.login-btn-label{flex:1;text-align:left;}
+.login-divider{display:flex;align-items:center;gap:12px;color:var(--warm-gray);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;width:100%;max-width:340px;margin:2px 0;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border-fine);}
+.login-skip-btn{width:100%;max-width:340px;padding:11px;background:transparent;border:1px dashed var(--border);border-radius:var(--r);color:var(--warm-gray);font-size:11.5px;font-style:italic;cursor:pointer;transition:all 0.3s;margin-top:4px;font-family:'Inter','Cairo',sans-serif;}
+.login-skip-btn:hover{border-color:var(--sage);color:var(--stone);}
+.login-privacy{font-size:10px;color:var(--warm-gray);margin-top:14px;font-style:italic;opacity:0.7;max-width:320px;}
+/* Google rendered button override */
+#google-btn-wrap{width:100%;max-width:340px;}
+#google-btn-wrap iframe,#google-btn-wrap>div{width:100%!important;}
+/* User bar in story panel */
+.story-user-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.11);margin-bottom:2px;}
+.story-user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.22);flex-shrink:0;}
+.story-user-emoji{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.12);display:grid;place-items:center;font-size:17px;flex-shrink:0;}
+.story-user-info{flex:1;min-width:0;}
+.story-user-name{font-size:12.5px;font-weight:600;color:rgba(255,248,235,0.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.story-user-via{font-size:10px;color:rgba(255,248,235,0.48);letter-spacing:0.06em;}
+/* Pre-filled indicator on options */
+.option.auto-filled{border-color:var(--sage)!important;background:linear-gradient(120deg,rgba(228,237,224,0.95),rgba(248,244,237,0.9))!important;}
+.option.auto-filled .option-indicator::after{content:'auto'!important;background:transparent!important;color:var(--sage)!important;font-size:8px!important;font-weight:700!important;letter-spacing:0.05em!important;width:auto!important;height:auto!important;border-radius:0!important;}
+.prefill-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--sage);background:rgba(139,166,122,0.12);border:1px solid rgba(139,166,122,0.25);border-radius:99px;padding:3px 10px;margin-left:8px;vertical-align:middle;}
+
 /* ─── Directional slide transitions ─── */
 @keyframes slideInFromRight {
   from { opacity:0; transform:translateX(48px) scale(0.98); }
@@ -1427,6 +1464,7 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 }
 .story-side .affirmation-label{color:var(--gold)}
 .story-side .affirmation-text{color:var(--stone)}
+.stage-side #login-screen,
 .stage-side #lang-screen,
 .stage-side #survey-screen,
 .stage-side #result-screen{
@@ -1581,6 +1619,13 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
   }
 }
 </style>
+<!-- ─ Google Identity Services ─ (replace YOUR_GOOGLE_CLIENT_ID) -->
+<script src="https://accounts.google.com/gsi/client" onload="initGSI()" async defer></script>
+<!-- ─ Facebook SDK ─ (replace YOUR_FACEBOOK_APP_ID) -->
+<script>
+window.fbAsyncInit=function(){FB.init({appId:'YOUR_FACEBOOK_APP_ID',cookie:true,xfbml:false,version:'v18.0'});};
+(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src='https://connect.facebook.net/en_US/sdk.js';fjs.parentNode.insertBefore(js,fjs);}(document,'script','facebook-jssdk'));
+</script>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -1591,6 +1636,14 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
   <div class="experience-shell">
       <div class="story-card unified-card">
         <div class="story-side">
+        <!-- user bar — hidden until login -->
+        <div class="story-user-bar hidden" id="story-user-bar">
+          <div class="story-user-emoji" id="story-user-avatar">👤</div>
+          <div class="story-user-info">
+            <div class="story-user-name" id="story-user-name">Guest</div>
+            <div class="story-user-via" id="story-user-via">Signed in</div>
+          </div>
+        </div>
         <div class="story-badge" id="story-stage">Guided Experience</div>
         <div class="story-title" id="story-title">A portrait worth finishing.</div>
         <div class="story-copy" id="story-copy">Each answer adds shape, mood, and detail to a more personal nutrition story.</div>
@@ -1618,7 +1671,34 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
         </div>
         </div>
         <div class="stage-side">
-      <div id="lang-screen">
+      <!-- ══ LOGIN SCREEN ══ -->
+      <div id="login-screen">
+        <div class="card login-card">
+          <span class="login-ornament">🌿</span>
+          <div class="login-headline">Welcome to Atelier Nutritionnel</div>
+          <div class="login-sub">Sign in to pre-fill your personal details and save your nutritional portrait to your account.</div>
+          <div class="login-btns">
+            <!-- Google — rendered by GSI into this wrapper -->
+            <div id="google-btn-wrap"></div>
+            <div class="login-divider">or</div>
+            <!-- Facebook -->
+            <button class="login-social-btn fb-btn" onclick="loginFacebook()">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <span class="login-btn-label">Continue with Facebook</span>
+            </button>
+            <!-- Apple -->
+            <button class="login-social-btn apple-btn" onclick="loginApple()">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+              <span class="login-btn-label">Continue with Apple</span>
+            </button>
+            <div class="login-divider">or</div>
+            <button class="login-skip-btn" onclick="loginGuest()">Continue as Guest — no sign-in needed</button>
+          </div>
+          <p class="login-privacy">We only read your name, photo, and basic profile to personalise your experience. No data is stored on our servers.</p>
+        </div>
+      </div>
+      <!-- ══ LANG SCREEN ══ -->
+      <div id="lang-screen" class="hidden">
         <div class="card">
           <div class="brand-mark">Atelier Nutritionnel</div>
           <span class="lang-ornament">🌿</span>
@@ -1867,6 +1947,168 @@ function calcBMI(){const f=getAnswer('measurements')?.fields||{};const h=parseFl
 function showResults(){document.getElementById('survey-screen').classList.add('hidden');document.getElementById('result-screen').classList.remove('hidden');const isAr=lang==='ar',goal=getAnswer('goal')?.val,diet=getAnswer('diet')?.val,exercise=getAnswer('exercise')?.val,weakness=getAnswer('weakness')?.val,stress=getAnswer('stress')?.val,stressEat=getAnswer('stress_eat')?.val,meals=getAnswer('meals')?.val,fav=getAnswer('fav_meal')?.text||'—',sleep=getAnswer('sleep')?.val,water=getAnswer('water')?.val,bmi=calcBMI(),archKey=getArchetype(goal,diet,exercise,weakness,stress,stressEat),arch=ARCHETYPES[archKey];const bmiHtml=bmi?`<div class="bmi-block"><div class="bmi-num" style="color:${bmi.cat.color}">${bmi.value}</div><div class="bmi-info"><div class="bmi-title">Body Mass Index</div><div class="bmi-cat" style="color:${bmi.cat.color}">${bmi.cat[lang]}</div></div></div>`:'';const profileRows=`<div class="profile-row"><span class="p-icon">🎯</span><span class="p-key">${isAr?'الطموح':'Aspiration'}</span><span class="p-val">${goal||'—'}</span></div><div class="profile-row"><span class="p-icon">🍽️</span><span class="p-key">${isAr?'الوجبات':'Meals'}</span><span class="p-val">${meals||'—'}</span></div><div class="profile-row"><span class="p-icon">💪</span><span class="p-key">${isAr?'التمرين':'Exercise'}</span><span class="p-val">${exercise||'—'}</span></div><div class="profile-row"><span class="p-icon">😴</span><span class="p-key">${isAr?'النوم':'Sleep'}</span><span class="p-val">${sleep||'—'}</span></div><div class="profile-row"><span class="p-icon">💧</span><span class="p-key">${isAr?'الماء':'Water'}</span><span class="p-val">${water||'—'}</span></div><div class="profile-row"><span class="p-icon">❤️</span><span class="p-key">${isAr?'الطبق المفضل':'Signature dish'}</span><span class="p-val">${fav}</span></div>`;const card=document.getElementById('result-card');card.innerHTML=`<span class="result-crest">${arch.emoji}</span><span class="result-eyebrow">${isAr?'بورتريهك الغذائي الشخصي':'Your Personalised Nutritional Portrait'}</span><div class="result-archetype">${arch[isAr?'ar':'en']}</div><div class="result-portrait-line">"${arch.portrait[lang]}"</div>${bmiHtml}<div class="profile-card"><div class="profile-head">${isAr?'نظرة عامة':'Overview'}</div>${profileRows}</div><div class="insight-block"><strong>${isAr?'توصية':'Insight'}</strong>${arch.tip[lang]}</div><button class="btn-restart" onclick="restart()">${isAr?'↺ بورتريه جديد':'↺ New Portrait'}</button>`;card.style.animation='none';card.offsetHeight;card.style.animation='revealUp 0.55s cubic-bezier(0.22,1,0.36,1) both';document.getElementById('story-stage').textContent=isAr?'النتيجة النهائية':'Final Portrait';document.getElementById('story-title').textContent=isAr?'اكتمل البورتريه الشخصي':'The personalised portrait is complete.';document.getElementById('story-copy').textContent=arch.portrait[lang];document.getElementById('story-progress-pct').textContent='100%';document.getElementById('story-progress-fill').style.width='100%';document.getElementById('story-step-no').textContent='✓';document.getElementById('story-left-no').textContent='00';document.getElementById('story-energy-no').textContent='5/5';document.getElementById('story-figure').textContent=arch.emoji;document.getElementById('story-caption').textContent=arch.tip[lang];document.getElementById('story-preview').innerHTML=`<span class="mini-chip">${goal||'balanced'}</span><span class="mini-chip">${exercise||'steady'}</span><span class="mini-chip">${water||'hydrated'}</span>`;document.getElementById('affirmation-text').textContent=isAr?'النهاية تبدو مُرضية عندما يشعر المستخدم بأن كل خطوة كانت ذات قيمة.' :'The finish feels rewarding when every step on the way felt intentional.';}
 
 // ══════════════════════════════════════════════════════
+//  SOCIAL LOGIN & PRE-FILL
+// ══════════════════════════════════════════════════════
+
+let userProfile = null;
+
+// ─── Google Identity Services ────────────────────────
+// Replace with your Client ID from console.cloud.google.com
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+function initGSI() {
+  if (typeof google === 'undefined') return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('google-btn-wrap'),
+    { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular', width: 340 }
+  );
+}
+
+function handleGoogleLogin(response) {
+  try {
+    // Decode JWT payload (base64)
+    const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    applyProfile({
+      name: payload.name || payload.given_name || 'User',
+      email: payload.email || '',
+      picture: payload.picture || null,
+      gender: null,      // Google doesn't expose gender in ID token
+      birthday: null,    // Google doesn't expose birthday in ID token
+      via: 'Google'
+    });
+  } catch(e) { loginGuest(); }
+}
+
+// ─── Facebook ────────────────────────────────────────
+// Replace with your App ID from developers.facebook.com
+const FACEBOOK_APP_ID = 'YOUR_FACEBOOK_APP_ID';
+
+function loginFacebook() {
+  if (typeof FB === 'undefined') {
+    alert('Facebook SDK not loaded. Check your App ID and internet connection.');
+    return;
+  }
+  FB.login(function(res) {
+    if (!res.authResponse) return; // user cancelled
+    FB.api('/me', { fields: 'name,email,gender,birthday,picture.width(200)' }, function(data) {
+      applyProfile({
+        name: data.name || 'User',
+        email: data.email || '',
+        picture: data.picture?.data?.url || null,
+        gender: data.gender || null,       // 'male' / 'female'
+        birthday: data.birthday || null,   // 'MM/DD/YYYY'
+        via: 'Facebook'
+      });
+    });
+  }, { scope: 'email,user_gender,user_birthday' });
+}
+
+// ─── Apple Sign-In ───────────────────────────────────
+// Requires Apple Developer account + Services ID configured at
+// developer.apple.com — replace placeholders below
+function loginApple() {
+  if (typeof AppleID === 'undefined') {
+    alert('Apple Sign-In requires an Apple Developer Services ID. See comments in code.');
+    return;
+  }
+  AppleID.auth.signIn().then(function(res) {
+    const id = res.authorization?.id_token;
+    if (!id) return loginGuest();
+    const payload = JSON.parse(atob(id.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const firstName = res.user?.name?.firstName || '';
+    const lastName  = res.user?.name?.lastName  || '';
+    applyProfile({
+      name: (firstName + ' ' + lastName).trim() || payload.email?.split('@')[0] || 'User',
+      email: payload.email || '',
+      picture: null,
+      gender: null,
+      birthday: null,
+      via: 'Apple'
+    });
+  }).catch(() => loginGuest());
+}
+
+// ─── Guest ───────────────────────────────────────────
+function loginGuest() {
+  applyProfile(null);
+}
+
+// ─── Apply profile & pre-fill survey fields ──────────
+function applyProfile(profile) {
+  userProfile = profile;
+
+  if (profile) {
+    // Show user bar in story panel
+    const bar = document.getElementById('story-user-bar');
+    if (bar) bar.classList.remove('hidden');
+
+    const nameEl = document.getElementById('story-user-name');
+    const viaEl  = document.getElementById('story-user-via');
+    const avaEl  = document.getElementById('story-user-avatar');
+    if (nameEl) nameEl.textContent = profile.name;
+    if (viaEl)  viaEl.textContent  = 'via ' + profile.via;
+    if (avaEl) {
+      if (profile.picture) {
+        avaEl.outerHTML = `<img class="story-user-avatar" id="story-user-avatar" src="${profile.picture}" alt="${profile.name}" onerror="this.outerHTML='<div class=\\'story-user-emoji\\'id=\\'story-user-avatar\\'>👤</div>'">`;
+      } else {
+        const icons = { Google:'🔵', Facebook:'🟦', Apple:'⚫', null:'👤' };
+        avaEl.textContent = icons[profile.via] || '👤';
+      }
+    }
+
+    // ── Pre-fill gender question ──────────────────────
+    if (profile.gender) {
+      const gMap = { male:'male', female:'female' };
+      const gVal = gMap[profile.gender.toLowerCase()];
+      const gIdx = QUESTIONS.findIndex(q => q.id === 'gender');
+      if (gIdx >= 0 && gVal) answers[gIdx] = { val: gVal, prefilled: true };
+    }
+
+    // ── Pre-fill age range from birthday ─────────────
+    if (profile.birthday) {
+      try {
+        const parts = profile.birthday.split('/');
+        const birthYear = parts.length === 3
+          ? parseInt(parts[2])                          // MM/DD/YYYY (Facebook)
+          : new Date(profile.birthday).getFullYear();   // ISO format
+        const age = new Date().getFullYear() - birthYear;
+        const aVal = age < 18 ? 'u18' : age <= 25 ? '18-25' : age <= 40 ? '26-40' : '40+';
+        const aIdx = QUESTIONS.findIndex(q => q.id === 'age');
+        if (aIdx >= 0) answers[aIdx] = { val: aVal, prefilled: true };
+      } catch(_) {}
+    }
+  }
+
+  // Move to language selection
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('lang-screen').classList.remove('hidden');
+}
+
+// ─── Mark pre-filled options visually ────────────────
+// Called inside renderStep — highlights auto-answered options
+function markPrefilledOptions() {
+  const q = QUESTIONS[step];
+  if (!answers[step]?.prefilled) return;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    if (q.options[i] && answers[step].val === q.options[i].val) {
+      el.classList.add('auto-filled');
+    }
+  });
+}
+
+// Patch renderStep to call markPrefilledOptions after render
+const _origRenderStep2 = renderStep;
+renderStep = function() {
+  _origRenderStep2();
+  markPrefilledOptions();
+};
+
+// ══════════════════════════════════════════════════════
 //  INTERACTIVE ENHANCEMENTS
 // ══════════════════════════════════════════════════════
 
@@ -1984,11 +2226,30 @@ showResults=function(){
   },60);
 };
 
-// ─── Reset counters on new survey ────────────────────
+// ─── Reset counters on new survey + restore pre-fills ─
 const _origStartSurvey=startSurvey;
 startSurvey=function(l){
   _lastMilestonePct=0;_prevStepIdx=-1;
-  _origStartSurvey(l);
+  _origStartSurvey(l); // resets answers={} internally
+  // Re-apply social login pre-fills (wiped by answers={})
+  if(userProfile){
+    if(userProfile.gender){
+      const gMap={male:'male',female:'female'};
+      const gVal=gMap[userProfile.gender.toLowerCase()];
+      const gIdx=QUESTIONS.findIndex(q=>q.id==='gender');
+      if(gIdx>=0&&gVal) answers[gIdx]={val:gVal,prefilled:true};
+    }
+    if(userProfile.birthday){
+      try{
+        const parts=userProfile.birthday.split('/');
+        const yr=parts.length===3?parseInt(parts[2]):new Date(userProfile.birthday).getFullYear();
+        const age=new Date().getFullYear()-yr;
+        const aVal=age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';
+        const aIdx=QUESTIONS.findIndex(q=>q.id==='age');
+        if(aIdx>=0) answers[aIdx]={val:aVal,prefilled:true};
+      }catch(_){}
+    }
+  }
 };
 
 // ─── Init ─────────────────────────────────────────────
