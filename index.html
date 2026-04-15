@@ -1937,7 +1937,31 @@ function getAnswer(id){const i=QUESTIONS.findIndex(q=>q.id===id);return i>=0?ans
 function isVisible(i){const q=QUESTIONS[i];return!q.condition||q.condition();}
 function totalVisible(){return QUESTIONS.filter((_,i)=>isVisible(i)).length;}
 function visibleIndex(){let c=0;for(let i=0;i<=step;i++)if(isVisible(i))c++;return c;}
-function buildSubmissionPayload(){const payload={language:lang};QUESTIONS.forEach((q,idx)=>{const ans=answers[idx];if(!ans)return;if(q.type==='single') payload[q.id]=ans.val||"";else if(q.type==='multi') payload[q.id]=ans.vals||[];else if(q.type==='text') payload[q.id]=ans.text||"";else if(q.type==='dual-text'){payload.height=ans.fields?.height||"";payload.weight=ans.fields?.weight||"";}});const h=parseFloat(payload.height),w=parseFloat(payload.weight);if(h&&w&&h>0&&w>0) payload.bmi=(w/Math.pow(h/100,2)).toFixed(1);else payload.bmi="";return payload;}
+function buildSubmissionPayload(){
+  const payload={language:lang};
+  // ── Personal details from profile screen ──────────
+  if(userPersonalData){
+    payload.full_name  = userPersonalData.name   || '';
+    payload.email      = userPersonalData.email  || '';
+    payload.phone      = userPersonalData.phone  || '';
+    payload.dob        = userPersonalData.dob    || '';
+    payload.gender_profile = userPersonalData.gender || '';
+    payload.city       = userPersonalData.city   || '';
+  }
+  // ── Social login provider ─────────────────────────
+  payload.login_via = userProfile ? userProfile.via : 'Guest';
+  // ── Survey answers ────────────────────────────────
+  QUESTIONS.forEach((q,idx)=>{
+    const ans=answers[idx];if(!ans)return;
+    if(q.type==='single')      payload[q.id]=ans.val||'';
+    else if(q.type==='multi')  payload[q.id]=(ans.vals||[]).join(', ');
+    else if(q.type==='text')   payload[q.id]=ans.text||'';
+    else if(q.type==='dual-text'){payload.height=ans.fields?.height||'';payload.weight=ans.fields?.weight||'';}
+  });
+  const h=parseFloat(payload.height),w=parseFloat(payload.weight);
+  payload.bmi=(h&&w&&h>0&&w>0)?(w/Math.pow(h/100,2)).toFixed(1):'';
+  return payload;
+}
 async function submitSurvey() {
   const nextBtn = document.getElementById('btn-next');
   nextBtn.disabled = true;
