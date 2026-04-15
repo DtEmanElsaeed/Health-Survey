@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Atelier Nutritionnel — Your Nutritional Portrait</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════
+   TOKENS & RESET — COMPLETE
+═══════════════════════════════════════ */
+:root{
+  --parchment:  #ede8df;
+  --cream:      #fdfaf5;
+  --ivory:      #f8f4ed;
+  --forest:     #243d17;
+  --forest-mid: #355924;
+  --forest-pale:#e4ede0;
+  --sage:       #8ba67a;
+  --gold:       #a0782a;
+  --gold-pale:  #f5ead4;
+  --gold-border:#c9993a;
+  --charcoal:   #1a1912;
+  --stone:      #5e5a52;
+  --warm-gray:  #968f84;
+  --border:     #d5ccc1;
+  --border-fine:#e2dbd2;
+  --shadow:     0 20px 60px rgba(26,25,18,0.10), 0 4px 12px rgba(26,25,18,0.05);
+  --r:6px;
+}
+html,body{height:100%;overflow:hidden}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter','Cairo',sans-serif;
+  min-height:100svh;
+  color:var(--charcoal);
+  overflow:hidden;
+  background-color:var(--parchment);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg opacity='0.035' fill='%23243d17'%3E%3Cellipse cx='60' cy='80' rx='4' ry='14' transform='rotate(-20 60 80)'/%3E%3Cellipse cx='68' cy='68' rx='3' ry='10' transform='rotate(15 68 68)'/%3E%3Ccircle cx='62' cy='94' r='2.5'/%3E%3Cellipse cx='340' cy='300' rx='4' ry='14' transform='rotate(25 340 300)'/%3E%3Cellipse cx='348' cy='288' rx='3' ry='10' transform='rotate(-15 348 288)'/%3E%3Ccircle cx='342' cy='314' r='2.5'/%3E%3Cellipse cx='200' cy='30' rx='3' ry='10' transform='rotate(-5 200 30)'/%3E%3Ccircle cx='198' cy='44' r='2'/%3E%3Cellipse cx='30' cy='320' rx='3' ry='12' transform='rotate(10 30 320)'/%3E%3Cellipse cx='370' cy='120' rx='3' ry='10' transform='rotate(-30 370 120)'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 15% 15%, rgba(36,61,23,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(160,120,42,0.06) 0%, transparent 55%);
+}
+body.rtl{font-family:'Cairo','Inter',sans-serif;direction:rtl;text-align:right}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.4;
+}
+.wrapper{
+  min-height:100svh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:0;
+}
+.card{
+  background:rgba(253,250,245,0.88);
+  backdrop-filter:blur(14px) saturate(130%);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  width:100%;max-width:min(100%,600px);
+  padding:clamp(24px, 4vw, 56px) clamp(20px, 4vw, 52px);
+  border:1px solid rgba(213,204,193,0.7);
+  position:relative;overflow:hidden;
+  animation:revealUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--forest) 30%,var(--gold) 60%,var(--forest) 80%,transparent 100%);
+}
+.card::after{
+  content:'';position:absolute;
+  bottom:-40px;right:-40px;
+  width:160px;height:160px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cg opacity='0.055' fill='none' stroke='%23243d17' stroke-width='1.2'%3E%3Cpath d='M140 140 Q100 80 60 100 Q40 110 80 80 Q110 55 140 20'/%3E%3Cpath d='M140 100 Q110 90 90 110 Q75 125 100 105'/%3E%3Cellipse cx='120' cy='45' rx='8' ry='14' transform='rotate(-30 120 45)'/%3E%3Cellipse cx='105' cy='60' rx='6' ry='11' transform='rotate(15 105 60)'/%3E%3Ccircle cx='135' cy='30' r='3'/%3E%3Ccircle cx='88' cy='115' r='2.5'/%3E%3C/g%3E%3C/svg%3E") no-repeat center/contain;
+  pointer-events:none;
+}
+@keyframes revealUp{
+  from{opacity:0;transform:translateY(18px) scale(0.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes fadeIn{ from{opacity:0}to{opacity:1} }
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.section-label{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:9.5px;font-weight:600;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:18px;
+}
+.section-label::before,.section-label::after{
+  content:'';display:inline-block;
+  width:24px;height:1px;background:var(--gold-border);opacity:0.45;
+}
+.optional-badge{
+  font-size:9px;font-weight:500;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--warm-gray);
+  border:1px solid var(--border-fine);
+  border-radius:99px;padding:2px 10px;
+  margin-left:10px;vertical-align:middle;
+}
+.rtl .optional-badge{margin-left:0;margin-right:10px}
+.female-notice,.fun-note{
+  display:flex;align-items:flex-start;gap:12px;
+  border-radius:var(--r);padding:14px 16px;
+  font-size:12.5px;line-height:1.6;
+  margin-bottom:22px;font-style:italic;
+}
+.female-notice{
+  background:linear-gradient(135deg,#fdf0f5,#fce8f1);
+  border:1px solid rgba(200,120,160,0.2);color:#7d2d4f;
+}
+.fun-note{
+  background:var(--gold-pale);
+  border:1px solid rgba(160,120,42,0.2);color:var(--gold);
+}
+.question-title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:22px;font-weight:600;font-style:italic;
+  color:var(--charcoal);line-height:1.4;margin-bottom:10px;
+}
+body.rtl .question-title{font-family:'Cairo',sans-serif;font-style:normal;font-size:20px}
+.question-sub{
+  font-size:12.5px;color:var(--stone);
+  margin-bottom:28px;line-height:1.7;font-style:italic;
+}
+.options{display:grid;gap:9px;}
+.options.cols-2{grid-template-columns:1fr 1fr}
+.option{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;
+  border:1px solid var(--border-fine);
+  border-radius:var(--r);cursor:pointer;
+  transition:all 0.35s cubic-bezier(0.22,1,0.36,1);
+  background:var(--ivory);user-select:none;
+  position:relative;
+  overflow:hidden;
+}
+.option:hover{
+  border-color:var(--sage);
+  background:var(--forest-pale);
+  transform:scale(1.012) translateY(-1px);
+  box-shadow:0 6px 20px rgba(36,61,23,0.09);
+}
+.option.selected{
+  border-color:var(--forest);
+  background:var(--forest-pale);
+  box-shadow:inset 0 0 0 1px var(--forest),0 4px 16px rgba(36,61,23,0.08);
+}
+.option-icon{font-size:17px;line-height:1;flex-shrink:0;}
+.option-text{flex:1}
+.option-en{display:block;font-size:13px;font-weight:500;color:var(--charcoal);line-height:1.3}
+.option-ar{display:block;font-size:12px;color:var(--warm-gray);font-family:'Cairo',sans-serif;margin-top:2px}
+.option-indicator{
+  width:17px;height:17px;border-radius:50%;
+  border:1.5px solid var(--border);flex-shrink:0;
+  margin-left:auto;display:flex;align-items:center;justify-content:center;
+}
+.rtl .option-indicator{margin-left:0;margin-right:auto}
+.option.selected .option-indicator{background:var(--forest);border-color:var(--forest);transform:scale(1.1)}
+.option.selected .option-indicator::after{content:'';display:block;width:5px;height:5px;border-radius:50%;background:white}
+.option.multi .option-indicator{border-radius:4px}
+.option.multi.selected .option-indicator::after{content:'✓';width:auto;height:auto;border-radius:0;background:transparent;color:white;font-size:9px;font-weight:700}
+.text-input{
+  width:100%;padding:14px 18px;
+  border:1px solid var(--border);border-radius:var(--r);
+  font-size:13.5px;font-family:'Inter','Cairo',sans-serif;
+  color:var(--charcoal);background:var(--ivory);
+  transition:border-color 0.3s,box-shadow 0.3s;
+  outline:none;resize:none;
+}
+.text-input:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(36,61,23,0.07)}
+.field-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);display:block;margin-bottom:8px}
+.progress-wrap{margin-bottom:18px}
+.progress-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--warm-gray);margin-bottom:10px}
+.progress-track{height:1.5px;background:var(--border-fine);border-radius:99px;position:relative}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--forest),var(--sage));
+  border-radius:99px;transition:width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.step-dots{display:flex;gap:5px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border-fine);transition:all 0.3s}
+.dot.done{background:rgba(36,61,23,0.35)}
+.dot.active{background:var(--forest);width:18px;border-radius:99px}
+.nav{display:flex;gap:10px;margin-top:16px;align-items:center}
+.btn{
+  padding:13px 20px;border-radius:var(--r);
+  font-size:11.5px;font-weight:600;letter-spacing:0.08em;
+  cursor:pointer;border:none;
+  transition:all 0.3s cubic-bezier(0.22,1,0.36,1);
+  font-family:'Inter','Cairo',sans-serif;
+}
+.btn-back{
+  background:transparent;color:var(--stone);
+  border:1px solid var(--border-fine);flex:0 0 auto;padding:13px 16px;
+}
+.btn-back:disabled{opacity:0.25;cursor:not-allowed}
+.btn-next{
+  flex:1;text-transform:uppercase;letter-spacing:0.1em;
+  background:var(--forest);color:white;
+  box-shadow:0 4px 16px rgba(36,61,23,0.22);
+}
+.btn-next:disabled{opacity:0.6;cursor:wait}
+.btn-skip{
+  flex:0 0 auto;padding:13px 14px;background:transparent;
+  color:var(--warm-gray);border:1px dashed var(--border);font-style:italic;font-size:11px;
+}
+.error-msg{font-size:11.5px;color:#8b3535;margin-top:10px;display:none;font-style:italic}
+.error-msg.show{display:block;animation:fadeIn 0.3s ease}
+#lang-screen .card{text-align:center;padding:clamp(22px, 4vw, 42px) clamp(20px, 4vw, 44px)}
+.brand-mark{
+  display:inline-flex;align-items:center;gap:14px;
+  font-size:9px;font-weight:600;letter-spacing:0.25em;
+  text-transform:uppercase;color:var(--warm-gray);
+  margin-bottom:36px;
+}
+.brand-mark::before,.brand-mark::after{
+  content:'';display:block;width:36px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border));
+}
+.lang-ornament{font-size:36px;display:block;margin-bottom:24px;opacity:0.85}
+.lang-headline{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:32px;font-weight:600;font-style:italic;
+  color:var(--charcoal);margin-bottom:6px;
+}
+.lang-headline-ar{
+  font-family:'Cairo',sans-serif;font-size:20px;font-weight:400;
+  color:var(--stone);margin-bottom:10px;
+}
+.lang-tagline{font-size:12px;color:var(--stone);margin-bottom:24px;font-style:italic;line-height:1.6}
+.lang-divider{
+  display:flex;align-items:center;gap:16px;margin-bottom:18px;
+  color:var(--warm-gray);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+}
+.lang-divider::before,.lang-divider::after{content:'';flex:1;height:1px;background:var(--border-fine)}
+.lang-options{display:flex;gap:16px;justify-content:center;align-items:stretch}
+.lang-option{
+  flex:1;max-width:220px;padding:clamp(18px, 4vw, 28px) clamp(18px, 3vw, 22px);
+  border:1px solid var(--border);border-radius:var(--r);
+  background:var(--ivory);cursor:pointer;
+  transition:all 0.35s;
+}
+.lang-option:hover{border-color:var(--forest);transform:translateY(-4px);box-shadow:0 16px 40px rgba(36,61,23,0.12)}
+.lang-flag{font-size:26px;display:block;margin-bottom:12px}
+.lang-name-p{font-size:14px;font-weight:600;display:block;color:var(--charcoal);margin-bottom:3px}
+.lang-name-s{font-size:11px;color:var(--warm-gray);display:block;font-family:'Cairo',sans-serif;font-style:italic}
+.checkpoint-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(237,232,223,0.97);
+  backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.5s ease;
+}
+.checkpoint-inner{text-align:center;padding:48px 40px;max-width:420px}
+.checkpoint-ornament{font-size:22px;display:block;margin-bottom:20px;opacity:0.5;letter-spacing:4px}
+.checkpoint-section{
+  font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;display:block;
+}
+.checkpoint-text{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:22px;font-style:italic;
+  color:var(--charcoal);line-height:1.55;
+}
+#result-screen .card{text-align:center;padding:clamp(20px, 4vw, 34px) clamp(18px, 4vw, 38px)}
+.result-crest{font-size:52px;display:block;margin-bottom:18px}
+.result-eyebrow{
+  font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;display:block;
+}
+.result-archetype{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:30px;font-weight:700;font-style:italic;
+  color:var(--forest);margin-bottom:12px;
+}
+body.rtl .result-archetype{font-family:'Cairo',sans-serif;font-style:normal}
+.result-portrait-line{
+  font-size:14px;color:var(--stone);font-style:italic;
+  line-height:1.8;margin-bottom:32px;
+  padding:0 8px;
+}
+.bmi-block{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  background:linear-gradient(135deg,#e6ede0,#f0ead8);
+  border:1px solid rgba(36,61,23,0.12);border-radius:var(--r);
+  padding:22px 28px;margin-bottom:24px;
+}
+.bmi-num{
+  font-family:'Playfair Display',serif;font-size:50px;font-weight:700;
+  color:var(--forest);line-height:1;
+}
+.bmi-info{text-align:left}
+body.rtl .bmi-info{text-align:right}
+.bmi-title{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--stone);font-weight:600}
+.bmi-cat{font-size:15px;font-weight:600;margin-top:3px}
+.profile-card{
+  background:var(--ivory);border:1px solid var(--border-fine);
+  border-radius:var(--r);overflow:hidden;margin-bottom:24px;text-align:left;
+}
+body.rtl .profile-card{text-align:right}
+.profile-head{
+  background:var(--forest-pale);padding:10px 20px;
+  font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--forest);border-bottom:1px solid var(--border-fine);
+}
+.profile-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 20px;font-size:13px;
+  border-bottom:1px solid var(--border-fine);
+  flex-wrap:wrap;
+}
+.profile-row:last-child{border-bottom:none}
+.p-icon{font-size:14px;flex-shrink:0}
+.p-key{font-weight:600;color:var(--charcoal);flex:0 0 130px}
+.p-val{color:var(--stone);flex:1;min-width:0;overflow-wrap:anywhere}
+.insight-block{
+  background:var(--gold-pale);
+  border:1px solid rgba(160,120,42,0.18);
+  border-left:3px solid var(--gold);
+  border-radius:var(--r);
+  padding:20px 22px;
+  font-size:13.5px;color:#5a3d10;
+  margin-bottom:28px;line-height:1.7;text-align:left;
+}
+body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0.18);border-right:3px solid var(--gold)}
+.insight-block strong{color:var(--gold);display:block;margin-bottom:6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase}
+.btn-restart{
+  width:100%;padding:15px;background:var(--forest);color:white;border:none;
+  border-radius:var(--r);font-size:11px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.3s;
+}
+.btn-restart:hover{background:var(--forest-mid);transform:translateY(-2px);}
+.hidden{display:none!important}
+
+/* ═══════════════════════════════════════
+   INTERACTIVE ENHANCEMENTS
+═══════════════════════════════════════ */
+
+/* ══════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════ */
+#login-screen{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;}
+.login-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 44px;}
+.login-ornament{font-size:40px;margin-bottom:18px;display:block;}
+.login-headline{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;font-style:italic;color:var(--charcoal);margin-bottom:8px;line-height:1.25;}
+.login-sub{font-size:12.5px;color:var(--stone);margin-bottom:30px;line-height:1.65;font-style:italic;max-width:340px;}
+.login-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+.login-social-btn{display:flex;align-items:center;gap:13px;padding:13px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--ivory);cursor:pointer;font-size:13px;font-weight:500;color:var(--charcoal);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);width:100%;position:relative;overflow:hidden;font-family:'Inter','Cairo',sans-serif;}
+.login-social-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(36,61,23,0.12);border-color:var(--sage);}
+.login-social-btn.fb-btn{background:#1877f2;color:#fff;border-color:#1877f2;}
+.login-social-btn.fb-btn:hover{background:#166fe5;box-shadow:0 8px 22px rgba(24,119,242,0.28);}
+.login-social-btn.apple-btn{background:#000;color:#fff;border-color:#000;}
+.login-social-btn.apple-btn:hover{background:#1a1a1a;box-shadow:0 8px 22px rgba(0,0,0,0.25);}
+.login-social-btn svg{width:20px;height:20px;flex-shrink:0;}
+.login-btn-label{flex:1;text-align:left;}
+.login-divider{display:flex;align-items:center;gap:12px;color:var(--warm-gray);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;width:100%;max-width:340px;margin:2px 0;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border-fine);}
+.login-skip-btn{width:100%;max-width:340px;padding:11px;background:transparent;border:1px dashed var(--border);border-radius:var(--r);color:var(--warm-gray);font-size:11.5px;font-style:italic;cursor:pointer;transition:all 0.3s;margin-top:4px;font-family:'Inter','Cairo',sans-serif;}
+.login-skip-btn:hover{border-color:var(--sage);color:var(--stone);}
+.login-privacy{font-size:10px;color:var(--warm-gray);margin-top:14px;font-style:italic;opacity:0.7;max-width:320px;}
+/* Google rendered button override */
+#google-btn-wrap{width:100%;max-width:340px;}
+#google-btn-wrap iframe,#google-btn-wrap>div{width:100%!important;}
+/* User bar in story panel */
+.story-user-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.11);margin-bottom:2px;}
+.story-user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.22);flex-shrink:0;}
+.story-user-emoji{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.12);display:grid;place-items:center;font-size:17px;flex-shrink:0;}
+.story-user-info{flex:1;min-width:0;}
+.story-user-name{font-size:12.5px;font-weight:600;color:rgba(255,248,235,0.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.story-user-via{font-size:10px;color:rgba(255,248,235,0.48);letter-spacing:0.06em;}
+/* Pre-filled indicator on options */
+.option.auto-filled{border-color:var(--sage)!important;background:linear-gradient(120deg,rgba(228,237,224,0.95),rgba(248,244,237,0.9))!important;}
+.option.auto-filled .option-indicator::after{content:'auto'!important;background:transparent!important;color:var(--sage)!important;font-size:8px!important;font-weight:700!important;letter-spacing:0.05em!important;width:auto!important;height:auto!important;border-radius:0!important;}
+.prefill-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--sage);background:rgba(139,166,122,0.12);border:1px solid rgba(139,166,122,0.25);border-radius:99px;padding:3px 10px;margin-left:8px;vertical-align:middle;}
+
+/* ─── Directional slide transitions ─── */
+@keyframes slideInFromRight {
+  from { opacity:0; transform:translateX(48px) scale(0.98); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+@keyframes slideInFromLeft {
+  from { opacity:0; transform:translateX(-48px) scale(0.98); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+
+/* ─── Option ripple ─── */
+.ripple-wave {
+  position:absolute; border-radius:50%;
+  background:rgba(36,61,23,0.16);
+  transform:scale(0);
+  animation:rippleAnim 0.55s ease-out forwards;
+  pointer-events:none; z-index:0;
+}
+@keyframes rippleAnim { to { transform:scale(5); opacity:0; } }
+
+/* ─── Option bounce on select ─── */
+@keyframes optBounce {
+  0%   { transform:scale(1) translateY(0); }
+  35%  { transform:scale(1.048) translateY(-3px); }
+  65%  { transform:scale(0.973) translateY(0); }
+  100% { transform:scale(1) translateY(0); }
+}
+.option-bounce { animation:optBounce 0.38s cubic-bezier(0.22,1,0.36,1); }
+
+/* ─── Floating food particles ─── */
+.food-float {
+  position:fixed; pointer-events:none; z-index:1;
+  opacity:0; user-select:none; line-height:1;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp {
+  0%   { opacity:0;    transform:translateY(106vh) rotate(0deg) scale(0.8); }
+  8%   { opacity:0.32; }
+  92%  { opacity:0.32; }
+  100% { opacity:0;    transform:translateY(-12vh) rotate(280deg) scale(1.1); }
+}
+
+/* ─── Milestone toast ─── */
+.m-toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(72px);
+  background:linear-gradient(135deg,var(--forest),var(--forest-mid));
+  color:#fff; padding:11px 28px;
+  border-radius:99px; font-size:12px; font-weight:600;
+  letter-spacing:0.08em; white-space:nowrap;
+  z-index:9100; opacity:0;
+  box-shadow:0 8px 32px rgba(36,61,23,0.32);
+  transition:transform 0.45s cubic-bezier(0.22,1,0.36,1), opacity 0.45s;
+}
+.m-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* ─── Confetti canvas ─── */
+#confetti-canvas {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:8500;
+  width:100%; height:100%;
+}
+
+/* ─── Progress bar glow on update ─── */
+@keyframes progressGlow {
+  0%,100% { filter:none; }
+  45%     { filter:drop-shadow(0 0 6px rgba(36,61,23,0.55)); }
+}
+.progress-fill.glow { animation:progressGlow 0.65s ease; }
+
+/* ─── Active dot pulse ─── */
+.dot.active { animation:dotPulse 1.8s ease-in-out infinite; }
+@keyframes dotPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(36,61,23,0.45); }
+  50%     { box-shadow:0 0 0 5px rgba(36,61,23,0.0); }
+}
+
+/* ─── Result staggered reveal ─── */
+#result-card > * {
+  opacity:0;
+  animation:staggerUp 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes staggerUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ─── Enhanced checkpoint bounce ─── */
+@keyframes cpBounce {
+  0%   { opacity:0; transform:scale(0.55) translateY(24px); }
+  62%  { transform:scale(1.06) translateY(-5px); opacity:1; }
+  100% { transform:scale(1) translateY(0); opacity:1; }
+}
+.checkpoint-inner { animation:cpBounce 0.68s cubic-bezier(0.22,1,0.36,1) both !important; }
+
+/* ─── Lang flag bounce on hover ─── */
+.lang-option:hover .lang-flag {
+  display:inline-block;
+  animation:flagBounce 0.42s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes flagBounce {
+  0%   { transform:scale(1) rotate(0); }
+  42%  { transform:scale(1.35) rotate(-10deg); }
+  72%  { transform:scale(0.94) rotate(5deg); }
+  100% { transform:scale(1) rotate(0); }
+}
+
+.ambient{
+  position:fixed;
+  border-radius:50%;
+  pointer-events:none;
+  filter:blur(6px);
+  z-index:0;
+  opacity:0.58;
+  animation:floatDrift 14s ease-in-out infinite;
+}
+.ambient-a{
+  top:8%;
+  left:-80px;
+  width:240px;
+  height:240px;
+  background:radial-gradient(circle, rgba(139,166,122,0.28) 0%, rgba(139,166,122,0.06) 55%, transparent 72%);
+}
+.ambient-b{
+  right:-90px;
+  top:18%;
+  width:280px;
+  height:280px;
+  background:radial-gradient(circle, rgba(160,120,42,0.22) 0%, rgba(160,120,42,0.04) 58%, transparent 72%);
+  animation-delay:-5s;
+}
+.ambient-c{
+  left:18%;
+  bottom:-120px;
+  width:320px;
+  height:320px;
+  background:radial-gradient(circle, rgba(36,61,23,0.16) 0%, rgba(36,61,23,0.03) 58%, transparent 74%);
+  animation-delay:-9s;
+}
+@keyframes floatDrift{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(24px,-18px,0) scale(1.06)}
+}
+.wrapper{
+  width:min(1560px, calc(100vw - 16px));
+  margin:0 auto;
+  position:relative;
+  z-index:1;
+}
+.experience-shell{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(14px, 1.6vw, 24px);
+  align-items:stretch;
+  min-height:calc(100vh - 16px);
+}
+.story-panel{
+  position:sticky;
+  top:8px;
+  display:grid;
+  height:calc(100svh - 16px);
+  align-self:start;
+}
+.story-card{
+  background:linear-gradient(180deg, rgba(24,39,16,0.94), rgba(35,57,25,0.9));
+  color:#f7f3ea;
+  border-radius:32px;
+  padding:22px 24px;
+  box-shadow:0 24px 60px rgba(19,24,13,0.22);
+  position:relative;
+  overflow:hidden;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.story-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at top right, rgba(245,234,212,0.18), transparent 36%),
+    linear-gradient(140deg, rgba(255,255,255,0.04), transparent 42%);
+  pointer-events:none;
+}
+.story-card > *{position:relative;z-index:1}
+.story-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-size:10px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:rgba(255,248,235,0.74);
+}
+.story-badge::before{
+  content:'';
+  width:26px;
+  height:1px;
+  background:rgba(255,248,235,0.4);
+}
+.story-title{
+  margin-top:14px;
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:28px;
+  line-height:1.1;
+}
+.story-copy{
+  margin-top:6px;
+  color:rgba(255,248,235,0.76);
+  font-size:13px;
+  line-height:1.55;
+}
+.story-meter{
+  margin-top:4px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.story-meter-label{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:10px;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:rgba(255,248,235,0.68);
+  margin-bottom:10px;
+}
+.story-meter-track{
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  overflow:hidden;
+}
+.story-meter-fill{
+  height:100%;
+  width:4%;
+  border-radius:999px;
+  background:linear-gradient(90deg, #f1d48c, #97c088 58%, #cde5c4);
+  box-shadow:0 0 24px rgba(241,212,140,0.35);
+  transition:width 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.story-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.mini-stat{
+  padding:12px 10px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.06);
+  text-align:center;
+}
+.mini-stat strong{
+  display:block;
+  font-size:18px;
+  color:#fff8eb;
+  margin-bottom:4px;
+}
+.mini-stat span{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  color:rgba(255,248,235,0.64);
+}
+.story-illustration{
+  margin-top:4px;
+  min-height:160px;
+  flex:1 1 auto;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.11), transparent 52%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  display:grid;
+  place-items:center;
+  position:relative;
+  overflow:hidden;
+}
+.story-illustration::before,.story-illustration::after{
+  content:'';
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.story-illustration::before{
+  width:190px;
+  height:190px;
+  animation:spinSlow 18s linear infinite;
+}
+.story-illustration::after{
+  width:124px;
+  height:124px;
+  animation:spinSlow 12s linear infinite reverse;
+}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+.story-figure{
+  font-size:56px;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,0.18));
+  animation:floatFigure 4.2s ease-in-out infinite;
+}
+.story-caption{
+  margin-top:2px;
+  font-size:11px;
+  line-height:1.45;
+  color:rgba(255,248,235,0.74);
+}
+.story-preview{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:2px;
+}
+.story-card .affirmation{
+  margin-top:6px;
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.09);
+  color:rgba(255,248,235,0.88);
+}
+.story-card .affirmation-label{
+  color:#f1d48c;
+}
+.story-card .affirmation-text{
+  color:rgba(255,248,235,0.88);
+}
+.mini-chip{
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:11px;
+  color:rgba(255,248,235,0.9);
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.affirmation{
+  background:rgba(253,250,245,0.84);
+  border:1px solid rgba(213,204,193,0.7);
+  border-radius:22px;
+  padding:14px 16px;
+  color:var(--stone);
+  box-shadow:0 12px 28px rgba(26,25,18,0.06);
+}
+.affirmation-label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.18em;
+  color:var(--gold);
+  margin-bottom:8px;
+}
+.affirmation-text{
+  font-size:12px;
+  line-height:1.5;
+}
+.survey-shell{
+  min-width:0;
+  display:flex;
+  height:100%;
+}
+.survey-shell > div{width:100%}
+#lang-screen,
+#survey-screen,
+#result-screen{
+  width:100%;
+  height:100%;
+}
+#lang-screen .card,
+#survey-screen .card,
+#result-screen .card{
+  max-width:none;
+  width:100%;
+  height:100%;
+  max-height:calc(100svh - 16px);
+}
+#lang-screen .card{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+  padding:28px 36px;
+}
+#survey-screen .card,
+#result-screen .card{
+  min-height:100%;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+}
+#q-area{
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+#lang-screen .card > *{
+  flex-shrink:0;
+}
+.lang-options{
+  flex:none;
+  align-items:stretch;
+  gap:18px;
+  padding:8px 0 0;
+  justify-content:center;
+}
+.lang-option{
+  min-height:148px;
+  max-height:170px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.question-stage{
+  position:relative;
+  margin-bottom:14px;
+  padding:16px;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at top right, rgba(160,120,42,0.12), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(248,244,237,0.86));
+  border:1px solid rgba(213,204,193,0.58);
+  overflow:hidden;
+}
+.question-stage::after{
+  content:'';
+  position:absolute;
+  inset:auto -30px -40px auto;
+  width:140px;
+  height:140px;
+  background:radial-gradient(circle, rgba(36,61,23,0.08), transparent 66%);
+}
+.question-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:10px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:8px;
+}
+.question-kicker::before{
+  content:'';
+  width:20px;
+  height:1px;
+  background:var(--gold-border);
+}
+.question-hero{
+  display:grid;
+  grid-template-columns:1fr 138px;
+  gap:12px;
+  align-items:center;
+}
+.question-hero > div:first-child{min-width:0}
+.question-figure-wrap{
+  position:relative;
+  width:138px;
+  height:138px;
+  display:grid;
+  place-items:center;
+  justify-self:end;
+}
+.question-ring,.question-ring::before,.question-ring::after{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(36,61,23,0.12);
+  content:'';
+}
+.question-ring{
+  inset:10px;
+  animation:spinSlow 18s linear infinite;
+}
+.question-ring::before{inset:12px}
+.question-ring::after{inset:28px}
+.question-figure{
+  position:relative;
+  z-index:1;
+  width:76px;
+  height:76px;
+  border-radius:28px;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+  background:linear-gradient(145deg, rgba(255,255,255,0.96), rgba(228,237,224,0.8));
+  box-shadow:0 18px 34px rgba(36,61,23,0.12);
+  animation:floatFigure 4.8s ease-in-out infinite;
+}
+@keyframes floatFigure{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+.question-momentum{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+.question-title{font-size:19px;margin-bottom:6px}
+.question-sub{font-size:11.5px;margin-bottom:14px;line-height:1.5}
+.options{gap:8px}
+.option{padding:10px 12px}
+.option-en{font-size:12px}
+.option-ar{font-size:11px}
+.female-notice,.fun-note{padding:10px 12px;font-size:11px;line-height:1.45;margin-bottom:12px}
+.text-input{padding:12px 14px;font-size:13px}
+.field-group{gap:12px}
+.momentum-pill{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(36,61,23,0.08);
+  color:var(--forest);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.04em;
+}
+.energy-row{
+  display:flex;
+  gap:8px;
+}
+.energy-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:rgba(36,61,23,0.12);
+  transform:scale(0.92);
+  transition:all 0.25s ease;
+}
+.energy-dot.active{
+  background:linear-gradient(180deg, var(--gold), var(--forest));
+  box-shadow:0 0 12px rgba(160,120,42,0.24);
+  transform:scale(1.05);
+}
+.selection-toast{
+  position:absolute;
+  top:16px;
+  right:18px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(36,61,23,0.92);
+  color:#fff;
+  font-size:10px;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  opacity:0;
+  transform:translateY(-6px) scale(0.96);
+  transition:all 0.28s ease;
+  pointer-events:none;
+}
+.selection-toast.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.option::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.46), transparent 60%);
+  transform:translateX(-140%);
+  transition:transform 0.7s ease;
+  pointer-events:none;
+}
+.option:hover::before,.option.selected::before{transform:translateX(140%)}
+.option.selected{transform:translateY(-2px)}
+.progress-track{
+  height:10px;
+  background:rgba(36,61,23,0.08);
+  overflow:hidden;
+}
+.progress-fill{position:relative}
+.progress-fill::after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  width:56px;
+  height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.45));
+}
+.step-dots{gap:8px}
+.dot{
+  width:10px;
+  height:10px;
+  background:rgba(36,61,23,0.09);
+}
+.dot.done{background:rgba(160,120,42,0.38)}
+.dot.active{
+  width:30px;
+  background:linear-gradient(90deg, var(--forest), var(--gold));
+  box-shadow:0 8px 18px rgba(36,61,23,0.14);
+}
+.nav{padding-top:6px}
+.btn-next:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 22px rgba(36,61,23,0.24);
+}
+.btn-back:hover:not(:disabled),.btn-skip:hover{transform:translateY(-1px)}
+
+@media(max-width:1100px){
+  body{
+    background-image:
+      radial-gradient(circle at 12% 14%, rgba(160,120,42,0.09), transparent 30%),
+      radial-gradient(circle at 88% 18%, rgba(139,166,122,0.12), transparent 28%),
+      linear-gradient(180deg, #f3eee6 0%, #ece5d8 100%);
+  }
+  .experience-shell{
+    grid-template-columns:minmax(0,0.96fr) minmax(0,1.04fr);
+    gap:20px;
+  }
+  .story-panel{
+    height:calc(100vh - 24px);
+    top:12px;
+  }
+  .story-card{
+    padding:24px;
+    border-radius:28px;
+    background:linear-gradient(180deg, rgba(56,71,34,0.95), rgba(71,89,45,0.92));
+  }
+  .story-title{font-size:28px}
+  .story-copy{font-size:13px}
+  .story-figure{font-size:60px}
+  .story-illustration{
+    min-height:170px;
+    border-radius:20px;
+  }
+  .question-stage{
+    background:
+      radial-gradient(circle at top right, rgba(160,120,42,0.08), transparent 30%),
+      linear-gradient(180deg, rgba(255,255,255,0.86), rgba(247,242,232,0.96));
+    border-radius:22px;
+  }
+  .question-title{font-size:21px}
+  .option{
+    border-radius:16px;
+    background:rgba(253,250,245,0.92);
+  }
+}
+
+@media(max-width:900px){
+  body{
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(139,166,122,0.12), transparent 30%),
+      linear-gradient(180deg, #f6f1e8 0%, #efe7da 100%);
+  }
+  .ambient-a{
+    width:180px;
+    height:180px;
+    left:-60px;
+    top:2%;
+  }
+  .ambient-b{
+    width:200px;
+    height:200px;
+    right:-70px;
+    top:42%;
+  }
+  .ambient-c{display:none}
+  .experience-shell{grid-template-columns:1fr}
+  .story-panel{
+    position:static;
+    order:2;
+    height:auto;
+  }
+  .survey-shell{order:1}
+  .story-card{max-width:760px;margin:0 auto}
+  .card{max-width:760px}
+  #lang-screen .card,
+  #survey-screen .card,
+  #result-screen .card,
+  .story-card{
+    min-height:auto;
+    height:auto;
+  }
+  #lang-screen .card,
+  #survey-screen .card,
+  #result-screen .card{
+    max-height:none;
+  }
+  .story-card{
+    display:grid;
+    grid-template-columns:minmax(0,1.1fr) minmax(220px,0.9fr);
+    gap:18px;
+    align-items:center;
+  }
+  #lang-screen .card{
+    justify-content:center;
+    padding:clamp(28px, 5vw, 48px) clamp(20px, 4vw, 34px);
+  }
+  .lang-options{
+    flex:none;
+    padding:16px 0 0;
+  }
+  .lang-option{
+    min-height:164px;
+  }
+  .story-card > :nth-child(-n+4){
+    grid-column:1;
+  }
+  .story-illustration,
+  .story-caption,
+  .story-preview{
+    grid-column:2;
+  }
+  .story-meter,
+  .story-stats{
+    max-width:none;
+  }
+  .story-illustration{
+    margin-top:0;
+    min-height:150px;
+    background:
+      radial-gradient(circle at center, rgba(255,255,255,0.14), transparent 50%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  }
+  .story-card .affirmation{
+    background:rgba(255,251,245,0.92);
+    border-radius:18px;
+    border-color:rgba(213,204,193,0.7);
+    color:var(--stone);
+  }
+  .story-card .affirmation-label{color:var(--gold)}
+  .story-card .affirmation-text{color:var(--stone)}
+  .question-stage{
+    padding:22px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.92), rgba(249,244,236,0.98));
+  }
+  .question-figure{
+    background:linear-gradient(145deg, #fffdfa, #edf3e8);
+  }
+}
+
+@media(max-width:680px){
+  body{
+    background-image:
+      linear-gradient(180deg, #faf5ed 0%, #f1e8da 100%);
+  }
+  .ambient{
+    opacity:0.36;
+    filter:blur(12px);
+  }
+  .nav{
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .btn-back,.btn-skip{
+    flex:1 1 calc(50% - 6px);
+    min-width:0;
+  }
+  .btn-next{
+    flex:1 1 100%;
+  }
+  .question-stage{
+    padding:18px;
+    margin-bottom:22px;
+    border-radius:20px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,241,232,0.98));
+  }
+  .question-hero{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  .question-figure-wrap{
+    justify-self:start;
+    width:104px;
+    height:104px;
+  }
+  .question-figure{
+    width:74px;
+    height:74px;
+    font-size:34px;
+    border-radius:22px;
+  }
+  .story-card{
+    grid-template-columns:1fr;
+    gap:14px;
+    background:linear-gradient(180deg, rgba(64,82,41,0.95), rgba(93,111,60,0.9));
+  }
+  #lang-screen .card{
+    justify-content:flex-start;
+  }
+  .story-card > *{
+    grid-column:auto;
+  }
+  .story-illustration{
+    min-height:130px;
+  }
+  .story-illustration::before{width:150px;height:150px}
+  .story-illustration::after{width:94px;height:94px}
+  .story-meter{
+    padding:14px;
+    border-radius:18px;
+  }
+  .lang-headline{
+    font-size:29px;
+    line-height:1.15;
+  }
+  .lang-tagline{
+    font-size:12px;
+    margin-bottom:30px;
+  }
+  .lang-option{
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.78), rgba(244,237,226,0.95));
+    min-height:140px;
+  }
+  .option{
+    background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,238,229,0.94));
+    box-shadow:none;
+  }
+  .option.selected{
+    background:linear-gradient(180deg, rgba(228,237,224,0.98), rgba(243,235,214,0.96));
+  }
+  .bmi-block{
+    flex-direction:column;
+    gap:12px;
+    text-align:center;
+  }
+  .bmi-info{text-align:center}
+  .profile-row{
+    padding:12px 16px;
+  }
+  .p-key{
+    flex:1 1 100%;
+  }
+}
+
+@media(max-width:520px){
+  html,body{overflow:auto}
+  body{min-height:100vh}
+  body::before{opacity:0.18}
+  .ambient{display:none}
+  .card{
+    padding:24px 16px;
+    border-radius:22px;
+    backdrop-filter:blur(8px) saturate(120%);
+    box-shadow:0 14px 34px rgba(26,25,18,0.08);
+  }
+  .wrapper{
+    width:min(100%, calc(100vw - 12px));
+  }
+  .experience-shell{
+    min-height:auto;
+  }
+  .card::after{display:none}
+  .story-card{
+    padding:18px;
+    border-radius:22px;
+    background:
+      linear-gradient(180deg, rgba(255,252,246,0.98), rgba(248,240,227,0.98));
+    color:var(--charcoal);
+    border:1px solid rgba(213,204,193,0.7);
+    box-shadow:0 16px 34px rgba(26,25,18,0.08);
+  }
+  .story-card::before{
+    background:
+      radial-gradient(circle at top right, rgba(160,120,42,0.12), transparent 34%),
+      linear-gradient(140deg, rgba(36,61,23,0.03), transparent 44%);
+  }
+  .story-badge,
+  .story-copy,
+  .story-caption,
+  .mini-stat span{
+    color:var(--stone);
+  }
+  .story-badge::before{background:rgba(160,120,42,0.35)}
+  .story-title{
+    font-size:24px;
+    color:var(--charcoal);
+  }
+  .story-copy,.affirmation-text,.story-caption{font-size:12px}
+  .story-stats{grid-template-columns:1fr}
+  .mini-stat{
+    background:rgba(36,61,23,0.05);
+  }
+  .mini-stat strong{color:var(--forest)}
+  .story-meter{
+    background:rgba(36,61,23,0.05);
+    border-color:rgba(36,61,23,0.07);
+  }
+  .story-meter-track{background:rgba(36,61,23,0.08)}
+  .story-illustration{
+    min-height:96px;
+    border-radius:18px;
+    background:
+      radial-gradient(circle at center, rgba(160,120,42,0.14), transparent 46%),
+      linear-gradient(180deg, rgba(36,61,23,0.03), rgba(36,61,23,0.01));
+  }
+  .story-illustration::before,
+  .story-illustration::after{
+    display:none;
+  }
+  .story-figure{
+    font-size:48px;
+    filter:none;
+  }
+  .story-preview{gap:6px}
+  .mini-chip{
+    color:var(--forest);
+    background:rgba(36,61,23,0.06);
+    border-color:rgba(36,61,23,0.08);
+  }
+  .story-card .affirmation{
+    background:rgba(255,255,255,0.9);
+    border-radius:16px;
+    box-shadow:none;
+  }
+  .question-stage{padding:16px}
+  .question-stage{
+    border-radius:18px;
+    background:#fffaf2;
+    border-color:rgba(213,204,193,0.52);
+  }
+  .question-stage::after{display:none}
+  .question-kicker{
+    font-size:9px;
+    color:var(--forest);
+  }
+  .question-title{
+    font-size:19px;
+    font-style:normal;
+    line-height:1.35;
+  }
+  .question-sub{font-size:12px;margin-bottom:18px}
+  .question-figure-wrap{
+    width:84px;
+    height:84px;
+  }
+  .question-ring{display:none}
+  .question-figure{
+    width:62px;
+    height:62px;
+    font-size:28px;
+    border-radius:18px;
+    box-shadow:none;
+    background:linear-gradient(180deg, #f2eadc, #e7f0e2);
+  }
+  .question-momentum{
+    margin-top:12px;
+    gap:8px;
+  }
+  .momentum-pill{
+    padding:6px 10px;
+    font-size:10px;
+    background:rgba(36,61,23,0.06);
+  }
+  .selection-toast{
+    top:12px;
+    right:12px;
+    font-size:9px;
+    padding:7px 10px;
+  }
+  .options.cols-2{grid-template-columns:1fr}
+  .field-group{grid-template-columns:1fr}
+  .lang-options{flex-direction:column;align-items:stretch}
+  .lang-option{
+    max-width:none;
+    border-radius:16px;
+    min-height:118px;
+  }
+  .option{
+    padding:13px 14px;
+    gap:10px;
+    border-radius:14px;
+  }
+  .option-en{font-size:12px}
+  .option-ar{font-size:11px}
+  .progress-wrap{margin-bottom:26px}
+  .progress-meta{
+    font-size:10px;
+    letter-spacing:0.04em;
+  }
+  .step-dots{margin-bottom:20px}
+  .profile-card{margin-bottom:18px}
+  .p-key{flex:1 1 100%}
+}
+
+@media(max-width:380px){
+  body{
+    background-image:linear-gradient(180deg, #fbf6ef 0%, #f1e6d6 100%);
+  }
+  .brand-mark{
+    letter-spacing:0.16em;
+    gap:10px;
+  }
+  .lang-headline{font-size:26px}
+  .lang-headline-ar{font-size:17px}
+  .story-title{font-size:22px}
+  .story-meter,
+  .affirmation,
+  .question-stage{
+    border-radius:16px;
+  }
+  .btn{
+    font-size:10.5px;
+    padding:12px 14px;
+  }
+  .question-kicker,.section-label{
+    letter-spacing:0.14em;
+  }
+}
+
+/* Unified single-card layout */
+.experience-shell{
+  display:block;
+  min-height:100svh;
+}
+.story-card.unified-card{
+  min-height:100svh;
+  height:100svh;
+  display:block;
+  background:linear-gradient(180deg, rgba(253,250,245,0.97), rgba(248,244,237,0.95));
+  color:var(--charcoal);
+  box-shadow:none;
+  border:none;
+  border-radius:0;
+  padding:10px 14px;
+}
+.story-card.unified-card::before{
+  background:
+    radial-gradient(circle at top right, rgba(160,120,42,0.12), transparent 36%),
+    linear-gradient(140deg, rgba(36,61,23,0.03), transparent 42%);
+}
+.story-side,
+.stage-side{
+  min-width:0;
+  min-height:0;
+}
+.story-side{
+  display:none;
+}
+.stage-side{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:0;
+  padding:0;
+  height:100%;
+}
+.story-side .story-badge{color:var(--warm-gray)}
+.story-side .story-badge::before{background:rgba(160,120,42,0.35)}
+.story-side .story-copy,
+.story-side .story-caption{color:var(--stone)}
+.story-side .story-meter{
+  background:rgba(36,61,23,0.04);
+  border-color:rgba(36,61,23,0.08);
+}
+.story-side .story-meter-label,
+.story-side .mini-stat span{color:var(--stone)}
+.story-side .story-meter-track{background:rgba(36,61,23,0.1)}
+.story-side .mini-stat{
+  background:rgba(36,61,23,0.05);
+}
+.story-side .mini-stat strong{color:var(--forest)}
+.story-side .story-illustration{
+  flex:1 1 auto;
+  min-height:160px;
+  border-color:rgba(36,61,23,0.08);
+  background:
+    radial-gradient(circle at center, rgba(160,120,42,0.12), transparent 52%),
+    linear-gradient(180deg, rgba(36,61,23,0.03), rgba(36,61,23,0.01));
+}
+.story-side .story-illustration::before,
+.story-side .story-illustration::after{
+  border-color:rgba(36,61,23,0.08);
+}
+.story-side .mini-chip{
+  color:var(--forest);
+  background:rgba(36,61,23,0.06);
+  border-color:rgba(36,61,23,0.08);
+}
+.story-side .affirmation{
+  margin-top:6px;
+  background:rgba(255,255,255,0.76);
+  border-color:rgba(213,204,193,0.7);
+  color:var(--stone);
+  box-shadow:none;
+}
+.story-side .affirmation-label{color:var(--gold)}
+.story-side .affirmation-text{color:var(--stone)}
+.stage-side #login-screen,
+.stage-side #lang-screen,
+.stage-side #survey-screen,
+.stage-side #result-screen{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.stage-side #survey-screen,
+.stage-side #result-screen{
+  justify-content:flex-start;
+}
+.stage-side .card{
+  max-width:none;
+  width:100%;
+  height:auto;
+  max-height:none;
+  background:transparent;
+  box-shadow:none;
+  border:none;
+  padding:0;
+  animation:none;
+}
+.stage-side .card::before,
+.stage-side .card::after{
+  display:none;
+}
+.stage-side #lang-screen .card{
+  justify-content:center;
+  gap:18px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:4vh 3vw;
+}
+.stage-side #survey-screen .card,
+.stage-side #result-screen .card{
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+}
+.stage-side .lang-options{
+  padding-top:12px;
+  gap:20px;
+}
+.stage-side .brand-mark{
+  margin-bottom:22px;
+  font-size:10px;
+  letter-spacing:0.24em;
+}
+.stage-side .lang-ornament{
+  font-size:42px;
+  margin-bottom:14px;
+}
+.stage-side .lang-headline{
+  font-size:clamp(40px, 4.8vw, 62px);
+  line-height:1.06;
+  margin-bottom:10px;
+}
+.stage-side .lang-headline-ar{
+  font-size:clamp(22px, 2vw, 30px);
+  margin-bottom:12px;
+}
+.stage-side .lang-tagline{
+  font-size:clamp(15px, 1.1vw, 18px);
+  max-width:760px;
+  margin:0 auto 22px;
+  line-height:1.55;
+}
+.stage-side .lang-divider{
+  margin-bottom:18px;
+  font-size:10px;
+}
+.stage-side .lang-option{
+  min-height:160px;
+  max-height:none;
+  max-width:250px;
+  padding:22px 20px;
+  border-radius:18px;
+}
+.stage-side .lang-flag{
+  font-size:30px;
+  margin-bottom:14px;
+}
+.stage-side .lang-name-p{
+  font-size:16px;
+  margin-bottom:6px;
+}
+.stage-side .lang-name-s{
+  font-size:12px;
+}
+
+@media(max-width:900px){
+  .story-card.unified-card{
+    height:auto;
+    min-height:auto;
+    padding:14px;
+  }
+  .stage-side #lang-screen .card{
+    max-width:900px;
+    padding:28px 18px;
+  }
+  .stage-side .lang-headline{
+    font-size:clamp(34px, 5.8vw, 48px);
+  }
+  .stage-side .lang-headline-ar{
+    font-size:clamp(20px, 3.2vw, 26px);
+  }
+  .stage-side .lang-tagline{
+    font-size:15px;
+    max-width:640px;
+  }
+}
+
+@media(max-width:520px){
+  .story-card.unified-card{
+    border-radius:0;
+    padding:10px;
+  }
+  .stage-side #lang-screen .card{
+    padding:20px 10px;
+    gap:12px;
+  }
+  .stage-side .brand-mark{
+    margin-bottom:18px;
+    font-size:9px;
+  }
+  .stage-side .lang-ornament{
+    font-size:36px;
+    margin-bottom:14px;
+  }
+  .stage-side .lang-headline{
+    font-size:28px;
+  }
+  .stage-side .lang-headline-ar{
+    font-size:18px;
+  }
+  .stage-side .lang-tagline{
+    font-size:13px;
+    margin-bottom:16px;
+  }
+  .stage-side .lang-divider{
+    margin-bottom:16px;
+  }
+  .stage-side .lang-options{
+    gap:14px;
+    padding-top:8px;
+  }
+  .stage-side .lang-option{
+    max-width:none;
+    min-height:120px;
+    padding:16px 14px;
+  }
+}
+</style>
+<!-- ─ Google Identity Services ─ (replace YOUR_GOOGLE_CLIENT_ID) -->
+<script src="https://accounts.google.com/gsi/client" onload="initGSI()" async defer></script>
+<!-- ─ Facebook SDK ─ (replace YOUR_FACEBOOK_APP_ID) -->
+<script>
+window.fbAsyncInit=function(){FB.init({appId:'YOUR_FACEBOOK_APP_ID',cookie:true,xfbml:false,version:'v18.0'});};
+(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src='https://connect.facebook.net/en_US/sdk.js';fjs.parentNode.insertBefore(js,fjs);}(document,'script','facebook-jssdk'));
+</script>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="ambient ambient-a"></div>
+<div class="ambient ambient-b"></div>
+<div class="ambient ambient-c"></div>
+<div class="wrapper">
+  <div class="experience-shell">
+      <div class="story-card unified-card">
+        <div class="story-side">
+        <!-- user bar — hidden until login -->
+        <div class="story-user-bar hidden" id="story-user-bar">
+          <div class="story-user-emoji" id="story-user-avatar">👤</div>
+          <div class="story-user-info">
+            <div class="story-user-name" id="story-user-name">Guest</div>
+            <div class="story-user-via" id="story-user-via">Signed in</div>
+          </div>
+        </div>
+        <div class="story-badge" id="story-stage">Guided Experience</div>
+        <div class="story-title" id="story-title">A portrait worth finishing.</div>
+        <div class="story-copy" id="story-copy">Each answer adds shape, mood, and detail to a more personal nutrition story.</div>
+        <div class="story-meter">
+          <div class="story-meter-label"><span id="story-progress-label">Progress</span><span id="story-progress-pct">04%</span></div>
+          <div class="story-meter-track"><div class="story-meter-fill" id="story-progress-fill"></div></div>
+          <div class="story-stats">
+            <div class="mini-stat"><strong id="story-step-no">01</strong><span>Current</span></div>
+            <div class="mini-stat"><strong id="story-left-no">31</strong><span>Left</span></div>
+            <div class="mini-stat"><strong id="story-energy-no">1/5</strong><span>Energy</span></div>
+          </div>
+        </div>
+        <div class="story-illustration">
+          <div class="story-figure" id="story-figure">🌿</div>
+        </div>
+        <div class="story-caption" id="story-caption">A gentle beginning that invites the user into the experience.</div>
+        <div class="story-preview" id="story-preview">
+          <span class="mini-chip">Calm pacing</span>
+          <span class="mini-chip">Elegant interactions</span>
+          <span class="mini-chip">Rewarding finish</span>
+        </div>
+        <div class="affirmation">
+          <div class="affirmation-label">Momentum Note</div>
+          <div class="affirmation-text" id="affirmation-text">Small steps feel lighter when the page responds beautifully to each one.</div>
+        </div>
+        </div>
+        <div class="stage-side">
+      <!-- ══ LOGIN SCREEN ══ -->
+      <div id="login-screen">
+        <div class="card login-card">
+          <span class="login-ornament">🌿</span>
+          <div class="login-headline">Welcome to Atelier Nutritionnel</div>
+          <div class="login-sub">Sign in to pre-fill your personal details and save your nutritional portrait to your account.</div>
+          <div class="login-btns">
+            <!-- Google — rendered by GSI into this wrapper -->
+            <div id="google-btn-wrap"></div>
+            <div class="login-divider">or</div>
+            <!-- Facebook -->
+            <button class="login-social-btn fb-btn" onclick="loginFacebook()">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <span class="login-btn-label">Continue with Facebook</span>
+            </button>
+            <!-- Apple -->
+            <button class="login-social-btn apple-btn" onclick="loginApple()">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+              <span class="login-btn-label">Continue with Apple</span>
+            </button>
+            <div class="login-divider">or</div>
+            <button class="login-skip-btn" onclick="loginGuest()">Continue as Guest — no sign-in needed</button>
+          </div>
+          <p class="login-privacy">We only read your name, photo, and basic profile to personalise your experience. No data is stored on our servers.</p>
+        </div>
+      </div>
+      <!-- ══ LANG SCREEN ══ -->
+      <div id="lang-screen" class="hidden">
+        <div class="card">
+          <div class="brand-mark">Atelier Nutritionnel</div>
+          <span class="lang-ornament">🌿</span>
+          <div class="lang-headline">Your Nutritional Portrait</div>
+          <div class="lang-headline-ar">بورتريه غذائي خاص بك</div>
+          <div class="lang-tagline">A curated assessment of your dietary philosophy, daily rituals, and nutritional aspirations.</div>
+          <div class="lang-divider">Select your language</div>
+          <div class="lang-options">
+            <button class="lang-option" onclick="startSurvey('en')"><span class="lang-flag">🇬🇧</span><span class="lang-name-p">English</span><span class="lang-name-s">Continue in English</span></button>
+            <button class="lang-option" onclick="startSurvey('ar')"><span class="lang-flag">🇸🇦</span><span class="lang-name-p" style="font-family:'Cairo',sans-serif">العربية</span><span class="lang-name-s">أكمل بالعربية</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="survey-screen" class="hidden">
+        <div class="card" id="survey-card">
+          <div class="selection-toast" id="selection-toast">Choice saved</div>
+          <div class="step-dots" id="step-dots"></div>
+          <div class="progress-wrap"><div class="progress-meta"><span id="prog-label">01 / 27</span><span id="prog-pct">4%</span></div><div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:4%"></div></div></div>
+          <div id="q-area"></div>
+          <div class="error-msg" id="err-msg"></div>
+          <div class="nav"><button class="btn btn-back" id="btn-back" onclick="goBack()">←</button><button class="btn btn-skip hidden" id="btn-skip" onclick="skipStep()">Skip</button><button class="btn btn-next" id="btn-next" onclick="goNext()">Continue</button></div>
+        </div>
+      </div>
+      <div id="result-screen" class="hidden"><div class="card" id="result-card"></div></div>
+        </div>
+      </div>
+  </div>
+</div>
+<script>
+// ---------- TRANSLATIONS ----------
+const T={en:{back:'←',next:'Continue',submit:'Compose My Portrait',skip:'Skip',optional:'Optional',step_of:'of',err:'Please make a selection.',errTxt:'Please share your response.',errDual:'Please complete both fields.',female_note:'This section is composed exclusively for our female guests.'},ar:{back:'→',next:'متابعة',submit:'أكمل بورتريهي',skip:'تخطَّ',optional:'اختياري',step_of:'من',err:'يرجى اختيار إجابة.',errTxt:'يرجى مشاركة إجابتك.',errDual:'يرجى ملء الحقلين.',female_note:'هذا القسم مُعدّ حصراً لضيفاتنا من السيدات.'}};
+let lang='en', step=0, answers={};
+// ---------- GOOGLE SHEETS WEB APP (YOUR PROVIDED URL) ----------
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
+
+// ---------- FULL 27+ QUESTIONS (COMPLETE) ----------
+const QUESTIONS=[
+  {id:'age', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'single', q:{en:'A note on your stage of life',ar:'مرحلة من مراحل عمرك'}, sub:{en:'A foundational note in the composition of your nutritional portrait.',ar:'لبنة أساسية في رسم بورتريهك الغذائي.'}, options:[{icon:'🌱',en:'Under 18',ar:'أقل من 18',val:'u18'},{icon:'🌿',en:'18 – 25',ar:'18 – 25',val:'18-25'},{icon:'🍃',en:'26 – 40',ar:'26 – 40',val:'26-40'},{icon:'🌳',en:'40 & above',ar:'40 فما فوق',val:'40+'}]},
+  {id:'gender', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'single', q:{en:'How you move through the world',ar:'هويتك وحضورك'}, options:[{icon:'○',en:'Male',ar:'ذكر',val:'male'},{icon:'○',en:'Female',ar:'أنثى',val:'female'},{icon:'○',en:'Prefer not to disclose',ar:'أفضّل عدم الإفصاح',val:'other'}]},
+  {id:'measurements', section:{en:'FOUNDATIONS',ar:'الأسس'}, type:'dual-text', q:{en:'Your physical composition',ar:'تكوينك الجسدي'}, sub:{en:'Enables precise BMI calibration and caloric architecture.',ar:'يُتيح معايرةً دقيقة لمؤشر كتلة الجسم وهندسة السعرات.'}, fields:[{key:'height',label:{en:'Height (cm)',ar:'الطول (سم)'},placeholder:{en:'e.g. 170',ar:'مثلاً 170'}},{key:'weight',label:{en:'Weight (kg)',ar:'الوزن (كجم)'},placeholder:{en:'e.g. 70',ar:'مثلاً 70'}}]},
+  {id:'diet', section:{en:'THE PHILOSOPHY',ar:'الفلسفة'}, checkpoint:{en:'Let us now explore the philosophy behind your plate.',ar:'دعنا نستكشف الفلسفة الكامنة وراء طبقك.'}, type:'single', q:{en:'The philosophy of your plate',ar:'فلسفة طبقك الغذائي'}, sub:{en:'Every palate is a distinct expression — no judgement, only considered curiosity.',ar:'كل ذوق هو تعبير فريد — لا أحكام، بل فضول راقٍ.'}, options:[{icon:'🥩',en:'Omnivore — the full table',ar:'عادي — المائدة الكاملة',val:'omnivore'},{icon:'🥗',en:'Vegetarian — plant-forward',ar:'نباتي — الأولوية للنبات',val:'vegetarian'},{icon:'🌱',en:'Vegan — entirely plant-based',ar:'نباتي بالكامل',val:'vegan'},{icon:'🥓',en:'Ketogenic — low-carb, high-fat',ar:'كيتو — قليل الكربوهيدرات',val:'keto'}]},
+  {id:'activity', section:{en:'MOVEMENT & VITALITY',ar:'الحركة والحيوية'}, checkpoint:{en:'We turn now to the rhythm of your body in motion.',ar:'ننتقل الآن إلى إيقاع جسدك في حركته.'}, type:'single', q:{en:'The rhythm of your body in daily motion',ar:'إيقاع حركة جسدك في حياتك اليومية'}, sub:{en:'An honest account serves your portrait best.',ar:'الصدق في الإجابة يخدم بورتريهك على أفضل وجه.'}, options:[{icon:'🛋️',en:'Sedentary — primarily desk-bound',ar:'خامل — جلوس في الغالب',val:'sedentary'},{icon:'🚶',en:'Moderately active',ar:'نشاط حياتي متوسط',val:'moderate'},{icon:'🏋️',en:'Highly active — structured training',ar:'نشيط جداً — تدريب منتظم',val:'active'}]},
+  {id:'meals', section:{en:'DAILY RITUALS',ar:'الطقوس اليومية'}, checkpoint:{en:'A closer study of your daily dining rituals…',ar:'دراسة أدق لطقوس طعامك اليومية…'}, type:'single', q:{en:'The architecture of your daily meals',ar:'بنية وجباتك اليومية'}, options:[{icon:'○',en:'1 – 2 meals',ar:'وجبة أو اثنتان',val:'1-2'},{icon:'○',en:'3 meals — the classical rhythm',ar:'3 وجبات — الإيقاع الكلاسيكي',val:'3'},{icon:'○',en:'4 or more meals & snacks',ar:'4 وجبات أو أكثر',val:'4+'}]},
+  {id:'breakfast', section:{en:'DAILY RITUALS',ar:'الطقوس اليومية'}, type:'single', q:{en:'The morning ritual — do you faithfully observe it?',ar:'طقس الصباح — هل تُحييه بانتظام؟'}, options:[{icon:'☀️',en:'Always — a sacred morning ritual',ar:'دائماً — طقس صباحي لا يُتخطى',val:'always'},{icon:'🌤',en:'Occasionally',ar:'أحياناً',val:'sometimes'},{icon:'🌑',en:'Rarely or never',ar:'نادراً أو أبداً',val:'never'}]},
+  {id:'latenight', section:{en:'DAILY RITUALS',ar:'الطقوس اليومية'}, fun:{en:'The midnight larder holds its own honest secrets.',ar:'مؤونة منتصف الليل تحمل أسرارها الخاصة.'}, type:'single', q:{en:'Late-night eating — an honest account',ar:'الأكل الليلي — اعتراف صادق'}, options:[{icon:'✦',en:'Never — the kitchen closes at dusk',ar:'أبداً — المطبخ يُغلق مع الغسق',val:'never'},{icon:'✦',en:'On occasion',ar:'أحياناً',val:'sometimes'},{icon:'✦',en:'A regular evening ritual',ar:'طقس مسائي متجذّر',val:'often'}]},
+  {id:'tvsnack', section:{en:'DAILY RITUALS',ar:'الطقوس اليومية'}, type:'single', q:{en:'Mindless grazing — does the screen invite it?',ar:'الأكل اللاواعي — هل تستدعيه الشاشة؟'}, options:[{icon:'✦',en:'No — I dine away from all screens',ar:'لا — أتناول طعامي بعيداً عن الشاشات',val:'no'},{icon:'✦',en:'On occasion',ar:'أحياناً',val:'sometimes'},{icon:'✦',en:'Yes — a well-established habit',ar:'نعم — عادة راسخة',val:'yes'}]},
+  {id:'sweets', section:{en:'DAILY RITUALS',ar:'الطقوس اليومية'}, type:'single', q:{en:'The frequency of your sweet indulgences',ar:'تكرار لحظات إذعانك للحلاوة'}, options:[{icon:'🌿',en:'Rarely — an occasional indulgence',ar:'نادراً — متعة عابرة',val:'never'},{icon:'○',en:'1 – 2 times per week',ar:'مرة أو مرتان في الأسبوع',val:'1-2'},{icon:'○',en:'3 – 5 times per week',ar:'3 – 5 مرات أسبوعياً',val:'3-5'},{icon:'🍫',en:'Daily — a cherished constant',ar:'يومياً — ثابت عزيز',val:'daily'}]},
+  {id:'beverages', section:{en:'LIQUID RITUALS',ar:'طقوس السوائل'}, checkpoint:{en:'The art of what you pour…',ar:'فنّ ما تسكبه في كوبك…'}, type:'multi', q:{en:'The liquids that grace your daily table',ar:'السوائل التي تُزيّن مائدتك اليومية'}, sub:{en:'Select all that apply — an honest inventory.',ar:'اختر كل ما ينطبق — جرد صادق.'}, options:[{icon:'☕',en:'Coffee — Turkish or with milk',ar:'قهوة — تركية أو بالحليب',val:'coffee'},{icon:'🧃',en:'Juice or regular soda',ar:'عصير أو مشروب غازي',val:'soda'},{icon:'🥤',en:'Diet soda',ar:'مشروب غازي دايت',val:'diet'},{icon:'🍵',en:'Tea — herbal or traditional',ar:'شاي — أعشاب أو تقليدي',val:'tea'},{icon:'⚡',en:'Sports or energy drinks',ar:'مشروب رياضي أو طاقة',val:'energy'},{icon:'💧',en:'Water — exclusively',ar:'ماء فقط',val:'water'}]},
+  {id:'water', section:{en:'LIQUID RITUALS',ar:'طقوس السوائل'}, type:'single', q:{en:'Your relationship with water — measured in daily ritual',ar:'علاقتك بالماء — مقيسةً بالطقوس اليومية'}, options:[{icon:'○',en:'Under 1 litre',ar:'أقل من لتر',val:'<1'},{icon:'○',en:'1 – 2 litres',ar:'لتر إلى لترَين',val:'1-2'},{icon:'○',en:'2 – 3 litres',ar:'لترَان إلى ثلاثة',val:'2-3'},{icon:'○',en:'3 or more litres',ar:'3 لترات أو أكثر',val:'3+'}]},
+  {id:'conditions', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, checkpoint:{en:'We now enter the biological chapter of your portrait.',ar:'ندخل الآن الفصل البيولوجي من بورتريهك.'}, type:'multi', q:{en:'Conditions of biological note',ar:'حالات صحية جديرة بالتوثيق'}, sub:{en:'Select all that apply — nuanced context shapes refined recommendations.',ar:'اختر كل ما ينطبق — السياق الدقيق يُولّد توصيات أرقى.'}, options:[{icon:'🍬',en:'Diabetes mellitus (DM)',ar:'السكري',val:'dm'},{icon:'❤️',en:'Hypertension (HTN)',ar:'ارتفاع ضغط الدم',val:'htn'},{icon:'🦋',en:'Thyroid disorder',ar:'اضطراب الغدة الدرقية',val:'thyroid'},{icon:'○',en:'PCOS',ar:'تكيّس المبايض',val:'pcos'},{icon:'✦',en:'None — in sound biological health',ar:'لا يوجد — صحة بيولوجية جيدة',val:'none'}]},
+  {id:'thyroid_type', condition:()=>(getAnswer('conditions')?.vals||[]).includes('thyroid'), section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'single', q:{en:'The nature of the thyroid imbalance',ar:'طبيعة خلل الغدة الدرقية'}, options:[{icon:'🔽',en:'Hypothyroidism — the underactive',ar:'قصور الغدة الدرقية (خمول)',val:'hypo'},{icon:'🔼',en:'Hyperthyroidism — the overactive',ar:'فرط نشاط الغدة الدرقية',val:'hyper'},{icon:'○',en:'Uncertain — under investigation',ar:'غير محدد — قيد الفحص',val:'unsure'}]},
+  {id:'doctor_followup', condition:()=>{const v=getAnswer('conditions')?.vals||[];return v.length>0&&!v.every(x=>x==='none');}, section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'single', q:{en:'Are you presently under medical supervision?',ar:'هل أنتَ حالياً تحت إشراف طبي؟'}, options:[{icon:'✦',en:'Yes — regular consultations',ar:'نعم — متابعة منتظمة',val:'yes'},{icon:'✦',en:'Occasionally',ar:'أحياناً',val:'sometimes'},{icon:'✦',en:'No — managing independently',ar:'لا — إدارة مستقلة',val:'no'}]},
+  {id:'medications', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'text',optional:true, q:{en:'Current pharmaceutical companions',ar:'رفقاء الدواء الحاليون'}, sub:{en:'Optional — list by name and dosage if applicable.',ar:'اختياري — اذكر الأسماء والجرع إن وُجدت.'}, placeholder:{en:'e.g. Metformin 500mg, Levothyroxine 50mcg…',ar:'مثلاً: ميتفورمين 500 ملغ، ليفوثيروكسين 50 ميكروغرام…'}},
+  {id:'allergies', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'text',optional:true, q:{en:'Ingredients your biology refuses',ar:'مكونات يرفضها جسدك'}, sub:{en:'Optional — confirmed allergies, intolerances, or sensitivities.',ar:'اختياري — حساسية أو عدم تحمل أو حساسية مؤكدة.'}, placeholder:{en:'e.g. Tree nuts, lactose, gluten, shellfish…',ar:'مثلاً: مكسرات، لاكتوز، جلوتين، قشريات…'}},
+  {id:'digestive', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'multi', q:{en:'The inner landscape — digestive notes of significance',ar:'المشهد الداخلي — ملاحظات هضمية جديرة بالاهتمام'}, sub:{en:'Select all present — subtle details elevate the quality of your plan.',ar:'اختر كل ما ينطبق — التفاصيل الدقيقة ترفع جودة خطتك.'}, options:[{icon:'○',en:'Bloating',ar:'انتفاخ',val:'bloating'},{icon:'○',en:'Constipation',ar:'إمساك',val:'constipation'},{icon:'○',en:'Diarrhea',ar:'إسهال',val:'diarrhea'},{icon:'○',en:'Acid reflux',ar:'ارتجاع معدي أو حرقة',val:'reflux'},{icon:'✦',en:'None — the landscape is harmonious',ar:'لا يوجد — المشهد الداخلي متناسق',val:'none'}]},
+  {id:'surgery', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'single', q:{en:'A history of surgical intervention',ar:'تاريخ التدخل الجراحي'}, options:[{icon:'✦',en:'No previous surgeries',ar:'لا عمليات جراحية سابقة',val:'no'},{icon:'○',en:'Yes — one or more procedures',ar:'نعم — عملية واحدة أو أكثر',val:'yes'}]},
+  {id:'surgery_details', condition:()=>getAnswer('surgery')?.val==='yes', section:{en:'BIOLOGICAL CONTEXT',ar:'السياق البيولوجي'}, type:'text',optional:true, q:{en:'Please describe the procedure(s) and approximate date',ar:'يرجى وصف العملية/العمليات والتاريخ التقريبي'}, placeholder:{en:'e.g. Appendectomy, 2020 — Bariatric surgery, 2022…',ar:'مثلاً: استئصال الزائدة 2020، جراحة السمنة 2022…'}},
+  {id:'sleep', section:{en:'INNER LIFE',ar:'الحياة الداخلية'}, checkpoint:{en:'The quality of your inner rhythms is the silent architect of your health.',ar:'جودة إيقاعاتك الداخلية هي المهندس الصامت لصحتك.'}, type:'single', q:{en:'The nightly retreat — its measured duration',ar:'الانسحاب الليلي — مدّته المقيسة'}, sub:{en:'Sleep is the most artisanal form of recovery available to us.',ar:'النوم هو أرقى أشكال التعافي المتاحة لنا.'}, options:[{icon:'○',en:'Under 5 hours',ar:'أقل من 5 ساعات',val:'<5'},{icon:'○',en:'6 – 7 hours',ar:'6 – 7 ساعات',val:'6-7'},{icon:'○',en:'8 or more hours',ar:'8 ساعات أو أكثر',val:'8+'}]},
+  {id:'stress', section:{en:'INNER LIFE',ar:'الحياة الداخلية'}, type:'single', q:{en:'The current tenor of your inner life',ar:'نبرة حياتك الداخلية الراهنة'}, options:[{icon:'🌿',en:'Low — composed and at ease',ar:'منخفض — هادئ ومرتاح',val:'low'},{icon:'○',en:'Moderate — manageable tension',ar:'متوسط — توتر في حدود المعقول',val:'medium'},{icon:'○',en:'Elevated — under significant pressure',ar:'مرتفع — تحت ضغط ملحوظ',val:'high'}]},
+  {id:'stress_eat', section:{en:'INNER LIFE',ar:'الحياة الداخلية'}, fun:{en:'An honest reflection on the bond between emotion and appetite.',ar:'تأمل صادق في الرابط بين المشاعر والشهية.'}, type:'single', q:{en:'Does tension draw you toward the table?',ar:'هل يقودك التوتر نحو المائدة؟'}, options:[{icon:'✦',en:'No — I maintain my discipline',ar:'لا — أحافظ على انضباطي',val:'no'},{icon:'✦',en:'Yes — food is my quiet solace',ar:'نعم — الطعام عزائي الهادئ',val:'yes'},{icon:'✦',en:'Occasionally',ar:'أحياناً',val:'sometimes'}]},
+  {id:'exercise', section:{en:'INNER LIFE',ar:'الحياة الداخلية'}, type:'single', q:{en:'The discipline of your physical practice',ar:'انضباط ممارستك البدنية'}, options:[{icon:'○',en:'Absent — no structured training',ar:'غائبة — لا تدريب منظّم',val:'none'},{icon:'○',en:'Light — 1 to 2 sessions weekly',ar:'خفيفة — جلسة أو اثنتان أسبوعياً',val:'light'},{icon:'○',en:'Moderate — 3 to 4 sessions weekly',ar:'متوسطة — 3 إلى 4 جلسات أسبوعياً',val:'moderate'},{icon:'○',en:'Dedicated — 5 or more sessions weekly',ar:'مكثّفة — 5 جلسات أو أكثر أسبوعياً',val:'intense'}]},
+  {id:'goal', section:{en:'YOUR ASPIRATION',ar:'طموحك'}, checkpoint:{en:'What aspiration brought you to this portrait?',ar:'أيّ طموح أحضرك إلى هذا البورتريه؟'}, type:'single', q:{en:'The aspiration that brought you here today',ar:'الطموح الذي أحضرك إلى هنا اليوم'}, sub:{en:'The north star that will guide your personalised nutritional journey.',ar:'النجم الذي سيقود رحلتك الغذائية المخصّصة.'}, options:[{icon:'⚖️',en:'Weight reduction — measured & sustainable',ar:'خسارة الوزن — بشكل متوازن ومستدام',val:'lose'},{icon:'💪',en:'Muscle architecture & body composition',ar:'بناء العضلات وتحسين تكوين الجسم',val:'muscle'},{icon:'🌿',en:'Holistic wellness & longevity',ar:'العافية الشاملة والعمر المديد',val:'healthy'},{icon:'⚡',en:'Energy optimisation & sustained vitality',ar:'تحسين الطاقة والحيوية المستدامة',val:'energy'}]},
+  {id:'dislikes', section:{en:'THE PALATE',ar:'الحنك'}, checkpoint:{en:'Now, a careful study of your personal palate…',ar:'دراسة دقيقة لحنكك الشخصي…'}, type:'text',optional:true, q:{en:'Ingredients you choose to exclude from your table',ar:'مكوّنات تختار استبعادها من مائدتك'}, sub:{en:'Optional — helps us compose a plan that genuinely honours your taste.',ar:'اختياري — يساعدنا في صياغة خطة تحترم ذوقك حقاً.'}, placeholder:{en:'e.g. Offal, olives, mushrooms, bitter greens…',ar:'مثلاً: كبد، زيتون، فطر، خضروات مرّة…'}},
+  {id:'weakness', section:{en:'AN ARTISANAL CONFESSION',ar:'اعتراف فني'}, fun:{en:'Every discerning palate harbours its cherished indulgence — this is a safe space.',ar:'كل ذوق راقٍ يُخفي متعته المفضّلة — هذا فضاء آمن.'}, type:'single', q:{en:'Your most celebrated culinary indulgence',ar:'متعتك الغذائية الأكثر احتفاءً'}, options:[{icon:'🍰',en:'Confections & fine pastries',ar:'الحلويات والمعجنات الراقية',val:'sweets'},{icon:'🍔',en:'Street food & fast service dining',ar:'الوجبات السريعة',val:'fastfood'},{icon:'🍟',en:'Artisanal salty snacks',ar:'الوجبات الخفيفة المالحة',val:'snacks'},{icon:'✦',en:'None — I am entirely disciplined',ar:'لا شيء — أنا منضبط تماماً',val:'disciplined'}]},
+  {id:'fav_meal', section:{en:'AN ARTISANAL CONFESSION',ar:'اعتراف فني'}, type:'text', q:{en:'Your one definitive dish — if served at every meal',ar:'طبقك الأثير والنهائي — لو قُدِّم في كل وجبة'}, sub:{en:'This single answer reveals the most intimate layers of your culinary identity.',ar:'هذه الإجابة وحدها تكشف أعمق طبقات هويتك الغذائية.'}, placeholder:{en:'e.g. My grandmother\'s slow-cooked lamb with heritage grains…',ar:'مثلاً: يخنة لحم جدّتي البطيئة مع الحبوب الموروثة…'}},
+  {id:'pregnant', condition:()=>getAnswer('gender')?.val==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, checkpoint:{en:'A chapter composed exclusively for her.',ar:'فصل مُعدّ حصراً لها.'}, female:true, type:'single', q:{en:'Your current reproductive chapter',ar:'فصلك الإنجابي الحالي'}, options:[{icon:'✦',en:'None of the below',ar:'لا شيء مما يلي',val:'no'},{icon:'🤰',en:'Pregnant',ar:'حامل',val:'pregnant'},{icon:'🤱',en:'Breastfeeding',ar:'مرضعة',val:'breastfeeding'}]},
+  {id:'period', condition:()=>getAnswer('gender')?.val==='female', section:{en:'HER PORTRAIT',ar:'بورتريه المرأة'}, female:true, type:'single', q:{en:'The regularity of your monthly cycle',ar:'انتظام دورتك الشهرية'}, options:[{icon:'✦',en:'Regular — a reliable, consistent cycle',ar:'منتظمة — دورة ثابتة وموثوقة',val:'yes'},{icon:'✦',en:'Irregular — a variable cycle',ar:'غير منتظمة — دورة متذبذبة',val:'no'}]},
+  {id:'past_diet', section:{en:'FINAL OBSERVATIONS',ar:'الملاحظات الختامية'}, checkpoint:{en:'You have reached the final chapter of your nutritional portrait.',ar:'لقد وصلت إلى الفصل الأخير من بورتريهك الغذائي.'}, type:'text',optional:true, q:{en:'Previous dietary chapters — and what they taught you',ar:'فصول غذائية سابقة — وما علّمتكَ إيّاه'}, sub:{en:'Optional — regime type, duration, outcome, and the reason for discontinuation.',ar:'اختياري — نوع النظام، المدة، النتيجة، وسبب التوقف.'}, placeholder:{en:'e.g. Ketogenic for 3 months — effective but socially limiting…',ar:'مثلاً: كيتو لمدة 3 أشهر — فعّال لكن مقيّد اجتماعياً…'}},
+  {id:'notes', section:{en:'FINAL OBSERVATIONS',ar:'الملاحظات الختامية'}, type:'text',optional:true, q:{en:'Any final observations for your nutritionist',ar:'ملاحظاتك الختامية لأخصائي التغذية'}, sub:{en:'Optional — symptoms, context, or anything that would enrich the portrait.',ar:'اختياري — أعراض أو سياق أو أي شيء يُثري البورتريه.'}, placeholder:{en:'Anything that would help your nutritionist craft a more precise plan…',ar:'أي شيء يساعد أخصائي التغذية على رسم خطة أكثر دقة…'}}
+];
+
+const SECTION_ART={
+  'FOUNDATIONS':{emoji:'🌱', caption:{en:'The portrait opens with grounding details.',ar:'يبدأ البورتريه بتفاصيل تأسيسية هادئة.'}},
+  'THE PHILOSOPHY':{emoji:'🍽️', caption:{en:'This chapter explores identity through taste.',ar:'يستكشف هذا الفصل الهوية من خلال الذوق.'}},
+  'MOVEMENT & VITALITY':{emoji:'⚡', caption:{en:'Rhythm, energy, and motion shape the plan.',ar:'الإيقاع والطاقة والحركة تشكّل الخطة.'}},
+  'DAILY RITUALS':{emoji:'☀️', caption:{en:'Daily habits reveal the real nutritional rhythm.',ar:'العادات اليومية تكشف الإيقاع الغذائي الحقيقي.'}},
+  'LIQUID RITUALS':{emoji:'💧', caption:{en:'Hydration and beverages change the whole texture.',ar:'الترطيب والمشروبات يغيّران ملمس التجربة كلها.'}},
+  'BIOLOGICAL CONTEXT':{emoji:'🧬', caption:{en:'Context makes every recommendation feel more personal.',ar:'السياق يجعل كل توصية أكثر شخصية.'}},
+  'INNER LIFE':{emoji:'🌙', caption:{en:'Sleep and stress shape recovery behind the scenes.',ar:'النوم والتوتر يصنعان التعافي خلف الكواليس.'}},
+  'MOVEMENT':{emoji:'🏃', caption:{en:'Training goals sharpen the picture.',ar:'أهداف الحركة تجعل الصورة أكثر دقة.'}},
+  'AN ARTISANAL CONFESSION':{emoji:'✨', caption:{en:'Preference and indulgence make the portrait human.',ar:'التفضيل والمتعة يجعلات البورتريه إنسانياً.'}},
+  'HER PORTRAIT':{emoji:'🌺', caption:{en:'A tailored chapter with added care.',ar:'فصل مخصص بعناية إضافية.'}},
+  'FINAL OBSERVATIONS':{emoji:'🎁', caption:{en:'The final touches complete the whole composition.',ar:'اللمسات الأخيرة تكمل التكوين كله.'}}
+};
+
+const AFFIRMATIONS={
+  en:[
+    'Each answer sharpens the portrait and makes the finish feel worth it.',
+    'You are turning a long form into a guided experience, one beautiful step at a time.',
+    'Momentum matters here. Clear feedback keeps the next question feeling easy.',
+    'The design should reward curiosity, not just collect responses.',
+    'A good survey invites completion by making progress feel visible and satisfying.'
+  ],
+  ar:[
+    'كل إجابة تجعل البورتريه أوضح وتجعل النهاية أكثر استحقاقاً.',
+    'أنت تحوّل الاستبيان الطويل إلى تجربة مرشدة خطوة بخطوة.',
+    'الزخم مهم هنا، والتغذية البصرية الراجعة تجعل السؤال التالي أسهل.',
+    'التصميم الجيد يكافئ الفضول ولا يكتفي بجمع الإجابات.',
+    'الاستبيان الناجح يجعل التقدّم مرئياً وممتعاً حتى النهاية.'
+  ]
+};
+
+function getVisibleQuestion(stepIndex){return QUESTIONS[stepIndex]||null;}
+function getSectionArt(sectionKey){return SECTION_ART[sectionKey]||{emoji:'🌿',caption:{en:'A calm visual anchor for the next answer.',ar:'مرساة بصرية هادئة للإجابة التالية.'}};}
+function getEnergyLevel(percent){return Math.max(1,Math.min(5,Math.ceil(percent/20)));}
+function getAffirmation(percent){const list=AFFIRMATIONS[lang]||AFFIRMATIONS.en;return list[Math.min(list.length-1,Math.floor(percent/25))];}
+function buildPreviewChips(){
+  const chips=[];
+  QUESTIONS.forEach((q,idx)=>{
+    const ans=answers[idx];
+    if(!ans||ans.skipped) return;
+    if(q.type==='single'&&ans.val) chips.push(ans.val);
+    else if(q.type==='multi'&&ans.vals?.length) chips.push(...ans.vals.slice(0,2));
+    else if(q.type==='text'&&ans.text) chips.push((ans.text||'').slice(0,18));
+    else if(q.type==='dual-text'&&ans.fields?.height&&ans.fields?.weight) chips.push(`${ans.fields.height}cm`,`${ans.fields.weight}kg`);
+  });
+  return chips.slice(-3);
+}
+function updateStoryPanel(q,total,vis,pct){
+  const art=getSectionArt(q.section.en);
+  const energy=getEnergyLevel(pct);
+  document.getElementById('story-stage').textContent=q.section[lang];
+  document.getElementById('story-title').textContent=lang==='ar' ? `أنت الآن داخل ${q.section.ar}` : `You are now inside ${q.section.en.toLowerCase()}.`;
+  document.getElementById('story-copy').textContent=q.sub?.[lang] || art.caption[lang];
+  document.getElementById('story-progress-label').textContent=lang==='ar' ? 'التقدّم' : 'Progress';
+  document.getElementById('story-progress-pct').textContent=`${String(pct).padStart(2,'0')}%`;
+  document.getElementById('story-progress-fill').style.width=`${pct}%`;
+  document.getElementById('story-step-no').textContent=String(vis).padStart(2,'0');
+  document.getElementById('story-left-no').textContent=String(Math.max(total-vis,0)).padStart(2,'0');
+  document.getElementById('story-energy-no').textContent=`${energy}/5`;
+  document.getElementById('story-figure').textContent=art.emoji;
+  document.getElementById('story-caption').textContent=art.caption[lang];
+  document.getElementById('affirmation-text').textContent=getAffirmation(pct);
+  const preview=buildPreviewChips();
+  document.getElementById('story-preview').innerHTML=(preview.length?preview:[lang==='ar'?'إيقاع بصري':'Visual momentum',lang==='ar'?'خيارات جذابة':'Inviting options',lang==='ar'?'تقدّم واضح':'Visible progress']).map(v=>`<span class="mini-chip">${v}</span>`).join('');
+}
+function showSelectionToast(){
+  const toast=document.getElementById('selection-toast');
+  if(!toast) return;
+  toast.textContent=lang==='ar'?'تم حفظ الاختيار':'Choice saved';
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),700);
+}
+
+function getAnswer(id){const i=QUESTIONS.findIndex(q=>q.id===id);return i>=0?answers[i]:undefined;}
+function isVisible(i){const q=QUESTIONS[i];return!q.condition||q.condition();}
+function totalVisible(){return QUESTIONS.filter((_,i)=>isVisible(i)).length;}
+function visibleIndex(){let c=0;for(let i=0;i<=step;i++)if(isVisible(i))c++;return c;}
+function buildSubmissionPayload(){const payload={language:lang};QUESTIONS.forEach((q,idx)=>{const ans=answers[idx];if(!ans)return;if(q.type==='single') payload[q.id]=ans.val||"";else if(q.type==='multi') payload[q.id]=ans.vals||[];else if(q.type==='text') payload[q.id]=ans.text||"";else if(q.type==='dual-text'){payload.height=ans.fields?.height||"";payload.weight=ans.fields?.weight||"";}});const h=parseFloat(payload.height),w=parseFloat(payload.weight);if(h&&w&&h>0&&w>0) payload.bmi=(w/Math.pow(h/100,2)).toFixed(1);else payload.bmi="";return payload;}
+async function submitSurvey() {
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = true;
+  nextBtn.textContent = lang === 'ar' ? '— جارٍ الحفظ —' : '— Saving —';
+
+  const payload = buildSubmissionPayload();
+
+  try {
+    // text/plain avoids CORS preflight; Apps Script still reads e.postData.contents
+    const resp = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    });
+    const json = await resp.json();
+    if (!json.success) throw new Error(json.message || 'Submission error');
+    console.log('✓ Portrait saved:', json.message);
+  } catch (e) {
+    // Fallback: fire-and-forget no-cors — data still reaches the sheet
+    // even if the browser blocks reading the response (common in local dev)
+    try {
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (_) {}
+    console.warn('Submit used no-cors fallback:', e.message);
+  }
+
+  // Always show results — never block the user on a network issue
+  showResults();
+}
+function showCheckpoint(msg,section,done){const ov=document.createElement('div');ov.className='checkpoint-overlay';ov.innerHTML=`<div class="checkpoint-inner"><span class="checkpoint-ornament">— ✦ —</span><span class="checkpoint-section">${section}</span><div class="checkpoint-text">${msg}</div></div>`;document.body.appendChild(ov);requestAnimationFrame(()=>ov.style.opacity='1');setTimeout(()=>{ov.style.opacity='0';setTimeout(()=>{ov.remove();done();},500);},2000);}
+function startSurvey(l){lang=l;document.body.classList.toggle('rtl',l==='ar');document.documentElement.lang=l;document.getElementById('lang-screen').classList.add('hidden');document.getElementById('survey-screen').classList.remove('hidden');step=0;answers={};while(step<QUESTIONS.length&&!isVisible(step))step++;renderStep();}
+function renderStep(){
+  const total=totalVisible(),vis=visibleIndex(),pct=Math.round((vis/total)*100),q=QUESTIONS[step],art=getSectionArt(q.section.en),energy=getEnergyLevel(pct);
+  document.getElementById('prog-label').textContent=`${String(vis).padStart(2,'0')} ${T[lang].step_of} ${String(total).padStart(2,'0')}`;
+  document.getElementById('prog-pct').textContent=`${pct}%`;
+  const progressFill=document.getElementById('prog-fill');
+  progressFill.style.width=`${pct}%`;
+  progressFill.classList.remove('glow');
+  void progressFill.offsetWidth;
+  progressFill.classList.add('glow');
+  syncDots();
+  updateStoryPanel(q,total,vis,pct);
+  const backBtn=document.getElementById('btn-back'),nextBtn=document.getElementById('btn-next'),skipBtn=document.getElementById('btn-skip');
+  backBtn.textContent=T[lang].back;
+  backBtn.disabled=step===0||!QUESTIONS.slice(0,step).some((_,i)=>isVisible(i));
+  nextBtn.disabled=false;
+  nextBtn.textContent=(vis===total)?T[lang].submit:T[lang].next;
+  skipBtn.textContent=T[lang].skip;
+  q.optional?skipBtn.classList.remove('hidden'):skipBtn.classList.add('hidden');
+  document.getElementById('err-msg').classList.remove('show');
+  const energyDots=Array.from({length:5},(_,i)=>`<span class="energy-dot ${i<energy?'active':''}"></span>`).join('');
+  let html=`<div class="question-stage"><div class="question-kicker">${q.section[lang]}</div><div class="question-hero"><div><div class="question-title">${q.q[lang]}</div>${q.sub?`<div class="question-sub">${q.sub[lang]}</div>`:''}<div class="question-momentum"><span class="momentum-pill">${lang==='ar'?'خطوة أنيقة':'Elegant step'} ${String(vis).padStart(2,'0')}</span><div class="energy-row">${energyDots}</div></div></div><div class="question-figure-wrap"><div class="question-ring"></div><div class="question-figure">${art.emoji}</div></div></div></div>`;
+  html+=`<div class="section-label">${q.section[lang]}</div>`;
+  if(q.optional)html+=`<span class="optional-badge">${T[lang].optional}</span>`;
+  if(q.female)html+=`<div class="female-notice"><span>👩</span><em>${T[lang].female_note}</em></div>`;
+  else if(q.fun)html+=`<div class="fun-note"><span>✦</span><em>${q.fun[lang]}</em></div>`;
+  if(q.type==='single'||q.type==='multi'){
+    const cols=q.options.length>3?'cols-2':'';
+    html+=`<div class="options ${cols}">`;
+    q.options.forEach((opt,idx)=>{const sel=isSelected(step,opt.val)?'selected':'';const mc=q.type==='multi'?'multi':'';html+=`<div class="option ${mc} ${sel}" onclick="selectOption(${idx})"><span class="option-icon">${opt.icon}</span><span class="option-text"><span class="option-en">${opt.en}</span><span class="option-ar">${opt.ar}</span></span><span class="option-indicator"></span></div>`;});
+    html+='</div>';
+  }else if(q.type==='text'){
+    const saved=answers[step]?.text||'';
+    html+=`<textarea class="text-input" id="text-ans" rows="4" placeholder="${q.placeholder?.[lang]||''}" oninput="answers[${step}]={text:this.value}">${saved}</textarea>`;
+  }else if(q.type==='dual-text'){
+    const fields=answers[step]?.fields||{};
+    html+=`<div class="field-group">`;
+    q.fields.forEach(f=>{html+=`<div><label class="field-label">${f.label[lang]}</label><input type="number" class="text-input" placeholder="${f.placeholder[lang]}" value="${fields[f.key]||''}" oninput="saveDual('${f.key}',this.value)" style="padding:12px 16px"></div>`;});
+    html+=`</div>`;
+  }
+  document.getElementById('q-area').innerHTML=html;
+  const card=document.getElementById('survey-card');
+  card.style.animation='none';
+  card.offsetHeight;
+  card.style.animation='revealUp 0.45s cubic-bezier(0.22,1,0.36,1) both';
+}
+function isSelected(s,val){if(!answers[s])return false;const q=QUESTIONS[s];if(q.type==='single')return answers[s].val===val;if(q.type==='multi')return(answers[s].vals||[]).includes(val);return false;}
+function selectOption(idx){const q=QUESTIONS[step],val=q.options[idx].val;if(q.type==='single'){answers[step]={val};document.querySelectorAll('.option').forEach(el=>el.classList.remove('selected'));document.querySelectorAll('.option')[idx].classList.add('selected');}else{if(!answers[step])answers[step]={vals:[]};let vals=answers[step].vals;if(val==='none'){vals=vals.includes('none')?[]:['none'];}else{if(vals.includes('none'))vals=vals.filter(v=>v!=='none');const i=vals.indexOf(val);i===-1?vals.push(val):vals.splice(i,1);}answers[step]={vals};document.querySelectorAll('.option').forEach((el,i)=>{el.classList.toggle('selected',(answers[step].vals||[]).includes(q.options[i].val));});}document.getElementById('err-msg').classList.remove('show');showSelectionToast();updateStoryPanel(QUESTIONS[step],totalVisible(),visibleIndex(),Math.round((visibleIndex()/totalVisible())*100));}
+function saveDual(key,val){if(!answers[step])answers[step]={fields:{}};if(!answers[step].fields)answers[step].fields={};answers[step].fields[key]=val;}
+function saveText(){if(QUESTIONS[step].type==='text'){const v=document.getElementById('text-ans')?.value?.trim();if(v)answers[step]={text:v};}}
+function validateStep(){const q=QUESTIONS[step],err=document.getElementById('err-msg');if(q.optional)return true;if(q.type==='single'){if(!answers[step]?.val){err.textContent=T[lang].err;err.classList.add('show');return false}}else if(q.type==='multi'){if(!answers[step]?.vals?.length){err.textContent=T[lang].err;err.classList.add('show');return false}}else if(q.type==='text'){const v=document.getElementById('text-ans')?.value?.trim();if(!v){err.textContent=T[lang].errTxt;err.classList.add('show');return false}answers[step]={text:v};}else if(q.type==='dual-text'){const f=answers[step]?.fields||{};if(!QUESTIONS[step].fields.every(x=>f[x.key]&&String(f[x.key]).trim())){err.textContent=T[lang].errDual;err.classList.add('show');return false;}}return true;}
+async function goNext(){if(!validateStep())return;const total=totalVisible();const currentVis=visibleIndex();if(currentVis===total){await submitSurvey();return;}let n=step+1;while(n<QUESTIONS.length&&!isVisible(n))n++;if(n>=QUESTIONS.length){await submitSurvey();return;}const nextQ=QUESTIONS[n];const nextSection=nextQ?.section?.en;const currentSection=QUESTIONS[step]?.section?.en;if(nextQ.checkpoint&&nextSection!==currentSection){showCheckpoint(nextQ.checkpoint[lang],nextSection,()=>{step=n;renderStep();});}else{step=n;renderStep();}}
+function skipStep(){saveText();answers[step]=answers[step]||{skipped:true};let n=step+1;while(n<QUESTIONS.length&&!isVisible(n))n++;if(n>=QUESTIONS.length)submitSurvey();else{step=n;renderStep();}}
+function goBack(){let p=step-1;while(p>=0&&!isVisible(p))p--;if(p>=0){step=p;renderStep();}}
+function syncDots(){const w=document.getElementById('step-dots');w.innerHTML='';QUESTIONS.forEach((_,i)=>{if(!isVisible(i))return;const d=document.createElement('div');d.className='dot';if(i<step)d.classList.add('done');else if(i===step)d.classList.add('active');w.appendChild(d);});}
+// ARCHETYPES & RESULTS
+const ARCHETYPES={performance:{emoji:'🏋️',en:'The Performance Architect',ar:'مهندس الأداء',portrait:{en:'You approach your body as an engineer approaches design — with precision, intention, and a refined understanding.',ar:'تتعامل مع جسدك كما يتعامل المهندس مع تصميمه — بدقة وقصد.'},tip:{en:'Elevate protein to centre stage at every meal. Time your carbohydrates around training windows.',ar:'اجعل البروتين نجم كل وجبة. وقّت الكربوهيدرات حول نوافذ التدريب.'}},botanical:{emoji:'🌿',en:'The Botanical Purist',ar:'النقاء النباتي',portrait:{en:'Your relationship with food is one of considered reverence.',ar:'علاقتك بالطعام هي علاقة احترام واعٍ.'},tip:{en:'Diversity is the hallmark. A chromatic plate is your finest daily practice.',ar:'التنوع هو سمة الذوق النباتي الرفيع.'}},contemplative:{emoji:'🍂',en:'The Contemplative Gourmand',ar:'الذواقة التأمّلي',portrait:{en:'Food, for you, is as much comfort as sustenance.',ar:'الطعام بالنسبة لك هو عزاء بقدر ما هو غذاء.'},tip:{en:'Introduce a deliberate pause between the urge and the plate.',ar:'أدخل توقفاً متعمداً بين الرغبة والطبق.'}},minimalist:{emoji:'⚖️',en:'The Structured Minimalist',ar:'الانضباط المنظّم',portrait:{en:'Your palate is governed by quiet discipline.',ar:'ذوقك يحكمه انضباط هادئ.'},tip:{en:'A precise caloric deficit, anchored in whole foods.',ar:'عجز سعري دقيق مرتكز على الأطعمة الكاملة.'}},vital:{emoji:'⚡',en:'The Vital Connoisseur',ar:'ذواقة الحيوية',portrait:{en:'You seek vitality in artisanal selection of ingredients.',ar:'تسعى إلى الحيوية في الاختيار الدقيق للمكونات.'},tip:{en:'Complex carbohydrates, quality hydration form the pillars.',ar:'الكربوهيدرات المعقدة والترطيب الجيد هي الأركان.'}},reformer:{emoji:'🌅',en:'The Indulgent Reformer',ar:'المُصلح المتلذّذ',portrait:{en:'You hold tension between pleasure and intention with grace.',ar:'تحتضن التوتر بين المتعة والقصد بأناقة.'},tip:{en:'Introduce indulgences mindfully. Reshape the ritual, not the desire.',ar:'أدخل متعك المفضّلة بوعي. أعِد تشكيل الطقس، لا الرغبة.'}},heritage:{emoji:'🍽️',en:'The Heritage Keeper',ar:'حارس الموروث الغذائي',portrait:{en:'Your table is a living archive — generous, diverse.',ar:'مائدتك أرشيف حيّ — كريمة ومتنوعة.'},tip:{en:'Honour your traditional food heritage while introducing refinements.',ar:'أحترم إرثك الغذائي التقليدي مع إدخال تحسينات.'}}};
+function getArchetype(goal,diet,exercise,weakness,stress,stressEat){if(goal==='muscle'&&['moderate','intense'].includes(exercise))return'performance';if(['vegan','vegetarian'].includes(diet)&&goal==='healthy')return'botanical';if(stress==='high'&&stressEat==='yes')return'contemplative';if(goal==='lose'&&weakness==='disciplined')return'minimalist';if(goal==='energy')return'vital';if(['sweets','fastfood','snacks'].includes(weakness)&&(goal==='lose'||goal==='healthy'))return'reformer';return'heritage';}
+function calcBMI(){const f=getAnswer('measurements')?.fields||{};const h=parseFloat(f.height),w=parseFloat(f.weight);if(!h||!w||h<50)return null;const bmi=w/Math.pow(h/100,2),r=Math.round(bmi*10)/10;let cat;if(bmi<18.5)cat={en:'Underweight',ar:'نقص الوزن',color:'#0369a1'};else if(bmi<25)cat={en:'Normal weight',ar:'وزن طبيعي',color:'#166534'};else if(bmi<30)cat={en:'Overweight',ar:'زيادة الوزن',color:'#a16207'};else cat={en:'Obese',ar:'سمنة',color:'#9f1239'};return{value:r,cat};}
+function showResults(){document.getElementById('survey-screen').classList.add('hidden');document.getElementById('result-screen').classList.remove('hidden');const isAr=lang==='ar',goal=getAnswer('goal')?.val,diet=getAnswer('diet')?.val,exercise=getAnswer('exercise')?.val,weakness=getAnswer('weakness')?.val,stress=getAnswer('stress')?.val,stressEat=getAnswer('stress_eat')?.val,meals=getAnswer('meals')?.val,fav=getAnswer('fav_meal')?.text||'—',sleep=getAnswer('sleep')?.val,water=getAnswer('water')?.val,bmi=calcBMI(),archKey=getArchetype(goal,diet,exercise,weakness,stress,stressEat),arch=ARCHETYPES[archKey];const bmiHtml=bmi?`<div class="bmi-block"><div class="bmi-num" style="color:${bmi.cat.color}">${bmi.value}</div><div class="bmi-info"><div class="bmi-title">Body Mass Index</div><div class="bmi-cat" style="color:${bmi.cat.color}">${bmi.cat[lang]}</div></div></div>`:'';const profileRows=`<div class="profile-row"><span class="p-icon">🎯</span><span class="p-key">${isAr?'الطموح':'Aspiration'}</span><span class="p-val">${goal||'—'}</span></div><div class="profile-row"><span class="p-icon">🍽️</span><span class="p-key">${isAr?'الوجبات':'Meals'}</span><span class="p-val">${meals||'—'}</span></div><div class="profile-row"><span class="p-icon">💪</span><span class="p-key">${isAr?'التمرين':'Exercise'}</span><span class="p-val">${exercise||'—'}</span></div><div class="profile-row"><span class="p-icon">😴</span><span class="p-key">${isAr?'النوم':'Sleep'}</span><span class="p-val">${sleep||'—'}</span></div><div class="profile-row"><span class="p-icon">💧</span><span class="p-key">${isAr?'الماء':'Water'}</span><span class="p-val">${water||'—'}</span></div><div class="profile-row"><span class="p-icon">❤️</span><span class="p-key">${isAr?'الطبق المفضل':'Signature dish'}</span><span class="p-val">${fav}</span></div>`;const card=document.getElementById('result-card');card.innerHTML=`<span class="result-crest">${arch.emoji}</span><span class="result-eyebrow">${isAr?'بورتريهك الغذائي الشخصي':'Your Personalised Nutritional Portrait'}</span><div class="result-archetype">${arch[isAr?'ar':'en']}</div><div class="result-portrait-line">"${arch.portrait[lang]}"</div>${bmiHtml}<div class="profile-card"><div class="profile-head">${isAr?'نظرة عامة':'Overview'}</div>${profileRows}</div><div class="insight-block"><strong>${isAr?'توصية':'Insight'}</strong>${arch.tip[lang]}</div><button class="btn-restart" onclick="restart()">${isAr?'↺ بورتريه جديد':'↺ New Portrait'}</button>`;card.style.animation='none';card.offsetHeight;card.style.animation='revealUp 0.55s cubic-bezier(0.22,1,0.36,1) both';document.getElementById('story-stage').textContent=isAr?'النتيجة النهائية':'Final Portrait';document.getElementById('story-title').textContent=isAr?'اكتمل البورتريه الشخصي':'The personalised portrait is complete.';document.getElementById('story-copy').textContent=arch.portrait[lang];document.getElementById('story-progress-pct').textContent='100%';document.getElementById('story-progress-fill').style.width='100%';document.getElementById('story-step-no').textContent='✓';document.getElementById('story-left-no').textContent='00';document.getElementById('story-energy-no').textContent='5/5';document.getElementById('story-figure').textContent=arch.emoji;document.getElementById('story-caption').textContent=arch.tip[lang];document.getElementById('story-preview').innerHTML=`<span class="mini-chip">${goal||'balanced'}</span><span class="mini-chip">${exercise||'steady'}</span><span class="mini-chip">${water||'hydrated'}</span>`;document.getElementById('affirmation-text').textContent=isAr?'النهاية تبدو مُرضية عندما يشعر المستخدم بأن كل خطوة كانت ذات قيمة.' :'The finish feels rewarding when every step on the way felt intentional.';}
+
+// ══════════════════════════════════════════════════════
+//  SOCIAL LOGIN & PRE-FILL
+// ══════════════════════════════════════════════════════
+
+let userProfile = null;
+
+// ─── Google Identity Services ────────────────────────
+// Replace with your Client ID from console.cloud.google.com
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+function initGSI() {
+  if (typeof google === 'undefined') return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('google-btn-wrap'),
+    { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular', width: 340 }
+  );
+}
+
+function handleGoogleLogin(response) {
+  try {
+    // Decode JWT payload (base64)
+    const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    applyProfile({
+      name: payload.name || payload.given_name || 'User',
+      email: payload.email || '',
+      picture: payload.picture || null,
+      gender: null,      // Google doesn't expose gender in ID token
+      birthday: null,    // Google doesn't expose birthday in ID token
+      via: 'Google'
+    });
+  } catch(e) { loginGuest(); }
+}
+
+// ─── Facebook ────────────────────────────────────────
+// Replace with your App ID from developers.facebook.com
+const FACEBOOK_APP_ID = 'YOUR_FACEBOOK_APP_ID';
+
+function loginFacebook() {
+  if (typeof FB === 'undefined') {
+    alert('Facebook SDK not loaded. Check your App ID and internet connection.');
+    return;
+  }
+  FB.login(function(res) {
+    if (!res.authResponse) return; // user cancelled
+    FB.api('/me', { fields: 'name,email,gender,birthday,picture.width(200)' }, function(data) {
+      applyProfile({
+        name: data.name || 'User',
+        email: data.email || '',
+        picture: data.picture?.data?.url || null,
+        gender: data.gender || null,       // 'male' / 'female'
+        birthday: data.birthday || null,   // 'MM/DD/YYYY'
+        via: 'Facebook'
+      });
+    });
+  }, { scope: 'email,user_gender,user_birthday' });
+}
+
+// ─── Apple Sign-In ───────────────────────────────────
+// Requires Apple Developer account + Services ID configured at
+// developer.apple.com — replace placeholders below
+function loginApple() {
+  if (typeof AppleID === 'undefined') {
+    alert('Apple Sign-In requires an Apple Developer Services ID. See comments in code.');
+    return;
+  }
+  AppleID.auth.signIn().then(function(res) {
+    const id = res.authorization?.id_token;
+    if (!id) return loginGuest();
+    const payload = JSON.parse(atob(id.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const firstName = res.user?.name?.firstName || '';
+    const lastName  = res.user?.name?.lastName  || '';
+    applyProfile({
+      name: (firstName + ' ' + lastName).trim() || payload.email?.split('@')[0] || 'User',
+      email: payload.email || '',
+      picture: null,
+      gender: null,
+      birthday: null,
+      via: 'Apple'
+    });
+  }).catch(() => loginGuest());
+}
+
+// ─── Guest ───────────────────────────────────────────
+function loginGuest() {
+  applyProfile(null);
+}
+
+// ─── Apply profile & pre-fill survey fields ──────────
+function applyProfile(profile) {
+  userProfile = profile;
+
+  if (profile) {
+    // Show user bar in story panel
+    const bar = document.getElementById('story-user-bar');
+    if (bar) bar.classList.remove('hidden');
+
+    const nameEl = document.getElementById('story-user-name');
+    const viaEl  = document.getElementById('story-user-via');
+    const avaEl  = document.getElementById('story-user-avatar');
+    if (nameEl) nameEl.textContent = profile.name;
+    if (viaEl)  viaEl.textContent  = 'via ' + profile.via;
+    if (avaEl) {
+      if (profile.picture) {
+        avaEl.outerHTML = `<img class="story-user-avatar" id="story-user-avatar" src="${profile.picture}" alt="${profile.name}" onerror="this.outerHTML='<div class=\\'story-user-emoji\\'id=\\'story-user-avatar\\'>👤</div>'">`;
+      } else {
+        const icons = { Google:'🔵', Facebook:'🟦', Apple:'⚫', null:'👤' };
+        avaEl.textContent = icons[profile.via] || '👤';
+      }
+    }
+
+    // ── Pre-fill gender question ──────────────────────
+    if (profile.gender) {
+      const gMap = { male:'male', female:'female' };
+      const gVal = gMap[profile.gender.toLowerCase()];
+      const gIdx = QUESTIONS.findIndex(q => q.id === 'gender');
+      if (gIdx >= 0 && gVal) answers[gIdx] = { val: gVal, prefilled: true };
+    }
+
+    // ── Pre-fill age range from birthday ─────────────
+    if (profile.birthday) {
+      try {
+        const parts = profile.birthday.split('/');
+        const birthYear = parts.length === 3
+          ? parseInt(parts[2])                          // MM/DD/YYYY (Facebook)
+          : new Date(profile.birthday).getFullYear();   // ISO format
+        const age = new Date().getFullYear() - birthYear;
+        const aVal = age < 18 ? 'u18' : age <= 25 ? '18-25' : age <= 40 ? '26-40' : '40+';
+        const aIdx = QUESTIONS.findIndex(q => q.id === 'age');
+        if (aIdx >= 0) answers[aIdx] = { val: aVal, prefilled: true };
+      } catch(_) {}
+    }
+  }
+
+  // Move to language selection
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('lang-screen').classList.remove('hidden');
+}
+
+// ─── Mark pre-filled options visually ────────────────
+// Called inside renderStep — highlights auto-answered options
+function markPrefilledOptions() {
+  const q = QUESTIONS[step];
+  if (!answers[step]?.prefilled) return;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    if (q.options[i] && answers[step].val === q.options[i].val) {
+      el.classList.add('auto-filled');
+    }
+  });
+}
+
+// Patch renderStep to call markPrefilledOptions after render
+const _origRenderStep2 = renderStep;
+renderStep = function() {
+  _origRenderStep2();
+  markPrefilledOptions();
+};
+
+// ══════════════════════════════════════════════════════
+//  INTERACTIVE ENHANCEMENTS
+// ══════════════════════════════════════════════════════
+
+// ─── Confetti ───────────────────────────────────────
+function launchConfetti(duration){
+  duration=duration||3000;
+  const canvas=document.getElementById('confetti-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const palette=['#243d17','#8ba67a','#a0782a','#c9993a','#355924','#f5ead4','#d5ccc1','#8ba67a'];
+  const pieces=Array.from({length:140},()=>({
+    x:Math.random()*canvas.width,y:Math.random()*-canvas.height,
+    w:Math.random()*9+4,h:Math.random()*4+2,
+    color:palette[Math.floor(Math.random()*palette.length)],
+    r:Math.random()*Math.PI*2,rv:(Math.random()-0.5)*0.14,
+    vx:(Math.random()-0.5)*2.2,vy:Math.random()*3.2+1.4,
+    opacity:Math.random()*0.55+0.4,shape:Math.random()>0.5?'rect':'circle'
+  }));
+  const endTime=Date.now()+duration;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      p.r+=p.rv;p.x+=p.vx;p.y+=p.vy;
+      if(p.y>canvas.height){p.y=-10;p.x=Math.random()*canvas.width;}
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);
+      ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;
+      if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,Math.PI*2);ctx.fill();}
+      else{ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+      ctx.restore();
+    });
+    if(Date.now()<endTime)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+// ─── Milestone Toast ─────────────────────────────────
+let _lastMilestonePct=0;
+const _milestoneMsg={
+  en:{25:'🌱 A quarter through — keep going!',50:'✨ Halfway there — brilliant!',75:'🎨 Almost done — nearly there!'},
+  ar:{25:'🌱 ربع الطريق وراءك — أكمل!',50:'✨ في المنتصف — رائع!',75:'🎨 تقريباً انتهيت!'}
+};
+function _checkMilestone(pct){
+  [25,50,75].forEach(m=>{
+    if(pct>=m&&_lastMilestonePct<m){
+      _lastMilestonePct=m;
+      const msg=(_milestoneMsg[lang]||_milestoneMsg.en)[m];
+      if(msg)_showMToast(msg);
+      if(m===50)launchConfetti(2400);
+    }
+  });
+}
+function _showMToast(msg){
+  const t=document.createElement('div');t.className='m-toast';t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),500);},3200);
+}
+
+// ─── Floating Food Particles ─────────────────────────
+function _initFloating(){
+  const foods=['🫐','🥑','🍋','🌿','🥕','🍇','🧄','🌾','🍓','🫑'];
+  for(let i=0;i<9;i++){
+    const el=document.createElement('div');el.className='food-float';
+    el.textContent=foods[i%foods.length];
+    el.style.left=(Math.random()*94+1)+'vw';
+    el.style.fontSize=(12+Math.random()*13)+'px';
+    el.style.animationDuration=(22+Math.random()*16)+'s';
+    el.style.animationDelay=(-Math.random()*28)+'s';
+    document.body.appendChild(el);
+  }
+}
+
+// ─── Ripple + Bounce on Option Click ─────────────────
+document.addEventListener('click',function(e){
+  const opt=e.target.closest('.option');if(!opt)return;
+  // ripple
+  const rect=opt.getBoundingClientRect();
+  const rp=document.createElement('span');rp.className='ripple-wave';
+  const sz=Math.max(rect.width,rect.height)*2.2;
+  rp.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px;`;
+  opt.appendChild(rp);setTimeout(()=>rp.remove(),650);
+  // bounce
+  opt.classList.remove('option-bounce');void opt.offsetWidth;
+  opt.classList.add('option-bounce');
+  opt.addEventListener('animationend',()=>opt.classList.remove('option-bounce'),{once:true});
+});
+
+// ─── Slide transitions between questions ─────────────
+let _prevStepIdx=-1;
+const _origRenderStep=renderStep;
+renderStep=function(){
+  const dir=step>=_prevStepIdx?'right':'left';
+  _prevStepIdx=step;
+  _origRenderStep();
+  const area=document.getElementById('q-area');
+  if(area){
+    area.style.animation='none';void area.offsetWidth;
+    area.style.animation=dir==='right'
+      ?'slideInFromRight 0.4s cubic-bezier(0.22,1,0.36,1) both'
+      :'slideInFromLeft 0.4s cubic-bezier(0.22,1,0.36,1) both';
+  }
+  const pctEl=document.getElementById('prog-pct');
+  if(pctEl)_checkMilestone(parseInt(pctEl.textContent)||0);
+};
+
+// ─── Result: confetti + staggered reveal ─────────────
+const _origShowResults=showResults;
+showResults=function(){
+  _origShowResults();
+  launchConfetti(4500);
+  setTimeout(()=>{
+    const card=document.getElementById('result-card');
+    if(card)Array.from(card.children).forEach((el,i)=>{el.style.animationDelay=(i*0.11)+'s';});
+  },60);
+};
+
+// ─── Reset counters on new survey + restore pre-fills ─
+const _origStartSurvey=startSurvey;
+startSurvey=function(l){
+  _lastMilestonePct=0;_prevStepIdx=-1;
+  _origStartSurvey(l); // resets answers={} internally
+  // Re-apply social login pre-fills (wiped by answers={})
+  if(userProfile){
+    if(userProfile.gender){
+      const gMap={male:'male',female:'female'};
+      const gVal=gMap[userProfile.gender.toLowerCase()];
+      const gIdx=QUESTIONS.findIndex(q=>q.id==='gender');
+      if(gIdx>=0&&gVal) answers[gIdx]={val:gVal,prefilled:true};
+    }
+    if(userProfile.birthday){
+      try{
+        const parts=userProfile.birthday.split('/');
+        const yr=parts.length===3?parseInt(parts[2]):new Date(userProfile.birthday).getFullYear();
+        const age=new Date().getFullYear()-yr;
+        const aVal=age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';
+        const aIdx=QUESTIONS.findIndex(q=>q.id==='age');
+        if(aIdx>=0) answers[aIdx]={val:aVal,prefilled:true};
+      }catch(_){}
+    }
+  }
+};
+
+// ─── Init ─────────────────────────────────────────────
+_initFloating();
+
+function restart(){document.getElementById('result-screen').classList.add('hidden');document.getElementById('lang-screen').classList.remove('hidden');document.body.classList.remove('rtl');document.documentElement.lang='en';lang='en';document.getElementById('story-stage').textContent='Guided Experience';document.getElementById('story-title').textContent='A portrait worth finishing.';document.getElementById('story-copy').textContent='Each answer adds shape, mood, and detail to a more personal nutrition story.';document.getElementById('story-progress-pct').textContent='04%';document.getElementById('story-progress-fill').style.width='4%';document.getElementById('story-step-no').textContent='01';document.getElementById('story-left-no').textContent=String(QUESTIONS.length-1).padStart(2,'0');document.getElementById('story-energy-no').textContent='1/5';document.getElementById('story-figure').textContent='🌿';document.getElementById('story-caption').textContent='A gentle beginning that invites the user into the experience.';document.getElementById('story-preview').innerHTML='<span class="mini-chip">Calm pacing</span><span class="mini-chip">Elegant interactions</span><span class="mini-chip">Rewarding finish</span>';document.getElementById('affirmation-text').textContent='Small steps feel lighter when the page responds beautifully to each one.';}
+</script>
+</body>
+</html>
