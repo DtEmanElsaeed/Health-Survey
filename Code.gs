@@ -64,6 +64,56 @@ function buildRow(data) {
   ];
 }
 
+function sendWelcomeEmail(data) {
+  var email = (data.email || "").toString().trim();
+  if (!email) return;
+
+  var isArabic = (data.language || "").toString().toLowerCase() === "ar";
+  var rawName = (data.full_name || "").toString().trim();
+  var firstName = rawName ? rawName.split(/\s+/)[0] : (isArabic ? "صديقي" : "there");
+
+  var subject = isArabic
+    ? "مرحباً بك في The First Step"
+    : "Welcome to The First Step";
+
+  var body = isArabic
+    ? [
+        "مرحباً " + firstName + "،",
+        "",
+        "أهلاً بك في The First Step.",
+        "يسعدنا أن تبدأ هذه الرحلة معنا، خطوة بخطوة، وبهدوء وثقة.",
+        "",
+        "لقد استلمنا بياناتك، وسنستخدمها لبناء صورة غذائية أكثر دقة وخصوصية لك.",
+        "لا تقلق من كثرة الأسئلة، فكل إجابة تقرّبنا من توصيات تناسبك فعلاً.",
+        "",
+        "نحن سعداء بوجودك هنا، ونتطلع لمرافقتك في هذه البداية.",
+        "",
+        "مع أطيب التمنيات،",
+        "The First Step"
+      ].join("\n")
+    : [
+        "Hi " + firstName + ",",
+        "",
+        "Welcome to The First Step.",
+        "We are really glad you are here and excited to be part of your journey.",
+        "",
+        "Your details have been received, and each answer you share helps us build a more personal and thoughtful nutritional portrait for you.",
+        "There is no need to feel overwhelmed by the process. We will take it one step at a time.",
+        "",
+        "You have already taken the hardest part: the first step.",
+        "",
+        "Warmly,",
+        "The First Step"
+      ].join("\n");
+
+  MailApp.sendEmail({
+    to: email,
+    subject: subject,
+    body: body,
+    name: "The First Step"
+  });
+}
+
 function doGet(e) {
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
@@ -131,6 +181,7 @@ function doPost(e) {
     }
 
     sheet.appendRow(newRow);
+    sendWelcomeEmail(data);
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, mode: "inserted" }))
       .setMimeType(ContentService.MimeType.JSON);
