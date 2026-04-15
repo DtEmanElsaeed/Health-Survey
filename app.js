@@ -1,5 +1,6 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
 const STATE_KEY = "nutritionPortraitStateV3";
+const GOOGLE_CLIENT_ID = "813060511200-a84bm6oqggc8da3p2qr9cat2er6ajpdi.apps.googleusercontent.com";
 
 const TEXT = {
   en: {
@@ -180,6 +181,59 @@ function setLanguage(lang) {
   document.body.classList.toggle("rtl", lang === "ar");
   document.documentElement.lang = lang;
   return state;
+}
+
+function decodeJwtPayload(token) {
+  const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(atob(payload));
+}
+
+function mergeProfileIntoUserData(existingUser, profile) {
+  return Object.assign({}, existingUser || {}, {
+    name: existingUser?.name || profile?.name || "",
+    email: existingUser?.email || profile?.email || "",
+    gender: existingUser?.gender || profile?.gender || ""
+  });
+}
+
+function handleGoogleLoginResponse(response) {
+  try {
+    const payload = decodeJwtPayload(response.credential);
+    const profile = {
+      name: payload.name || payload.given_name || "User",
+      email: payload.email || "",
+      picture: payload.picture || "",
+      gender: "",
+      birthday: "",
+      via: "Google"
+    };
+    const state = loadState();
+    saveState(Object.assign({}, state, {
+      userProfile: profile,
+      userPersonalData: mergeProfileIntoUserData(state.userPersonalData, profile)
+    }));
+    navigate("profile.html");
+  } catch (error) {
+    console.error("Google login failed", error);
+  }
+}
+
+function initGoogleButton() {
+  if (typeof google === "undefined") return;
+  const wrap = document.getElementById("google-btn-wrap");
+  if (!wrap) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLoginResponse,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(wrap, {
+    theme: "outline",
+    size: "large",
+    text: "continue_with",
+    shape: "rectangular",
+    width: 340
+  });
 }
 
 function normalizeSheetValue(val) {
@@ -402,6 +456,7 @@ function initLoginPage() {
   document.getElementById("arabic-title").textContent = TEXT.ar.arabic;
   document.getElementById("english-copy").textContent = "Continue in English";
   document.getElementById("arabic-copy").textContent = "أكمل بالعربية";
+  initGoogleButton();
 
   document.querySelectorAll("[data-lang]").forEach(card => {
     card.addEventListener("click", () => {
@@ -423,6 +478,7 @@ function initProfilePage() {
   updateChrome(state, t(state.lang, "profileTitle"), t(state.lang, "profileCopy"), { step: "02", left: "04", mode: state.isEditMode ? "Edit" : "Profile", chips: ["Email lookup", "DOB → Age", "Profile first"] });
 
   const user = state.userPersonalData || {};
+  const social = state.userProfile || null;
   document.getElementById("page-title").textContent = t(state.lang, "profileTitle");
   document.getElementById("page-copy").textContent = t(state.lang, "profileCopy");
   document.getElementById("name-label").textContent = state.lang === "ar" ? "الاسم الكامل" : "Full name";
@@ -449,6 +505,12 @@ function initProfilePage() {
   fields.dob.value = user.dob || "";
   fields.gender.value = user.gender || "";
   fields.city.value = user.city || "";
+
+  if (social) {
+    if (!fields.name.value && social.name) fields.name.value = social.name;
+    if (!fields.email.value && social.email) fields.email.value = social.email;
+    if (!fields.gender.value && social.gender) fields.gender.value = social.gender;
+  }
 
   document.getElementById("back-btn").addEventListener("click", () => navigate("login.html"));
   document.getElementById("profile-form").addEventListener("submit", async event => {

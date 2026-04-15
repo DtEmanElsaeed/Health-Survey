@@ -31,6 +31,7 @@ body{
     radial-gradient(circle at top left, rgba(36,61,23,0.06), transparent 32%),
     radial-gradient(circle at bottom right, rgba(160,120,42,0.08), transparent 36%),
     linear-gradient(135deg, rgba(255,255,255,0.42), rgba(255,255,255,0));
+  overflow-x:hidden;
 }
 
 body.rtl{direction:rtl;text-align:right;font-family:'Cairo','Inter',sans-serif}
@@ -39,9 +40,7 @@ a{color:inherit}
 
 .app-shell{
   min-height:100vh;
-  display:grid;
-  grid-template-columns:minmax(280px, 0.92fr) minmax(0, 1.08fr);
-  gap:24px;
+  display:block;
   padding:24px;
 }
 
@@ -54,14 +53,7 @@ a{color:inherit}
   backdrop-filter:blur(14px) saturate(125%);
 }
 
-.story-panel{
-  padding:28px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  overflow:hidden;
-  position:relative;
-}
+.story-panel{display:none}
 
 .story-panel::after{
   content:'';
@@ -152,10 +144,40 @@ a{color:inherit}
 }
 
 .page-card{
+  width:min(1120px, 100%);
+  margin:0 auto;
   padding:30px;
   display:flex;
   flex-direction:column;
   min-height:calc(100vh - 48px);
+  position:relative;
+  overflow:hidden;
+  animation:cardLift .6s cubic-bezier(.22,1,.36,1) both;
+}
+
+.page-card::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto 0;
+  height:3px;
+  background:linear-gradient(90deg, transparent, var(--forest), var(--gold), transparent);
+  opacity:.9;
+}
+
+.page-card::after{
+  content:'';
+  position:absolute;
+  right:-110px;
+  bottom:-110px;
+  width:300px;
+  height:300px;
+  background:radial-gradient(circle, rgba(36,61,23,.09), transparent 70%);
+  pointer-events:none;
+}
+
+@keyframes cardLift{
+  from{opacity:0;transform:translateY(16px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
 }
 
 .section-label{
@@ -217,10 +239,8 @@ a{color:inherit}
   padding:18px;
 }
 
-.lang-card button,
-.auth-card button{
-  width:100%;
-}
+.lang-card{cursor:pointer;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.lang-card:hover{transform:translateY(-2px);border-color:var(--sage);box-shadow:0 12px 24px rgba(36,61,23,.08)}
 
 .card-flag{
   font-size:28px;
@@ -338,6 +358,47 @@ a{color:inherit}
   opacity:.65;
   cursor:not-allowed;
   transform:none;
+}
+
+.login-social{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.social-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 18px;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  background:rgba(255,255,255,.45);
+}
+
+.social-label{
+  font-size:10px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--warm-gray);
+}
+
+#google-btn-wrap > div{
+  width:100% !important;
+}
+
+.floating-ornament{
+  position:absolute;
+  right:38px;
+  top:34px;
+  font-size:40px;
+  opacity:.88;
+  animation:floatY 5.5s ease-in-out infinite;
+}
+
+@keyframes floatY{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
 }
 
 .summary-note{
@@ -488,7 +549,6 @@ a{color:inherit}
 
 @media (max-width: 980px){
   .app-shell{
-    grid-template-columns:1fr;
     min-height:auto;
   }
   .page-card{min-height:auto}
