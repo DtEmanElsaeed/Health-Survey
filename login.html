@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutrition Portrait | Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="login">
+  <div class="app-shell">
+    <aside class="story-panel">
+      <div>
+        <div class="brand-line" id="story-brand">Atelier Nutritionnel</div>
+        <h1 class="story-title" id="story-title">A portrait worth finishing.</h1>
+        <p class="story-copy" id="story-copy">Each answer adds shape, mood, and detail to a more personal nutrition story.</p>
+        <div class="story-metrics">
+          <div class="metric-card"><div class="metric-label">Step</div><div class="metric-value" id="story-step">01</div></div>
+          <div class="metric-card"><div class="metric-label">Stages Left</div><div class="metric-value" id="story-left">05</div></div>
+          <div class="metric-card"><div class="metric-label">Mode</div><div class="metric-value" id="story-mode">EN</div></div>
+        </div>
+      </div>
+      <div class="story-footer" id="story-chips"></div>
+    </aside>
+    <main class="page-card">
+      <div class="center-stack">
+        <div class="section-label">Entry</div>
+        <h2 class="page-title" id="page-title">Begin your nutritional portrait</h2>
+        <p class="page-copy" id="page-copy">Choose your language, then continue to your profile.</p>
+        <div class="lang-grid">
+          <button class="lang-card" type="button" data-lang="en">
+            <div class="card-flag">🇬🇧</div>
+            <div class="card-title" id="english-title">English</div>
+            <p class="card-copy" id="english-copy">Continue in English</p>
+          </button>
+          <button class="lang-card" type="button" data-lang="ar">
+            <div class="card-flag">🇸🇦</div>
+            <div class="card-title" id="arabic-title">العربية</div>
+            <p class="card-copy" id="arabic-copy">أكمل بالعربية</p>
+          </button>
+        </div>
+        <div class="auth-actions">
+          <div class="auth-card">
+            <div class="card-title">Guest</div>
+            <p class="card-copy" id="guest-note">Guest mode still saves and updates by email.</p>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" id="guest-btn">Continue as guest</button>
+            </div>
+          </div>
+          <div class="auth-card">
+            <div class="card-title">Structure</div>
+            <p class="card-copy">This refactor separates login, profile, summary, survey, and result into dedicated pages with shared logic.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
