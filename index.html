@@ -362,8 +362,8 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 .login-skip-btn:hover{border-color:var(--sage);color:var(--stone);}
 .login-privacy{font-size:10px;color:var(--warm-gray);margin-top:14px;font-style:italic;opacity:0.7;max-width:320px;}
 /* Google rendered button override */
-#google-btn-wrap{width:100%;max-width:340px;}
-#google-btn-wrap iframe,#google-btn-wrap>div{width:100%!important;}
+#google-btn-wrap{width:100%;max-width:340px;min-height:44px;display:flex;justify-content:center;align-items:center;}
+#google-btn-wrap > div,#google-btn-wrap iframe{width:100%!important;max-width:340px!important;}
 /* User bar in story panel */
 .story-user-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.11);margin-bottom:2px;}
 .story-user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.22);flex-shrink:0;}
@@ -2080,15 +2080,24 @@ const GOOGLE_CLIENT_ID = '813060511200-a84bm6oqggc8da3p2qr9cat2er6ajpdi.apps.goo
 
 function initGSI() {
   if (typeof google === 'undefined') return;
+  const wrap = document.getElementById('google-btn-wrap');
+  if (!wrap) return;
+
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleLogin,
     auto_select: false
   });
-  google.accounts.id.renderButton(
-    document.getElementById('google-btn-wrap'),
-    { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular', width: 340 }
-  );
+  wrap.innerHTML = '';
+  google.accounts.id.renderButton(wrap, {
+    type: 'standard',
+    theme: 'outline',
+    size: 'large',
+    text: 'signin_with',
+    shape: 'rectangular',
+    logo_alignment: 'left',
+    width: Math.min(340, Math.max(280, wrap.clientWidth || 340))
+  });
 }
 
 function handleGoogleLogin(response) {
