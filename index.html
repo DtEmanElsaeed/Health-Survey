@@ -1951,6 +1951,7 @@ function buildSubmissionPayload(){
   }
   // ── Social login provider ─────────────────────────
   payload.login_via = userProfile ? userProfile.via : 'Guest';
+  payload.mode = isEditMode ? 'update' : 'insert';
   // ── Survey answers ────────────────────────────────
   QUESTIONS.forEach((q,idx)=>{
     const ans=answers[idx];if(!ans)return;
@@ -2207,6 +2208,134 @@ function applyProfile(profile) {
 // ══════════════════════════════════════════════════════
 
 let userPersonalData = null;
+let isEditMode = false;
+
+function _normalizeSheetValue(val) {
+  return val == null ? '' : String(val).trim();
+}
+
+function _showEditBanner(name) {
+  document.getElementById('edit-mode-banner')?.remove();
+  const banner = document.createElement('div');
+  banner.id = 'edit-mode-banner';
+  banner.style.cssText = [
+    'position:fixed',
+    'top:0',
+    'left:0',
+    'right:0',
+    'z-index:9999',
+    'background:linear-gradient(90deg,#3a5c28,#5d6f3c)',
+    'color:#fff',
+    'text-align:center',
+    'padding:10px 16px',
+    'font-size:13px',
+    'font-weight:500',
+    'letter-spacing:0.02em',
+    'box-shadow:0 2px 12px rgba(0,0,0,0.18)'
+  ].join(';');
+  banner.innerHTML = lang === 'ar'
+    ? `✏️ مرحباً مجدداً <strong>${name}</strong> — بياناتك محملة. عدّل ما تريد ثم احفظ.`
+    : `✏️ Welcome back, <strong>${name}</strong> — your answers are pre-loaded. Edit anything and save.`;
+  document.body.prepend(banner);
+}
+
+function _loadAnswersFromSheet(sheetRow) {
+  const colToId = {
+    'Age': 'age',
+    'Gender': 'gender',
+    'Diet': 'diet',
+    'Activity': 'activity',
+    'Meals/Day': 'meals',
+    'Breakfast': 'breakfast',
+    'Late Night': 'latenight',
+    'TV Snack': 'tvsnack',
+    'Sweets': 'sweets',
+    'Beverages': 'beverages',
+    'Water': 'water',
+    'Conditions': 'conditions',
+    'Thyroid Type': 'thyroid_type',
+    'Doctor Followup': 'doctor_followup',
+    'Medications': 'medications',
+    'Allergies': 'allergies',
+    'Digestive': 'digestive',
+    'Surgery': 'surgery',
+    'Surgery Details': 'surgery_details',
+    'Sleep': 'sleep',
+    'Stress': 'stress',
+    'Stress Eat': 'stress_eat',
+    'Exercise': 'exercise',
+    'Goal': 'goal',
+    'Dislikes': 'dislikes',
+    'Weakness': 'weakness',
+    'Fav Meal': 'fav_meal',
+    'Pregnant': 'pregnant',
+    'Period': 'period',
+    'Past Diet': 'past_diet',
+    'Notes': 'notes'
+  };
+
+  QUESTIONS.forEach((q, idx) => {
+    const colName = Object.keys(colToId).find(k => colToId[k] === q.id);
+    if (!colName) return;
+    const raw = _normalizeSheetValue(sheetRow[colName]);
+    if (!raw) return;
+
+    if (q.type === 'single') {
+      answers[idx] = { val: raw };
+    } else if (q.type === 'multi') {
+      answers[idx] = { vals: raw.split(',').map(v => v.trim()).filter(Boolean) };
+    } else if (q.type === 'text') {
+      answers[idx] = { text: raw };
+    } else if (q.type === 'dual-text') {
+      answers[idx] = {
+        fields: {
+          height: _normalizeSheetValue(sheetRow['Height']),
+          weight: _normalizeSheetValue(sheetRow['Weight'])
+        }
+      };
+    }
+  });
+
+  userPersonalData = {
+    name: _normalizeSheetValue(sheetRow['Full Name']) || (userPersonalData?.name || ''),
+    email: _normalizeSheetValue(sheetRow['Email']) || (userPersonalData?.email || ''),
+    phone: _normalizeSheetValue(sheetRow['Phone']) || (userPersonalData?.phone || ''),
+    dob: _normalizeSheetValue(sheetRow['DOB']) || (userPersonalData?.dob || ''),
+    gender: _normalizeSheetValue(sheetRow['Gender (Profile)']) || (userPersonalData?.gender || ''),
+    city: _normalizeSheetValue(sheetRow['City']) || (userPersonalData?.city || '')
+  };
+}
+
+function _proceedToSurvey(gender, dob) {
+  const btn = document.getElementById('pf-next-btn');
+  btn.disabled = false;
+  btn.textContent = lang === 'ar' ? 'ابدأ بورتريهي ←' : 'Begin My Portrait →';
+
+  document.getElementById('profile-screen').classList.add('hidden');
+  document.getElementById('survey-screen').classList.remove('hidden');
+
+  const gIdx = QUESTIONS.findIndex(q => q.id === 'gender');
+  if (gIdx >= 0 && gender && !answers[gIdx]) {
+    answers[gIdx] = { val: gender, prefilled: true };
+  }
+
+  if (dob) {
+    const age = Math.floor((Date.now() - new Date(dob)) / 31557600000);
+    const ageVal = age < 18 ? 'u18' : age <= 25 ? '18-25' : age <= 40 ? '26-40' : '40+';
+    const aIdx = QUESTIONS.findIndex(q => q.id === 'age');
+    if (aIdx >= 0 && !answers[aIdx]) {
+      answers[aIdx] = { val: ageVal, prefilled: true };
+    }
+  }
+
+  const storyName = document.getElementById('story-user-name');
+  if (storyName && userPersonalData?.name) storyName.textContent = userPersonalData.name;
+  document.getElementById('story-user-bar')?.classList.remove('hidden');
+
+  step = 0;
+  while (step < QUESTIONS.length && !isVisible(step)) step++;
+  renderStep();
+}
 
 // Intercept startSurvey — show profile screen first
 const _origStartSurveyBase = startSurvey;
@@ -2284,39 +2413,39 @@ function submitProfile() {
   const gender= document.getElementById('pf-gender').value;
   const city  = document.getElementById('pf-city').value.trim();
   const errEl = document.getElementById('pf-err');
+  const btn   = document.getElementById('pf-next-btn');
 
-  // Validate
   if (!name)   { showPfErr(errEl, isAr?'يرجى إدخال اسمك الكامل.':'Please enter your full name.'); return; }
-  if (!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showPfErr(errEl, isAr?'يرجى إدخال بريد إلكتروني صحيح.':'Please enter a valid email address.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showPfErr(errEl, isAr?'يرجى إدخال بريد إلكتروني صحيح.':'Please enter a valid email address.'); return; }
   if (!phone)  { showPfErr(errEl, isAr?'يرجى إدخال رقم هاتفك.':'Please enter your phone number.'); return; }
   if (!dob)    { showPfErr(errEl, isAr?'يرجى إدخال تاريخ ميلادك.':'Please enter your date of birth.'); return; }
   if (!gender) { showPfErr(errEl, isAr?'يرجى اختيار الجنس.':'Please select your gender.'); return; }
   errEl.classList.remove('show');
 
-  // Store personal data
+  answers = {};
   userPersonalData = { name, email, phone, dob, gender, city };
 
-  // Pre-fill gender question
-  const gIdx=QUESTIONS.findIndex(q=>q.id==='gender');
-  if (gIdx>=0) answers[gIdx]={val:gender,prefilled:true};
+  btn.disabled = true;
+  btn.textContent = isAr ? 'جارٍ التحقق…' : 'Checking…';
 
-  // Pre-fill age range from DOB
-  const age=Math.floor((Date.now()-new Date(dob))/31557600000);
-  const aVal=age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';
-  const aIdx=QUESTIONS.findIndex(q=>q.id==='age');
-  if (aIdx>=0) answers[aIdx]={val:aVal,prefilled:true};
-
-  // Update story panel name
-  const storyName=document.getElementById('story-user-name');
-  if (storyName) storyName.textContent=name;
-  document.getElementById('story-user-bar')?.classList.remove('hidden');
-
-  // Go to survey
-  document.getElementById('profile-screen').classList.add('hidden');
-  document.getElementById('survey-screen').classList.remove('hidden');
-  step=0;
-  while(step<QUESTIONS.length&&!isVisible(step))step++;
-  renderStep();
+  fetch(WEB_APP_URL + '?email=' + encodeURIComponent(email))
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.found && res.data) {
+        isEditMode = true;
+        _loadAnswersFromSheet(res.data);
+        _showEditBanner(name);
+      } else {
+        isEditMode = false;
+        document.getElementById('edit-mode-banner')?.remove();
+      }
+      _proceedToSurvey(gender, dob);
+    })
+    .catch(() => {
+      isEditMode = false;
+      document.getElementById('edit-mode-banner')?.remove();
+      _proceedToSurvey(gender, dob);
+    });
 }
 
 function showPfErr(el, msg) {
@@ -2490,7 +2619,7 @@ startSurvey=function(l){
 // ─── Init ─────────────────────────────────────────────
 _initFloating();
 
-function restart(){document.getElementById('result-screen').classList.add('hidden');document.getElementById('lang-screen').classList.remove('hidden');document.body.classList.remove('rtl');document.documentElement.lang='en';lang='en';document.getElementById('story-stage').textContent='Guided Experience';document.getElementById('story-title').textContent='A portrait worth finishing.';document.getElementById('story-copy').textContent='Each answer adds shape, mood, and detail to a more personal nutrition story.';document.getElementById('story-progress-pct').textContent='04%';document.getElementById('story-progress-fill').style.width='4%';document.getElementById('story-step-no').textContent='01';document.getElementById('story-left-no').textContent=String(QUESTIONS.length-1).padStart(2,'0');document.getElementById('story-energy-no').textContent='1/5';document.getElementById('story-figure').textContent='🌿';document.getElementById('story-caption').textContent='A gentle beginning that invites the user into the experience.';document.getElementById('story-preview').innerHTML='<span class="mini-chip">Calm pacing</span><span class="mini-chip">Elegant interactions</span><span class="mini-chip">Rewarding finish</span>';document.getElementById('affirmation-text').textContent='Small steps feel lighter when the page responds beautifully to each one.';}
+function restart(){document.getElementById('result-screen').classList.add('hidden');document.getElementById('lang-screen').classList.remove('hidden');document.body.classList.remove('rtl');document.documentElement.lang='en';lang='en';isEditMode=false;document.getElementById('edit-mode-banner')?.remove();document.getElementById('story-stage').textContent='Guided Experience';document.getElementById('story-title').textContent='A portrait worth finishing.';document.getElementById('story-copy').textContent='Each answer adds shape, mood, and detail to a more personal nutrition story.';document.getElementById('story-progress-pct').textContent='04%';document.getElementById('story-progress-fill').style.width='4%';document.getElementById('story-step-no').textContent='01';document.getElementById('story-left-no').textContent=String(QUESTIONS.length-1).padStart(2,'0');document.getElementById('story-energy-no').textContent='1/5';document.getElementById('story-figure').textContent='🌿';document.getElementById('story-caption').textContent='A gentle beginning that invites the user into the experience.';document.getElementById('story-preview').innerHTML='<span class="mini-chip">Calm pacing</span><span class="mini-chip">Elegant interactions</span><span class="mini-chip">Rewarding finish</span>';document.getElementById('affirmation-text').textContent='Small steps feel lighter when the page responds beautifully to each one.';}
 </script>
 </body>
 </html>
