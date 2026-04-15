@@ -380,6 +380,41 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 .option.auto-filled .option-indicator::after{content:'auto'!important;background:transparent!important;color:var(--sage)!important;font-size:8px!important;font-weight:700!important;letter-spacing:0.05em!important;width:auto!important;height:auto!important;border-radius:0!important;}
 .prefill-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--sage);background:rgba(139,166,122,0.12);border:1px solid rgba(139,166,122,0.25);border-radius:99px;padding:3px 10px;margin-left:8px;vertical-align:middle;}
 
+/* ══════════════════════════════════════
+   PERSONAL DETAILS SCREEN
+══════════════════════════════════════ */
+#profile-screen{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;}
+#profile-card{
+  display:grid;
+  grid-template-rows:auto 1fr auto auto;
+  min-height:100%;
+  overflow-y:auto;
+  padding:36px 44px 32px;
+}
+.profile-screen-header{margin-bottom:24px;}
+.profile-form{display:flex;flex-direction:column;gap:16px;}
+.pf-group{display:flex;flex-direction:column;gap:7px;}
+.pf-req{color:var(--forest);font-weight:700;margin-left:2px;}
+.pf-optional-lbl{font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--warm-gray);border:1px solid var(--border-fine);border-radius:99px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
+/* pre-filled glow on inputs */
+.text-input.pf-autofilled{border-color:var(--sage);background:linear-gradient(120deg,rgba(228,237,224,0.5),rgba(253,250,245,0.9));}
+.pf-autofilled-tag{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;color:var(--sage);letter-spacing:0.08em;margin-top:4px;}
+.pf-autofilled-tag::before{content:'✓ Auto-filled from ';opacity:0.9;}
+/* stage-side sizing */
+.stage-side #profile-screen{justify-content:flex-start;}
+.stage-side #profile-card{
+  max-width:none;width:100%;height:auto;
+  max-height:none;background:transparent;
+  box-shadow:none;border:none;padding:0;animation:none;
+  overflow-y:visible;
+}
+.stage-side #profile-card::before,
+.stage-side #profile-card::after{display:none;}
+@media(max-width:520px){
+  #profile-card{padding:24px 16px 24px;}
+  .profile-screen-header{margin-bottom:18px;}
+}
+
 /* ─── Directional slide transitions ─── */
 @keyframes slideInFromRight {
   from { opacity:0; transform:translateX(48px) scale(0.98); }
@@ -1712,6 +1747,59 @@ window.fbAsyncInit=function(){FB.init({appId:'YOUR_FACEBOOK_APP_ID',cookie:true,
           </div>
         </div>
       </div>
+      <!-- ══ PERSONAL DETAILS SCREEN ══ -->
+      <div id="profile-screen" class="hidden">
+        <div class="card" id="profile-card">
+          <div class="profile-screen-header">
+            <div class="section-label" id="profile-section-label">YOUR PROFILE</div>
+            <div class="question-title" id="profile-headline">Tell us a little about yourself</div>
+            <div class="question-sub" id="profile-subline">This helps us personalise your nutritional portrait. All fields marked <span style="color:var(--forest);font-style:normal;font-weight:600">*</span> are required.</div>
+          </div>
+          <div class="profile-form" id="profile-form">
+            <!-- Full Name -->
+            <div class="pf-group">
+              <label class="field-label" id="lbl-name">Full Name <span class="pf-req">*</span></label>
+              <input type="text" class="text-input" id="pf-name" placeholder="e.g. Sarah Al-Mansouri" autocomplete="name"/>
+            </div>
+            <!-- Email -->
+            <div class="pf-group">
+              <label class="field-label" id="lbl-email">Email Address <span class="pf-req">*</span></label>
+              <input type="email" class="text-input" id="pf-email" placeholder="e.g. sarah@example.com" autocomplete="email"/>
+            </div>
+            <!-- Phone -->
+            <div class="pf-group">
+              <label class="field-label" id="lbl-phone">Phone Number <span class="pf-req">*</span></label>
+              <input type="tel" class="text-input" id="pf-phone" placeholder="e.g. +971 50 123 4567" autocomplete="tel"/>
+            </div>
+            <!-- DOB + Gender row -->
+            <div class="field-group">
+              <div class="pf-group">
+                <label class="field-label" id="lbl-dob">Date of Birth <span class="pf-req">*</span></label>
+                <input type="date" class="text-input" id="pf-dob" autocomplete="bday"/>
+              </div>
+              <div class="pf-group">
+                <label class="field-label" id="lbl-gender">Gender <span class="pf-req">*</span></label>
+                <select class="text-input" id="pf-gender" style="cursor:pointer">
+                  <option value="" id="opt-select">— Select —</option>
+                  <option value="male" id="opt-male">Male</option>
+                  <option value="female" id="opt-female">Female</option>
+                  <option value="other" id="opt-other">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+            <!-- City -->
+            <div class="pf-group">
+              <label class="field-label" id="lbl-city">City / Emirate <span class="pf-optional-lbl">optional</span></label>
+              <input type="text" class="text-input" id="pf-city" placeholder="e.g. Dubai, Abu Dhabi, Sharjah…" autocomplete="address-level2"/>
+            </div>
+          </div>
+          <div class="error-msg" id="pf-err"></div>
+          <div class="nav" style="margin-top:28px">
+            <button class="btn btn-back" id="pf-back-btn" onclick="profileGoBack()">←</button>
+            <button class="btn btn-next" id="pf-next-btn" onclick="submitProfile()">Begin My Portrait →</button>
+          </div>
+        </div>
+      </div>
       <div id="survey-screen" class="hidden">
         <div class="card" id="survey-card">
           <div class="selection-toast" id="selection-toast">Choice saved</div>
@@ -2087,6 +2175,128 @@ function applyProfile(profile) {
   // Move to language selection
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('lang-screen').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════════
+//  PERSONAL DETAILS SCREEN
+// ══════════════════════════════════════════════════════
+
+let userPersonalData = null;
+
+// Intercept startSurvey — show profile screen first
+const _origStartSurveyBase = startSurvey;
+startSurvey = function(l) {
+  lang = l;
+  document.body.classList.toggle('rtl', l === 'ar');
+  document.documentElement.lang = l;
+  document.getElementById('lang-screen').classList.add('hidden');
+  showProfileScreen();
+};
+
+function showProfileScreen() {
+  document.getElementById('profile-screen').classList.remove('hidden');
+  const isAr = lang === 'ar';
+
+  // Translate labels
+  document.getElementById('profile-section-label').textContent = isAr ? 'ملفك الشخصي' : 'YOUR PROFILE';
+  document.getElementById('profile-headline').textContent      = isAr ? 'أخبرنا قليلاً عن نفسك' : 'Tell us a little about yourself';
+  document.getElementById('profile-subline').innerHTML         = isAr
+    ? 'يساعدنا هذا في تخصيص بورتريهك الغذائي. الحقول المميزة بـ <span style="color:var(--forest);font-style:normal;font-weight:600">*</span> إلزامية.'
+    : 'This helps us personalise your nutritional portrait. Fields marked <span style="color:var(--forest);font-style:normal;font-weight:600">*</span> are required.';
+  document.getElementById('lbl-name').innerHTML    = (isAr ? 'الاسم الكامل' : 'Full Name') + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-email').innerHTML   = (isAr ? 'البريد الإلكتروني' : 'Email Address') + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-phone').innerHTML   = (isAr ? 'رقم الهاتف' : 'Phone Number') + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-dob').innerHTML     = (isAr ? 'تاريخ الميلاد' : 'Date of Birth') + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-gender').innerHTML  = (isAr ? 'الجنس' : 'Gender') + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-city').innerHTML    = (isAr ? 'المدينة / الإمارة' : 'City / Emirate') + ' <span class="pf-optional-lbl">' + (isAr ? 'اختياري' : 'optional') + '</span>';
+  document.getElementById('pf-name').placeholder  = isAr ? 'مثلاً: سارة المنصوري' : 'e.g. Sarah Al-Mansouri';
+  document.getElementById('pf-email').placeholder = isAr ? 'مثلاً: sarah@example.com' : 'e.g. sarah@example.com';
+  document.getElementById('pf-phone').placeholder = isAr ? 'مثلاً: 971501234567+' : 'e.g. +971 50 123 4567';
+  document.getElementById('pf-city').placeholder  = isAr ? 'مثلاً: دبي، أبوظبي، الشارقة…' : 'e.g. Dubai, Abu Dhabi, Sharjah…';
+  document.getElementById('opt-select').textContent = isAr ? '— اختر —' : '— Select —';
+  document.getElementById('opt-male').textContent   = isAr ? 'ذكر' : 'Male';
+  document.getElementById('opt-female').textContent = isAr ? 'أنثى' : 'Female';
+  document.getElementById('opt-other').textContent  = isAr ? 'أفضّل عدم الإفصاح' : 'Prefer not to say';
+  document.getElementById('pf-next-btn').textContent = isAr ? 'ابدأ بورتريهي ←' : 'Begin My Portrait →';
+  document.getElementById('pf-back-btn').textContent = isAr ? '→' : '←';
+
+  // Pre-fill from social login
+  if (userProfile) {
+    const nameEl  = document.getElementById('pf-name');
+    const emailEl = document.getElementById('pf-email');
+    if (userProfile.name  && !nameEl.value)  { nameEl.value  = userProfile.name;  nameEl.classList.add('pf-autofilled'); }
+    if (userProfile.email && !emailEl.value) { emailEl.value = userProfile.email; emailEl.classList.add('pf-autofilled'); }
+    if (userProfile.gender) {
+      const gv = {male:'male',female:'female'}[userProfile.gender.toLowerCase()];
+      if (gv) { const s=document.getElementById('pf-gender'); s.value=gv; s.classList.add('pf-autofilled'); }
+    }
+    if (userProfile.birthday) {
+      try {
+        const p=userProfile.birthday.split('/');
+        const iso=p.length===3?`${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`:userProfile.birthday;
+        const d=document.getElementById('pf-dob'); d.value=iso; d.classList.add('pf-autofilled');
+      } catch(_){}
+    }
+  }
+
+  // Animate card in
+  const card=document.getElementById('profile-card');
+  card.style.animation='none'; card.offsetHeight;
+  card.style.animation='revealUp 0.48s cubic-bezier(0.22,1,0.36,1) both';
+}
+
+function profileGoBack() {
+  document.getElementById('profile-screen').classList.add('hidden');
+  document.getElementById('lang-screen').classList.remove('hidden');
+}
+
+function submitProfile() {
+  const isAr  = lang === 'ar';
+  const name  = document.getElementById('pf-name').value.trim();
+  const email = document.getElementById('pf-email').value.trim();
+  const phone = document.getElementById('pf-phone').value.trim();
+  const dob   = document.getElementById('pf-dob').value;
+  const gender= document.getElementById('pf-gender').value;
+  const city  = document.getElementById('pf-city').value.trim();
+  const errEl = document.getElementById('pf-err');
+
+  // Validate
+  if (!name)   { showPfErr(errEl, isAr?'يرجى إدخال اسمك الكامل.':'Please enter your full name.'); return; }
+  if (!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showPfErr(errEl, isAr?'يرجى إدخال بريد إلكتروني صحيح.':'Please enter a valid email address.'); return; }
+  if (!phone)  { showPfErr(errEl, isAr?'يرجى إدخال رقم هاتفك.':'Please enter your phone number.'); return; }
+  if (!dob)    { showPfErr(errEl, isAr?'يرجى إدخال تاريخ ميلادك.':'Please enter your date of birth.'); return; }
+  if (!gender) { showPfErr(errEl, isAr?'يرجى اختيار الجنس.':'Please select your gender.'); return; }
+  errEl.classList.remove('show');
+
+  // Store personal data
+  userPersonalData = { name, email, phone, dob, gender, city };
+
+  // Pre-fill gender question
+  const gIdx=QUESTIONS.findIndex(q=>q.id==='gender');
+  if (gIdx>=0) answers[gIdx]={val:gender,prefilled:true};
+
+  // Pre-fill age range from DOB
+  const age=Math.floor((Date.now()-new Date(dob))/31557600000);
+  const aVal=age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';
+  const aIdx=QUESTIONS.findIndex(q=>q.id==='age');
+  if (aIdx>=0) answers[aIdx]={val:aVal,prefilled:true};
+
+  // Update story panel name
+  const storyName=document.getElementById('story-user-name');
+  if (storyName) storyName.textContent=name;
+  document.getElementById('story-user-bar')?.classList.remove('hidden');
+
+  // Go to survey
+  document.getElementById('profile-screen').classList.add('hidden');
+  document.getElementById('survey-screen').classList.remove('hidden');
+  step=0;
+  while(step<QUESTIONS.length&&!isVisible(step))step++;
+  renderStep();
+}
+
+function showPfErr(el, msg) {
+  el.textContent=msg; el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 // ─── Mark pre-filled options visually ────────────────
