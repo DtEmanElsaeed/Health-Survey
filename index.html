@@ -354,10 +354,6 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 .login-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
 .login-social-btn{display:flex;align-items:center;gap:13px;padding:13px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--ivory);cursor:pointer;font-size:13px;font-weight:500;color:var(--charcoal);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);width:100%;position:relative;overflow:hidden;font-family:'Inter','Cairo',sans-serif;}
 .login-social-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(36,61,23,0.12);border-color:var(--sage);}
-.login-social-btn.fb-btn{background:#1877f2;color:#fff;border-color:#1877f2;}
-.login-social-btn.fb-btn:hover{background:#166fe5;box-shadow:0 8px 22px rgba(24,119,242,0.28);}
-.login-social-btn.apple-btn{background:#000;color:#fff;border-color:#000;}
-.login-social-btn.apple-btn:hover{background:#1a1a1a;box-shadow:0 8px 22px rgba(0,0,0,0.25);}
 .login-social-btn svg{width:20px;height:20px;flex-shrink:0;}
 .login-btn-label{flex:1;text-align:left;}
 .login-divider{display:flex;align-items:center;gap:12px;color:var(--warm-gray);font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;width:100%;max-width:340px;margin:2px 0;}
@@ -1666,11 +1662,6 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
 </style>
 <!-- ─ Google Identity Services ─ (replace YOUR_GOOGLE_CLIENT_ID) -->
 <script src="https://accounts.google.com/gsi/client" onload="initGSI()" async defer></script>
-<!-- ─ Facebook SDK ─ (replace YOUR_FACEBOOK_APP_ID) -->
-<script>
-window.fbAsyncInit=function(){FB.init({appId:'YOUR_FACEBOOK_APP_ID',cookie:true,xfbml:false,version:'v18.0'});};
-(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src='https://connect.facebook.net/en_US/sdk.js';fjs.parentNode.insertBefore(js,fjs);}(document,'script','facebook-jssdk'));
-</script>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -1725,17 +1716,6 @@ window.fbAsyncInit=function(){FB.init({appId:'YOUR_FACEBOOK_APP_ID',cookie:true,
           <div class="login-btns">
             <!-- Google — rendered by GSI into this wrapper -->
             <div id="google-btn-wrap"></div>
-            <div class="login-divider">or</div>
-            <!-- Facebook -->
-            <button class="login-social-btn fb-btn" onclick="loginFacebook()">
-              <svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              <span class="login-btn-label">Continue with Facebook</span>
-            </button>
-            <!-- Apple -->
-            <button class="login-social-btn apple-btn" onclick="loginApple()">
-              <svg viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-              <span class="login-btn-label">Continue with Apple</span>
-            </button>
             <div class="login-divider">or</div>
             <button class="login-skip-btn" onclick="loginGuest()">Continue as Guest — no sign-in needed</button>
           </div>
@@ -2126,55 +2106,6 @@ function handleGoogleLogin(response) {
   } catch(e) { loginGuest(); }
 }
 
-// ─── Facebook ────────────────────────────────────────
-// Replace with your App ID from developers.facebook.com
-const FACEBOOK_APP_ID = 'YOUR_FACEBOOK_APP_ID';
-
-function loginFacebook() {
-  if (typeof FB === 'undefined') {
-    alert('Facebook SDK not loaded. Check your App ID and internet connection.');
-    return;
-  }
-  FB.login(function(res) {
-    if (!res.authResponse) return; // user cancelled
-    FB.api('/me', { fields: 'name,email,gender,birthday,picture.width(200)' }, function(data) {
-      applyProfile({
-        name: data.name || 'User',
-        email: data.email || '',
-        picture: data.picture?.data?.url || null,
-        gender: data.gender || null,       // 'male' / 'female'
-        birthday: data.birthday || null,   // 'MM/DD/YYYY'
-        via: 'Facebook'
-      });
-    });
-  }, { scope: 'email,user_gender,user_birthday' });
-}
-
-// ─── Apple Sign-In ───────────────────────────────────
-// Requires Apple Developer account + Services ID configured at
-// developer.apple.com — replace placeholders below
-function loginApple() {
-  if (typeof AppleID === 'undefined') {
-    alert('Apple Sign-In requires an Apple Developer Services ID. See comments in code.');
-    return;
-  }
-  AppleID.auth.signIn().then(function(res) {
-    const id = res.authorization?.id_token;
-    if (!id) return loginGuest();
-    const payload = JSON.parse(atob(id.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-    const firstName = res.user?.name?.firstName || '';
-    const lastName  = res.user?.name?.lastName  || '';
-    applyProfile({
-      name: (firstName + ' ' + lastName).trim() || payload.email?.split('@')[0] || 'User',
-      email: payload.email || '',
-      picture: null,
-      gender: null,
-      birthday: null,
-      via: 'Apple'
-    });
-  }).catch(() => loginGuest());
-}
-
 // ─── Guest ───────────────────────────────────────────
 function loginGuest() {
   applyProfile(null);
@@ -2198,7 +2129,7 @@ function applyProfile(profile) {
       if (profile.picture) {
         avaEl.outerHTML = `<img class="story-user-avatar" id="story-user-avatar" src="${profile.picture}" alt="${profile.name}" onerror="this.outerHTML='<div class=\\'story-user-emoji\\'id=\\'story-user-avatar\\'>👤</div>'">`;
       } else {
-        const icons = { Google:'🔵', Facebook:'🟦', Apple:'⚫', null:'👤' };
+        const icons = { Google:'🔵', null:'👤' };
         avaEl.textContent = icons[profile.via] || '👤';
       }
     }
@@ -2216,7 +2147,7 @@ function applyProfile(profile) {
       try {
         const parts = profile.birthday.split('/');
         const birthYear = parts.length === 3
-          ? parseInt(parts[2])                          // MM/DD/YYYY (Facebook)
+          ? parseInt(parts[2])                          // MM/DD/YYYY
           : new Date(profile.birthday).getFullYear();   // ISO format
         const age = new Date().getFullYear() - birthYear;
         const aVal = age < 18 ? 'u18' : age <= 25 ? '18-25' : age <= 40 ? '26-40' : '40+';
