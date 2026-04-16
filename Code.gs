@@ -136,6 +136,25 @@ function buildRow(data) {
   ];
 }
 
+function findRowByEmail(sheet, email) {
+  var targetEmail = (email || "").toString().toLowerCase().trim();
+  if (!targetEmail) return -1;
+
+  var values = sheet.getDataRange().getValues();
+  if (!values.length) return -1;
+
+  var headers = values[0];
+  var emailCol = headers.indexOf("Email");
+  if (emailCol === -1) return -1;
+
+  for (var i = 1; i < values.length; i++) {
+    var rowEmail = (values[i][emailCol] || "").toString().toLowerCase().trim();
+    if (rowEmail === targetEmail) return i + 1;
+  }
+
+  return -1;
+}
+
 function sendWelcomeEmail(data) {
   var email = (data.email || "").toString().trim();
   if (!email) return;
@@ -234,22 +253,14 @@ function doPost(e) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
     var data = JSON.parse(e.postData.contents);
     var newRow = buildRow(data);
+    var existingRow = findRowByEmail(sheet, data.email);
 
-    if (data.mode === "update" && data.email) {
-      var values = sheet.getDataRange().getValues();
-      var headers = values[0];
-      var emailCol = headers.indexOf("Email");
-      var targetEmail = data.email.toLowerCase().trim();
-
-      for (var i = 1; i < values.length; i++) {
-        var rowEmail = (values[i][emailCol] || "").toString().toLowerCase().trim();
-        if (rowEmail === targetEmail) {
-          sheet.getRange(i + 1, 1, 1, newRow.length).setValues([newRow]);
-          return ContentService
-            .createTextOutput(JSON.stringify({ success: true, mode: "updated", row: i + 1 }))
-            .setMimeType(ContentService.MimeType.JSON);
-        }
-      }
+    // Email is the account identity, so any existing row should be updated.
+    if (existingRow !== -1) {
+      sheet.getRange(existingRow, 1, 1, newRow.length).setValues([newRow]);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, mode: "updated", row: existingRow }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
     sheet.appendRow(newRow);

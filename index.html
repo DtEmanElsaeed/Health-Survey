@@ -176,13 +176,6 @@ body.rtl .question-title{font-family:'Cairo',sans-serif;font-style:normal;font-s
 .text-input:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(36,61,23,0.07)}
 .field-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .field-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);display:block;margin-bottom:8px}
-.progress-wrap{margin-bottom:18px}
-.progress-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--warm-gray);margin-bottom:10px}
-.progress-track{height:1.5px;background:var(--border-fine);border-radius:99px;position:relative}
-.progress-fill{
-  height:100%;background:linear-gradient(90deg,var(--forest),var(--sage));
-  border-radius:99px;transition:width 0.6s cubic-bezier(0.22,1,0.36,1);
-}
 .step-dots{display:flex;gap:5px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
 .dot{width:5px;height:5px;border-radius:50%;background:var(--border-fine);transition:all 0.3s}
 .dot.done{background:rgba(36,61,23,0.35)}
@@ -871,48 +864,100 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
   background:var(--gold-border);
 }
 .question-hero{
-  display:grid;
-  grid-template-columns:1fr 138px;
-  gap:12px;
-  align-items:center;
-}
-.question-hero > div:first-child{min-width:0}
-.question-figure-wrap{
+  display:block;
   position:relative;
-  width:138px;
-  height:138px;
-  display:grid;
-  place-items:center;
-  justify-self:end;
+  min-height:168px;
+  padding:20px 22px;
+  border-radius:24px;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.76), rgba(248,243,234,0.9)),
+    radial-gradient(circle at top right, rgba(160,120,42,0.08), transparent 40%);
+  border:1px solid rgba(213,204,193,0.56);
 }
-.question-ring,.question-ring::before,.question-ring::after{
-  position:absolute;
-  border-radius:50%;
-  border:1px solid rgba(36,61,23,0.12);
-  content:'';
-}
-.question-ring{
-  inset:10px;
-  animation:spinSlow 18s linear infinite;
-}
-.question-ring::before{inset:12px}
-.question-ring::after{inset:28px}
-.question-figure{
+.question-hero > div:first-child{
+  min-width:0;
   position:relative;
   z-index:1;
-  width:76px;
-  height:76px;
-  border-radius:28px;
-  display:grid;
-  place-items:center;
-  font-size:34px;
-  background:linear-gradient(145deg, rgba(255,255,255,0.96), rgba(228,237,224,0.8));
-  box-shadow:0 18px 34px rgba(36,61,23,0.12);
-  animation:floatFigure 4.8s ease-in-out infinite;
 }
-@keyframes floatFigure{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
+.question-stage-bg{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.question-stage-bg::before{
+  content:'';
+  position:absolute;
+  right:-10%;
+  top:-18%;
+  width:240px;
+  height:240px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(36,61,23,0.08) 0%, rgba(36,61,23,0.03) 45%, transparent 72%);
+}
+.question-stage-bg::after{
+  content:'';
+  position:absolute;
+  left:-5%;
+  bottom:-18%;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(160,120,42,0.08) 0%, rgba(160,120,42,0.03) 40%, transparent 72%);
+}
+.question-bg-mark{
+  position:absolute;
+  right:22px;
+  bottom:14px;
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:42px;
+  line-height:1;
+  letter-spacing:0.08em;
+  color:rgba(36,61,23,0.07);
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+body.rtl .question-bg-mark{
+  right:auto;
+  left:22px;
+  font-family:'Cairo',sans-serif;
+  letter-spacing:0.03em;
+}
+.question-stage.theme-foundations .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(242,247,236,0.94)),
+    radial-gradient(circle at top right, rgba(139,166,122,0.1), transparent 42%);
+}
+.question-stage.theme-philosophy .question-hero,
+.question-stage.theme-palate .question-hero,
+.question-stage.theme-confession .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(247,240,228,0.94)),
+    radial-gradient(circle at top right, rgba(160,120,42,0.1), transparent 42%);
+}
+.question-stage.theme-movement .question-hero,
+.question-stage.theme-inner-life .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(236,243,239,0.95)),
+    radial-gradient(circle at top right, rgba(36,61,23,0.08), transparent 42%);
+}
+.question-stage.theme-daily-rituals .question-hero,
+.question-stage.theme-liquid-rituals .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(237,244,246,0.95)),
+    radial-gradient(circle at top right, rgba(99,139,160,0.08), transparent 42%);
+}
+.question-stage.theme-biological-context .question-hero,
+.question-stage.theme-her-portrait .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(244,238,243,0.95)),
+    radial-gradient(circle at top right, rgba(152,110,137,0.08), transparent 42%);
+}
+.question-stage.theme-final-observations .question-hero{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(245,241,232,0.95)),
+    radial-gradient(circle at top right, rgba(160,120,42,0.08), transparent 42%);
 }
 .question-momentum{
   display:flex;
@@ -1150,9 +1195,6 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
     background:
       linear-gradient(180deg, rgba(255,255,255,0.92), rgba(249,244,236,0.98));
   }
-  .question-figure{
-    background:linear-gradient(145deg, #fffdfa, #edf3e8);
-  }
 }
 
 @media(max-width:680px){
@@ -1183,19 +1225,16 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
       linear-gradient(180deg, rgba(255,255,255,0.96), rgba(247,241,232,0.98));
   }
   .question-hero{
-    grid-template-columns:1fr;
-    gap:14px;
+    min-height:148px;
+    padding:18px;
   }
-  .question-figure-wrap{
-    justify-self:start;
-    width:104px;
-    height:104px;
-  }
-  .question-figure{
-    width:74px;
-    height:74px;
+  .question-bg-mark{
     font-size:34px;
-    border-radius:22px;
+    right:18px;
+    bottom:14px;
+  }
+  body.rtl .question-bg-mark{
+    left:18px;
   }
   .story-card{
     grid-template-columns:1fr;
@@ -1349,18 +1388,23 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
     line-height:1.35;
   }
   .question-sub{font-size:12px;margin-bottom:18px}
-  .question-figure-wrap{
-    width:84px;
-    height:84px;
-  }
-  .question-ring{display:none}
-  .question-figure{
-    width:62px;
-    height:62px;
-    font-size:28px;
+  .question-hero{
+    min-height:136px;
+    padding:16px;
     border-radius:18px;
-    box-shadow:none;
-    background:linear-gradient(180deg, #f2eadc, #e7f0e2);
+  }
+  .question-bg-mark{
+    font-size:24px;
+    right:14px;
+    bottom:12px;
+    max-width:60%;
+    white-space:normal;
+    text-align:right;
+  }
+  body.rtl .question-bg-mark{
+    left:14px;
+    right:auto;
+    text-align:left;
   }
   .question-momentum{
     margin-top:12px;
@@ -1833,7 +1877,6 @@ body.rtl .insight-block{text-align:right;border-left:1px solid rgba(160,120,42,0
         <div class="card" id="survey-card">
           <div class="selection-toast" id="selection-toast">Choice saved</div>
           <div class="step-dots" id="step-dots"></div>
-          <div class="progress-wrap"><div class="progress-meta"><span id="prog-label">01 / 27</span><span id="prog-pct">4%</span></div><div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:4%"></div></div></div>
           <div id="q-area"></div>
           <div class="error-msg" id="err-msg"></div>
           <div class="nav"><button class="btn btn-back" id="btn-back" onclick="goBack()">←</button><button class="btn btn-skip hidden" id="btn-skip" onclick="skipStep()">Skip</button><button class="btn btn-next" id="btn-next" onclick="goNext()">Continue</button></div>
@@ -1915,16 +1958,16 @@ const QUESTIONS=[
 ];
 
 const SECTION_ART={
-  'MEDICAL BACKGROUND':{emoji:'', caption:{en:'Medical context shapes every recommendation.',ar:'السياق الطبي يُشكّل كل توصية.'}},
-  'DAILY ROUTINE':{emoji:'', caption:{en:'Daily habits reveal the real nutritional rhythm.',ar:'العادات اليومية تكشف الإيقاع الغذائي الحقيقي.'}},
-  'NUTRITION HABITS':{emoji:'', caption:{en:'What and how often you eat tells the whole story.',ar:'ما تأكله وبأي تكرار يحكي القصة كاملة.'}},
-  'BEVERAGES':{emoji:'', caption:{en:'Hydration and beverages change everything.',ar:'الترطيب والمشروبات يغيّران كل شيء.'}},
-  'LIFESTYLE':{emoji:'', caption:{en:'Sleep, stress and movement shape your recovery.',ar:'النوم والتوتر والحركة يصنعان التعافي.'}},
-  'BEHAVIOR':{emoji:'', caption:{en:'Small habits have the biggest impact.',ar:'العادات الصغيرة لها أكبر الأثر.'}},
-  'GOALS':{emoji:'', caption:{en:'A clear goal makes every step intentional.',ar:'الهدف الواضح يجعل كل خطوة مقصودة.'}},
-  'PREFERENCES':{emoji:'', caption:{en:'Your preferences make the plan yours.',ar:'تفضيلاتك تجعل الخطة خاصة بك.'}},
-  'OPEN QUESTIONS':{emoji:'', caption:{en:'Your context helps us go deeper.',ar:'سياقك يساعدنا على التعمق أكثر.'}},
-  'HER PORTRAIT':{emoji:'', caption:{en:'A tailored chapter with added care.',ar:'فصل مخصص بعناية إضافية.'}}
+  'MEDICAL BACKGROUND':{emoji:'🩺', caption:{en:'Medical context shapes every recommendation.',ar:'السياق الطبي يُشكّل كل توصية.'}},
+  'DAILY ROUTINE':{emoji:'🌅', caption:{en:'Daily habits reveal the real nutritional rhythm.',ar:'العادات اليومية تكشف الإيقاع الغذائي الحقيقي.'}},
+  'NUTRITION HABITS':{emoji:'🍽️', caption:{en:'What and how often you eat tells the whole story.',ar:'ما تأكله وبأي تكرار يحكي القصة كاملة.'}},
+  'BEVERAGES':{emoji:'💧', caption:{en:'Hydration and beverages change everything.',ar:'الترطيب والمشروبات يغيّران كل شيء.'}},
+  'LIFESTYLE':{emoji:'🏃', caption:{en:'Sleep, stress and movement shape your recovery.',ar:'النوم والتوتر والحركة يصنعان التعافي.'}},
+  'BEHAVIOR':{emoji:'🔍', caption:{en:'Small habits have the biggest impact.',ar:'العادات الصغيرة لها أكبر الأثر.'}},
+  'GOALS':{emoji:'🎯', caption:{en:'A clear goal makes every step intentional.',ar:'الهدف الواضح يجعل كل خطوة مقصودة.'}},
+  'PREFERENCES':{emoji:'✦', caption:{en:'Your preferences make the plan yours.',ar:'تفضيلاتك تجعل الخطة خاصة بك.'}},
+  'OPEN QUESTIONS':{emoji:'💬', caption:{en:'Your context helps us go deeper.',ar:'سياقك يساعدنا على التعمق أكثر.'}},
+  'HER PORTRAIT':{emoji:'🌺', caption:{en:'A tailored chapter with added care.',ar:'فصل مخصص بعناية إضافية.'}}
 };
 
 
@@ -1995,6 +2038,21 @@ function totalVisible(){return QUESTIONS.filter((_,i)=>isVisible(i)).length;}
 function visibleIndex(){let c=0;for(let i=0;i<=step;i++)if(isVisible(i))c++;return c;}
 function getCurrentGenderValue(){return getAnswer('gender')?.val||userPersonalData?.gender||'';}
 function deriveAgeBandFromDob(dob){if(!dob)return'';const dt=new Date(dob);if(Number.isNaN(dt.getTime()))return'';const age=Math.floor((Date.now()-dt.getTime())/31557600000);return age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';}
+function sectionThemeClass(sectionKey){
+  const map={
+    'MEDICAL BACKGROUND':'theme-biological-context',
+    'DAILY ROUTINE':'theme-daily-rituals',
+    'NUTRITION HABITS':'theme-philosophy',
+    'BEVERAGES':'theme-liquid-rituals',
+    'LIFESTYLE':'theme-inner-life',
+    'BEHAVIOR':'theme-confession',
+    'GOALS':'theme-final-observations',
+    'PREFERENCES':'theme-palate',
+    'OPEN QUESTIONS':'theme-final-observations',
+    'HER PORTRAIT':'theme-her-portrait'
+  };
+  return map[sectionKey] || 'theme-foundations';
+}
 function buildSubmissionPayload(){
   const payload={language:lang};
   // ── Personal details from profile screen ──────────
@@ -2024,6 +2082,8 @@ function buildSubmissionPayload(){
   return payload;
 }
 async function submitSurvey() {
+  if (submitSurvey.inFlight) return;
+  submitSurvey.inFlight = true;
   const nextBtn = document.getElementById('btn-next');
   nextBtn.disabled = true;
   nextBtn.textContent = lang === 'ar' ? '— جارٍ الحفظ —' : '— Saving —';
@@ -2031,43 +2091,29 @@ async function submitSurvey() {
   const payload = buildSubmissionPayload();
 
   try {
-    // text/plain avoids CORS preflight; Apps Script still reads e.postData.contents
     const resp = await fetch(WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify(payload)
     });
-    const json = await resp.json();
-    if (!json.success) throw new Error(json.message || 'Submission error');
-    console.log('✓ Portrait saved:', json.message);
+    const text = await resp.text();
+    if (text) {
+      const json = JSON.parse(text);
+      if (json.success === false) throw new Error(json.message || 'Submission error');
+      console.log('Portrait saved:', json.mode || 'ok');
+    }
   } catch (e) {
-    // Fallback: fire-and-forget no-cors — data still reaches the sheet
-    // even if the browser blocks reading the response (common in local dev)
-    try {
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(payload)
-      });
-    } catch (_) {}
-    console.warn('Submit used no-cors fallback:', e.message);
+    console.warn('Submit request could not be confirmed:', e.message);
+  } finally {
+    submitSurvey.inFlight = false;
   }
 
-  // Always show results — never block the user on a network issue
   showResults();
 }
 function showCheckpoint(msg,section,done){const ov=document.createElement('div');ov.className='checkpoint-overlay';ov.innerHTML=`<div class="checkpoint-inner"><span class="checkpoint-ornament">— ✦ —</span><span class="checkpoint-section">${section}</span><div class="checkpoint-text">${msg}</div></div>`;document.body.appendChild(ov);requestAnimationFrame(()=>ov.style.opacity='1');setTimeout(()=>{ov.style.opacity='0';setTimeout(()=>{ov.remove();done();},500);},2000);}
 function startSurvey(l){lang=l;document.body.classList.toggle('rtl',l==='ar');document.documentElement.lang=l;document.getElementById('lang-screen').classList.add('hidden');document.getElementById('survey-screen').classList.remove('hidden');step=0;answers={};while(step<QUESTIONS.length&&!isVisible(step))step++;renderStep();}
 function renderStep(){
   const total=totalVisible(),vis=visibleIndex(),pct=Math.round((vis/total)*100),q=QUESTIONS[step],art=getSectionArt(q.section.en),energy=getEnergyLevel(pct);
-  document.getElementById('prog-label').textContent=`${String(vis).padStart(2,'0')} ${T[lang].step_of} ${String(total).padStart(2,'0')}`;
-  document.getElementById('prog-pct').textContent=`${pct}%`;
-  const progressFill=document.getElementById('prog-fill');
-  progressFill.style.width=`${pct}%`;
-  progressFill.classList.remove('glow');
-  void progressFill.offsetWidth;
-  progressFill.classList.add('glow');
   syncDots();
   updateStoryPanel(q,total,vis,pct);
   const backBtn=document.getElementById('btn-back'),nextBtn=document.getElementById('btn-next'),skipBtn=document.getElementById('btn-skip');
@@ -2079,7 +2125,8 @@ function renderStep(){
   q.optional?skipBtn.classList.remove('hidden'):skipBtn.classList.add('hidden');
   document.getElementById('err-msg').classList.remove('show');
   const energyDots=Array.from({length:5},(_,i)=>`<span class="energy-dot ${i<energy?'active':''}"></span>`).join('');
-  let html=`<div class="question-stage"><div class="question-kicker">${q.section[lang]}</div><div class="question-hero"><div><div class="question-title">${q.q[lang]}</div>${q.sub?`<div class="question-sub">${q.sub[lang]}</div>`:''}<div class="question-momentum"><span class="momentum-pill">${lang==='ar'?'خطوة أنيقة':'Elegant step'} ${String(vis).padStart(2,'0')}</span><div class="energy-row">${energyDots}</div></div></div><div class="question-figure-wrap"><div class="question-ring"></div><div class="question-figure">${art.emoji}</div></div></div></div>`;
+  const themeClass=sectionThemeClass(q.section.en);
+  let html=`<div class="question-stage ${themeClass}"><div class="question-kicker">${q.section[lang]}</div><div class="question-hero"><div class="question-stage-bg" aria-hidden="true"><span class="question-bg-mark">${q.section[lang]}</span></div><div><div class="question-title">${q.q[lang]}</div>${q.sub?`<div class="question-sub">${q.sub[lang]}</div>`:''}<div class="question-momentum"><span class="momentum-pill">${lang==='ar'?'خطوة أنيقة':'Elegant step'} ${String(vis).padStart(2,'0')}</span><div class="energy-row">${energyDots}</div></div></div></div></div>`;
   html+=`<div class="section-label">${q.section[lang]}</div>`;
   if(q.optional)html+=`<span class="optional-badge">${T[lang].optional}</span>`;
   if(q.female)html+=`<div class="female-notice"><span>👩</span><em>${T[lang].female_note}</em></div>`;
@@ -2644,7 +2691,7 @@ renderStep=function(){
       ?'slideInFromRight 0.4s cubic-bezier(0.22,1,0.36,1) both'
       :'slideInFromLeft 0.4s cubic-bezier(0.22,1,0.36,1) both';
   }
-  const pctEl=document.getElementById('prog-pct');
+  const pctEl=document.getElementById('story-progress-pct');
   if(pctEl)_checkMilestone(parseInt(pctEl.textContent)||0);
 };
 
