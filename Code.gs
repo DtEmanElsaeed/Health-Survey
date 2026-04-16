@@ -342,7 +342,11 @@ function doPost(e) {
 
     sheet.appendRow(newRow);
     clearDashboardCache_();
-    sendWelcomeEmail(data);
+    try {
+      sendWelcomeEmail(data);
+    } catch (mailErr) {
+      Logger.log("Welcome email skipped: " + mailErr);
+    }
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, mode: "inserted" }))
       .setMimeType(ContentService.MimeType.JSON);
