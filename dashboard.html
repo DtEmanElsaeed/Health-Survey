@@ -762,6 +762,7 @@ const DASHBOARD_PASS = "adnim123";
 let allPatients = [];
 let filteredPatients = [];
 let selectedPatientEmail = "";
+let patientDetailsCache = {};
 
 const els = {
   authShell: document.getElementById('auth-shell'),
@@ -969,7 +970,9 @@ function filterPatients(){
   }
 
   if(filteredPatients.length){
-    renderDetails(filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail) || filteredPatients[0]);
+    const selected = filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail) || filteredPatients[0];
+    selectedPatientEmail = norm(selected["Email"]);
+    openPatientDetails(selectedPatientEmail);
   } else {
     selectedPatientEmail = "";
     els.detailsHost.innerHTML = `
@@ -1016,10 +1019,22 @@ function renderPatientList(){
     btn.addEventListener('click', () => {
       selectedPatientEmail = btn.dataset.email || "";
       renderPatientList();
-      renderDetails(filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail));
+      openPatientDetails(selectedPatientEmail);
       if(isMobileViewport()) showMobileSection('details-host');
     });
   });
+}
+
+function renderDetailsLoading(row){
+  const title = escapeHtml(oneOf(row || {}, ["Full Name", "Email"]) || "Patient");
+  els.detailsHost.innerHTML = `
+    <div class="empty-state">
+      <div>
+        <h3>Opening ${title}</h3>
+        <p>Loading the full submission details for this patient.</p>
+      </div>
+    </div>
+  `;
 }
 
 function renderDetails(row){
@@ -1122,6 +1137,29 @@ function renderDetails(row){
   `;
 }
 
+async function openPatientDetails(email){
+  const summaryRow = filteredPatients.find(row => norm(row["Email"]) === norm(email)) || allPatients.find(row => norm(row["Email"]) === norm(email)) || null;
+  if(!summaryRow && !email){
+    renderDetails(null);
+    return;
+  }
+  if(patientDetailsCache[email]){
+    renderDetails(patientDetailsCache[email]);
+    return;
+  }
+  renderDetailsLoading(summaryRow);
+  try{
+    const response = await fetch(WEB_APP_URL + '?email=' + encodeURIComponent(email), { method: 'GET' });
+    const payload = await response.json();
+    if(payload && payload.found && payload.data){
+      patientDetailsCache[email] = payload.data;
+      renderDetails(payload.data);
+      return;
+    }
+  }catch(_){}
+  renderDetails(summaryRow);
+}
+
 function detailRow(key, value){
   return `<div class="detail-row"><div class="detail-key">${escapeHtml(key)}</div><div class="detail-val">${escapeHtml(value || "—")}</div></div>`;
 }
@@ -1144,7 +1182,8 @@ async function loadDashboard(){
   els.error.style.display = "none";
 
   try {
-    const response = await fetch(WEB_APP_URL, { method: "GET" });
+    patientDetailsCache = {};
+    const response = await fetch(WEB_APP_URL + '?view=dashboard', { method: "GET" });
     const payload = await response.json();
     if(!payload || payload.success === false){
       throw new Error(payload?.message || "Unable to load dashboard data.");
@@ -1162,7 +1201,8 @@ async function loadDashboard(){
     filteredPatients = [...allPatients];
     selectedPatientEmail = filteredPatients[0] ? norm(filteredPatients[0]["Email"]) : "";
     renderPatientList();
-    renderDetails(filteredPatients[0]);
+    if(filteredPatients[0]) openPatientDetails(selectedPatientEmail);
+    else renderDetails(null);
     els.lastSync.textContent = `Last sync ${new Intl.DateTimeFormat(undefined, { hour:"numeric", minute:"2-digit", day:"numeric", month:"short" }).format(new Date())}`;
   } catch (error) {
     els.error.textContent = error.message || "Something went wrong while loading patient data.";

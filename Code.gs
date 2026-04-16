@@ -28,6 +28,12 @@ var HEADERS = [
   "Pregnant", "Period",
   "Raw JSON"
 ];
+var DASHBOARD_CACHE_KEY = "dashboard_summary_v1";
+var DASHBOARD_CACHE_TTL = 120;
+var DASHBOARD_FIELDS = [
+  "Timestamp", "Language", "Full Name", "Email", "Phone", "City", "Login Via",
+  "Age", "BMI", "Conditions", "Goal", "Stress"
+];
 
 function getSheet_() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
@@ -181,6 +187,43 @@ function findRowByEmail(sheet, email) {
   return -1;
 }
 
+function rowToObject_(headers, row, fields) {
+  var obj = {};
+  var keys = fields && fields.length ? fields : headers;
+  keys.forEach(function(key) {
+    var idx = headers.indexOf(key);
+    if (idx !== -1) obj[key] = row[idx];
+  });
+  return obj;
+}
+
+function getDashboardSummaries_(sheet) {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(DASHBOARD_CACHE_KEY);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  var values = sheet.getDataRange().getDisplayValues();
+  if (!values.length) return [];
+
+  var headers = values[0];
+  var rows = values.slice(1).filter(function(row) {
+    var emailIdx = headers.indexOf("Email");
+    var nameIdx = headers.indexOf("Full Name");
+    return (emailIdx !== -1 && row[emailIdx]) || (nameIdx !== -1 && row[nameIdx]);
+  }).map(function(row) {
+    return rowToObject_(headers, row, DASHBOARD_FIELDS);
+  });
+
+  cache.put(DASHBOARD_CACHE_KEY, JSON.stringify(rows), DASHBOARD_CACHE_TTL);
+  return rows;
+}
+
+function clearDashboardCache_() {
+  CacheService.getScriptCache().remove(DASHBOARD_CACHE_KEY);
+}
+
 function sendWelcomeEmail(data) {
   var email = (data.email || "").toString().trim();
   if (!email) return;
@@ -235,19 +278,25 @@ function doGet(e) {
   try {
     var sheet = getSheet_();
     ensureHeaders_(sheet);
-    var values = sheet.getDataRange().getValues();
+    var values = sheet.getDataRange().getDisplayValues();
     var headers = values[0];
     var emailCol = headers.indexOf("Email");
+    var view = e.parameter && e.parameter.view ? e.parameter.view.toLowerCase().trim() : "";
 
     var filterEmail = e.parameter && e.parameter.email
       ? e.parameter.email.toLowerCase().trim()
       : null;
 
+    if (view === "dashboard") {
+      var summaries = getDashboardSummaries_(sheet);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, count: summaries.length, data: summaries }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     if (!filterEmail) {
       var all = values.slice(1).map(function(row) {
-        var obj = {};
-        headers.forEach(function(h, i) { obj[h] = row[i]; });
-        return obj;
+        return rowToObject_(headers, row);
       });
       return ContentService
         .createTextOutput(JSON.stringify({ success: true, count: all.length, data: all }))
@@ -257,8 +306,7 @@ function doGet(e) {
     for (var i = 1; i < values.length; i++) {
       var rowEmail = (values[i][emailCol] || "").toString().toLowerCase().trim();
       if (rowEmail === filterEmail) {
-        var obj = {};
-        headers.forEach(function(h, idx) { obj[h] = values[i][idx]; });
+        var obj = rowToObject_(headers, values[i]);
         return ContentService
           .createTextOutput(JSON.stringify({ found: true, rowIndex: i + 1, data: obj }))
           .setMimeType(ContentService.MimeType.JSON);
@@ -286,12 +334,14 @@ function doPost(e) {
     // Email is the account identity, so any existing row should be updated.
     if (existingRow !== -1) {
       sheet.getRange(existingRow, 1, 1, newRow.length).setValues([newRow]);
+      clearDashboardCache_();
       return ContentService
         .createTextOutput(JSON.stringify({ success: true, mode: "updated", row: existingRow }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
     sheet.appendRow(newRow);
+    clearDashboardCache_();
     sendWelcomeEmail(data);
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, mode: "inserted" }))
