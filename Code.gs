@@ -1,49 +1,75 @@
-// Run this ONCE manually to set column headers
+var SHEET_NAME = "Sheet1";
+var HEADERS = [
+  "Timestamp", "Language",
+  "Full Name", "Email", "Phone", "DOB", "Gender (Profile)", "City", "Login Via", "Age",
+  "Height", "Weight", "BMI",
+  "Conditions", "Conditions Other", "Thyroid Type",
+  "Medications YN", "Medications",
+  "Allergies",
+  "Digestive", "Digestive Duration",
+  "Surgery", "Surgery Details", "Injury",
+  "Wake Time", "Morning Intake",
+  "Breakfast YN", "Breakfast What", "Breakfast Skip Reason", "After Breakfast",
+  "Lunch Time", "Lunch What",
+  "Morning Snacks YN", "Morning Snacks What",
+  "Dinner Time", "Dinner What",
+  "After Dinner YN", "After Dinner What",
+  "Meals/Day",
+  "Eating Out Breakfast", "Eating Out Lunch", "Eating Out Dinner", "Eating Out Places",
+  "Fruits/Day", "Veggies/Day",
+  "Red Meat/Week", "Chicken/Week", "Fish/Week", "Cereal/Week",
+  "Beverages", "Beverages Amount", "Water",
+  "Exercise YN", "Exercise Type", "Exercise Freq", "Gym",
+  "Sleep", "Stress", "Stress Eat", "TV Snack", "TV Hours",
+  "Late Night", "Sweets",
+  "Goal", "Goal Timeline",
+  "Dislikes", "Diet Type",
+  "Past Diet Barrier", "Notes",
+  "Pregnant", "Period",
+  "Raw JSON"
+];
+
+function getSheet_() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+}
+
+function rowLooksLikeAnyHeader_(row) {
+  return row.some(function(cell) {
+    var value = (cell || "").toString().trim();
+    return value === "Email" || value === "Timestamp" || value === "Full Name" || value === "Language";
+  });
+}
+
+function headersMatch_(row) {
+  if (!row || row.length < HEADERS.length) return false;
+  for (var i = 0; i < HEADERS.length; i++) {
+    if ((row[i] || "").toString().trim() !== HEADERS[i]) return false;
+  }
+  return true;
+}
+
+function ensureHeaders_(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow === 0) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    return;
+  }
+
+  var firstRow = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), HEADERS.length)).getDisplayValues()[0];
+  if (headersMatch_(firstRow)) return;
+
+  if (rowLooksLikeAnyHeader_(firstRow)) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    return;
+  }
+
+  sheet.insertRowBefore(1);
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+}
+
+// Run this ONCE manually to set or repair column headers
 function initSheet() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
-  var headers = [
-    "Timestamp", "Language",
-    // Profile
-    "Full Name", "Email", "Phone", "DOB", "Gender (Profile)", "City", "Login Via", "Age",
-    // Measurements
-    "Height", "Weight", "BMI",
-    // Medical Background
-    "Conditions", "Conditions Other", "Thyroid Type",
-    "Medications YN", "Medications",
-    "Allergies",
-    "Digestive", "Digestive Duration",
-    "Surgery", "Surgery Details", "Injury",
-    // Daily Routine
-    "Wake Time", "Morning Intake",
-    "Breakfast YN", "Breakfast What", "Breakfast Skip Reason", "After Breakfast",
-    "Lunch Time", "Lunch What",
-    "Morning Snacks YN", "Morning Snacks What",
-    "Dinner Time", "Dinner What",
-    "After Dinner YN", "After Dinner What",
-    // Nutrition Habits
-    "Meals/Day",
-    "Eating Out Breakfast", "Eating Out Lunch", "Eating Out Dinner", "Eating Out Places",
-    "Fruits/Day", "Veggies/Day",
-    "Red Meat/Week", "Chicken/Week", "Fish/Week", "Cereal/Week",
-    // Beverages
-    "Beverages", "Beverages Amount", "Water",
-    // Lifestyle
-    "Exercise YN", "Exercise Type", "Exercise Freq", "Gym",
-    "Sleep", "Stress", "Stress Eat", "TV Snack", "TV Hours",
-    // Behavior
-    "Late Night", "Sweets",
-    // Goals
-    "Goal", "Goal Timeline",
-    // Preferences
-    "Dislikes", "Diet Type",
-    // Open
-    "Past Diet Barrier", "Notes",
-    // Her Portrait
-    "Pregnant", "Period",
-    // Raw
-    "Raw JSON"
-  ];
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  ensureHeaders_(getSheet_());
 }
 
 function buildRow(data) {
@@ -207,7 +233,8 @@ function sendWelcomeEmail(data) {
 
 function doGet(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
+    var sheet = getSheet_();
+    ensureHeaders_(sheet);
     var values = sheet.getDataRange().getValues();
     var headers = values[0];
     var emailCol = headers.indexOf("Email");
@@ -250,7 +277,8 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
+    var sheet = getSheet_();
+    ensureHeaders_(sheet);
     var data = JSON.parse(e.postData.contents);
     var newRow = buildRow(data);
     var existingRow = findRowByEmail(sheet, data.email);
