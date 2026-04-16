@@ -416,6 +416,26 @@ body{
   flex-wrap:wrap;
   gap:8px;
 }
+.detail-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:12px;
+}
+.pdf-btn{
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--forest),var(--forest-soft));
+  color:#fff;
+  padding:12px 18px;
+  font:600 14px 'Inter',sans-serif;
+  cursor:pointer;
+  box-shadow:0 12px 20px rgba(48,77,35,.18);
+}
+.pdf-btn:disabled{
+  opacity:.65;
+  cursor:wait;
+}
 .detail-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -559,6 +579,13 @@ body{
   .patient-head,
   .panel-title{
     flex-direction:column;
+  }
+  .detail-actions{
+    align-items:stretch;
+    width:100%;
+  }
+  .pdf-btn{
+    width:100%;
   }
   .detail-row{
     flex-direction:column;
@@ -750,9 +777,10 @@ body{
       <button class="mobile-nav-btn" type="button" data-target="mobile-patients-section">Patients</button>
       <button class="mobile-nav-btn" type="button" data-target="details-host">Details</button>
     </nav>
-  </div>
+</div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
 const DASHBOARD_AUTH_KEY = "the-first-step-dashboard-auth";
@@ -763,6 +791,7 @@ let allPatients = [];
 let filteredPatients = [];
 let selectedPatientEmail = "";
 let patientDetailsCache = {};
+let currentDetailRow = null;
 
 const els = {
   authShell: document.getElementById('auth-shell'),
@@ -1039,6 +1068,7 @@ function renderDetailsLoading(row){
 
 function renderDetails(row){
   if(!row){
+    currentDetailRow = null;
     els.detailsHost.innerHTML = `
       <div class="empty-state">
         <div>
@@ -1049,6 +1079,8 @@ function renderDetails(row){
     `;
     return;
   }
+
+  currentDetailRow = row;
 
   const conditions = splitList(row["Conditions"]).map(titleCase).join(", ") || "None noted";
   const digestive = splitList(row["Digestive"]).map(titleCase).join(", ") || "None noted";
@@ -1068,13 +1100,16 @@ function renderDetails(row){
             Last saved ${escapeHtml(fmtTimestamp(row["Timestamp"]))}
           </div>
         </div>
-        <div class="detail-tags">
-          ${[
-            norm(row["Goal"]) && titleCase(row["Goal"]),
-            norm(row["Language"]) && norm(row["Language"]).toUpperCase(),
-            norm(row["Login Via"]),
-            norm(row["BMI"]) && `BMI ${fmtNumber(row["BMI"])}`
-          ].filter(Boolean).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
+        <div class="detail-actions">
+          <button class="pdf-btn" type="button" onclick="downloadCurrentPatientPdf()">Download PDF Report</button>
+          <div class="detail-tags">
+            ${[
+              norm(row["Goal"]) && titleCase(row["Goal"]),
+              norm(row["Language"]) && norm(row["Language"]).toUpperCase(),
+              norm(row["Login Via"]),
+              norm(row["BMI"]) && `BMI ${fmtNumber(row["BMI"])}`
+            ].filter(Boolean).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
+          </div>
         </div>
       </div>
 
@@ -1162,6 +1197,179 @@ async function openPatientDetails(email){
 
 function detailRow(key, value){
   return `<div class="detail-row"><div class="detail-key">${escapeHtml(key)}</div><div class="detail-val">${escapeHtml(value || "—")}</div></div>`;
+}
+
+function cleanReportValue(value){
+  return norm(value) || "—";
+}
+
+function buildPatientReportSections(row){
+  const conditions = splitList(row["Conditions"]).map(titleCase).join(", ") || "None noted";
+  const digestive = splitList(row["Digestive"]).map(titleCase).join(", ") || "None noted";
+  const beverages = splitList(row["Beverages"]).map(titleCase).join(", ") || "—";
+  const eatingOut = [row["Eating Out Breakfast"], row["Eating Out Lunch"], row["Eating Out Dinner"]].map(norm).filter(Boolean).join(" / ") || "—";
+
+  return [
+    {
+      title: "Profile",
+      rows: [
+        ["Full name", oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"],
+        ["Email", cleanReportValue(row["Email"])],
+        ["Phone", cleanReportValue(row["Phone"])],
+        ["City", cleanReportValue(row["City"])],
+        ["Date of birth", fmtDate(row["DOB"])],
+        ["Gender", titleCase(row["Gender (Profile)"])],
+        ["Age range", cleanReportValue(row["Age"])],
+        ["Height / Weight", `${cleanReportValue(row["Height"])} cm / ${cleanReportValue(row["Weight"])} kg`],
+        ["BMI", fmtNumber(row["BMI"])]
+      ]
+    },
+    {
+      title: "Medical Context",
+      rows: [
+        ["Conditions", conditions],
+        ["Condition details", cleanReportValue(row["Conditions Other"])],
+        ["Thyroid type", titleCase(row["Thyroid Type"])],
+        ["Medications", cleanReportValue(row["Medications"])],
+        ["Digestive issues", digestive],
+        ["Surgery", titleCase(row["Surgery"])],
+        ["Surgery details", cleanReportValue(row["Surgery Details"])]
+      ]
+    },
+    {
+      title: "Lifestyle",
+      rows: [
+        ["Wake time", cleanReportValue(row["Wake Time"])],
+        ["Meals / day", cleanReportValue(row["Meals/Day"])],
+        ["Water", cleanReportValue(row["Water"])],
+        ["Sleep", cleanReportValue(row["Sleep"])],
+        ["Stress", titleCase(row["Stress"])],
+        ["Stress eating", titleCase(row["Stress Eat"])],
+        ["Exercise", oneOf(row, ["Exercise Freq", "Exercise YN"]) || "—"]
+      ]
+    },
+    {
+      title: "Nutrition Goals",
+      rows: [
+        ["Main goal", titleCase(row["Goal"])],
+        ["Goal timeline", cleanReportValue(row["Goal Timeline"])],
+        ["Past diet regime", cleanReportValue(row["Past Diet Regime"])],
+        ["Diet barrier", cleanReportValue(row["Past Diet Barrier"])],
+        ["Dislikes", cleanReportValue(row["Dislikes"])],
+        ["Eating out", eatingOut]
+      ]
+    },
+    {
+      title: "Food Pattern",
+      rows: [
+        ["Breakfast", cleanReportValue(row["Breakfast What"] || titleCase(row["Breakfast YN"]))],
+        ["Lunch", cleanReportValue(row["Lunch What"])],
+        ["Dinner", cleanReportValue(row["Dinner What"])],
+        ["Beverages", beverages],
+        ["Beverage amount", cleanReportValue(row["Beverages Amount"])],
+        ["Sweets", cleanReportValue(row["Sweets"])]
+      ]
+    },
+    {
+      title: "Additional Notes",
+      rows: [
+        ["Notes", oneOf(row, ["Notes", "Raw JSON"]) || "No extra notes shared."]
+      ]
+    }
+  ];
+}
+
+function safeFilePart(value){
+  return (norm(value) || "patient")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48) || "patient";
+}
+
+function downloadCurrentPatientPdf(){
+  const row = currentDetailRow;
+  if(!row) return;
+  const jspdfApi = window.jspdf;
+  if(!jspdfApi || !jspdfApi.jsPDF){
+    alert("PDF export is not available right now. Please refresh and try again.");
+    return;
+  }
+
+  const { jsPDF } = jspdfApi;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 48;
+  const maxTextWidth = pageWidth - marginX * 2;
+  let y = 56;
+
+  const addPageIfNeeded = (needed = 24) => {
+    if (y + needed <= pageHeight - 48) return;
+    doc.addPage();
+    y = 56;
+  };
+
+  const writeWrapped = (text, x, fontSize, color, gapAfter = 14, weight = "normal") => {
+    doc.setFont("helvetica", weight);
+    doc.setFontSize(fontSize);
+    doc.setTextColor(color);
+    const lines = doc.splitTextToSize(String(text), maxTextWidth - (x - marginX));
+    lines.forEach(line => {
+      addPageIfNeeded(fontSize + 8);
+      doc.text(line, x, y);
+      y += fontSize + 6;
+    });
+    y += gapAfter;
+  };
+
+  doc.setFillColor(48, 77, 35);
+  doc.roundedRect(marginX, y, pageWidth - marginX * 2, 84, 18, 18, "F");
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("THE FIRST STEP", marginX + 22, y + 24);
+  doc.setFont("times", "italic");
+  doc.setFontSize(28);
+  doc.text("Patient Nutrition Report", marginX + 22, y + 54);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(`Generated ${new Date().toLocaleString()}`, marginX + 22, y + 74);
+  y += 112;
+
+  writeWrapped(`Patient: ${oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"}`, marginX, 18, "#292418", 6, "bold");
+  writeWrapped(`Email: ${cleanReportValue(row["Email"])}   •   Phone: ${cleanReportValue(row["Phone"])}   •   Last saved: ${fmtTimestamp(row["Timestamp"])}`, marginX, 11, "#786d57", 18);
+
+  buildPatientReportSections(row).forEach(section => {
+    addPageIfNeeded(42);
+    doc.setDrawColor(177, 137, 68);
+    doc.setLineWidth(1);
+    doc.line(marginX, y + 3, marginX + 24, y + 3);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor("#b18944");
+    doc.text(section.title.toUpperCase(), marginX + 34, y + 8);
+    y += 24;
+
+    section.rows.forEach(([label, value]) => {
+      const textValue = String(value || "—");
+      addPageIfNeeded(30);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor("#304d23");
+      doc.text(`${label}:`, marginX, y);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor("#292418");
+      const lines = doc.splitTextToSize(textValue, maxTextWidth - 120);
+      doc.text(lines, marginX + 120, y);
+      y += Math.max(18, lines.length * 15);
+    });
+
+    y += 12;
+  });
+
+  const filename = `${safeFilePart(oneOf(row, ["Full Name", "Email"]))}-report.pdf`;
+  doc.save(filename);
 }
 
 function escapeHtml(value){
