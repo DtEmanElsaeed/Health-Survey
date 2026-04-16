@@ -29,6 +29,102 @@ body{
     radial-gradient(circle at bottom right, rgba(48,77,35,.10), transparent 28%),
     linear-gradient(180deg, #f9f4ea 0%, #f3ede1 100%);
 }
+.hidden{display:none !important}
+.auth-shell{
+  min-height:100svh;
+  display:grid;
+  place-items:center;
+  padding:18px;
+}
+.auth-card{
+  width:min(520px, 100%);
+  border:1px solid rgba(95,73,25,.10);
+  border-radius:30px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,252,247,.94)),
+    radial-gradient(circle at top left, rgba(177,137,68,.12), transparent 28%),
+    var(--paper);
+  box-shadow:var(--shadow);
+  padding:34px 28px 28px;
+}
+.auth-mark{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  font-size:12px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:18px;
+}
+.auth-mark::before,.auth-mark::after{
+  content:"";
+  width:38px;
+  height:1px;
+  background:currentColor;
+  opacity:.6;
+}
+.auth-title{
+  margin:0 0 12px;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(38px,5vw,58px);
+  line-height:.95;
+}
+.auth-copy{
+  margin:0 0 24px;
+  color:var(--muted);
+  line-height:1.75;
+  font-size:16px;
+}
+.auth-form{
+  display:grid;
+  gap:14px;
+}
+.auth-label{
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:8px;
+}
+.auth-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top:8px;
+}
+.auth-btn,.logout-btn{
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--forest),var(--forest-soft));
+  color:#fff;
+  padding:14px 20px;
+  font:600 14px 'Inter',sans-serif;
+  cursor:pointer;
+  box-shadow:0 12px 20px rgba(48,77,35,.18);
+}
+.auth-hint{
+  margin-top:18px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(177,137,68,.10);
+  color:#6d572d;
+  font-size:14px;
+  line-height:1.65;
+}
+.auth-error{
+  display:none;
+  margin-top:8px;
+  color:#8f2c2c;
+  background:rgba(154,40,40,.08);
+  border:1px solid rgba(154,40,40,.16);
+  border-radius:14px;
+  padding:12px 14px;
+  font-size:14px;
+}
+.dashboard-app{
+  min-height:100svh;
+}
 .page{
   width:min(1600px, calc(100vw - 28px));
   margin:14px auto;
@@ -133,6 +229,12 @@ body{
   box-shadow:0 12px 20px rgba(48,77,35,.18);
 }
 .sync-btn:disabled{opacity:.65;cursor:wait}
+.logout-btn{
+  background:rgba(255,255,255,.84);
+  color:var(--forest);
+  border:1px solid rgba(48,77,35,.16);
+  box-shadow:none;
+}
 .quick-list{
   display:grid;
   gap:10px;
@@ -378,6 +480,12 @@ body{
   padding:14px 16px;
   margin-bottom:14px;
 }
+.mobile-nav{
+  display:none;
+}
+.mobile-section{
+  display:block;
+}
 @media (max-width: 1180px){
   .hero,
   .dashboard-grid{
@@ -388,21 +496,59 @@ body{
   }
 }
 @media (max-width: 760px){
+  body{
+    background:
+      radial-gradient(circle at top center, rgba(177,137,68,.14), transparent 24%),
+      linear-gradient(180deg, #f8f3e9 0%, #efe8db 100%);
+  }
+  .auth-shell{
+    padding:10px;
+    align-items:stretch;
+  }
+  .auth-card{
+    min-height:calc(100svh - 20px);
+    border-radius:28px;
+    padding:26px 20px 22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .auth-title{
+    font-size:44px;
+  }
+  .auth-copy{
+    font-size:15px;
+  }
+  .auth-actions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .auth-btn,.logout-btn{
+    width:100%;
+    padding:15px 18px;
+  }
   .page{
-    width:min(100vw, calc(100vw - 12px));
-    margin:6px auto;
-    min-height:calc(100svh - 12px);
-    padding:16px;
-    border-radius:18px;
+    width:100vw;
+    margin:0;
+    min-height:100svh;
+    padding:14px 14px 92px;
+    border-radius:0;
+    border:none;
+    box-shadow:none;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,251,245,.92)),
+      radial-gradient(circle at top left, rgba(177,137,68,.10), transparent 26%),
+      var(--paper);
   }
   .hero-card,.hero-side,.panel,.table-panel,.empty-state{
-    border-radius:20px;
+    border-radius:24px;
   }
   .hero-card{
-    padding:24px 18px;
+    padding:22px 18px;
   }
   .hero h1{
-    font-size:40px;
+    font-size:34px;
+    max-width:none;
   }
   .stats,
   .filters,
@@ -422,10 +568,114 @@ body{
     max-width:100%;
     text-align:left;
   }
+  .hero{
+    gap:16px;
+    margin-bottom:16px;
+  }
+  .hero-side{
+    padding:18px;
+  }
+  .hero-side .quick-list{
+    grid-template-columns:1fr;
+  }
+  .stats{
+    display:flex;
+    gap:12px;
+    overflow:auto;
+    margin:0 0 16px;
+    padding-bottom:2px;
+    scroll-snap-type:x proximity;
+  }
+  .stat-card{
+    min-width:220px;
+    scroll-snap-align:start;
+    padding:18px 16px;
+  }
+  .dashboard-grid{
+    display:block;
+  }
+  .mobile-nav{
+    position:fixed;
+    left:12px;
+    right:12px;
+    bottom:12px;
+    z-index:20;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    padding:10px;
+    border-radius:24px;
+    background:rgba(255,252,247,.92);
+    border:1px solid rgba(126,100,42,.16);
+    box-shadow:0 18px 30px rgba(52,42,18,.12);
+    backdrop-filter:blur(12px);
+  }
+  .mobile-nav-btn{
+    border:none;
+    background:transparent;
+    border-radius:18px;
+    padding:12px 10px;
+    color:var(--muted);
+    font:600 12px 'Inter',sans-serif;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .mobile-nav-btn.active{
+    background:linear-gradient(135deg,var(--forest),var(--forest-soft));
+    color:#fff;
+    box-shadow:0 10px 18px rgba(48,77,35,.16);
+  }
+  .mobile-section{
+    display:none;
+  }
+  .mobile-section.active{
+    display:block;
+  }
+  .patient-list{
+    max-height:none;
+    overflow:visible;
+  }
+  .table-panel{
+    min-height:unset;
+    padding:18px;
+  }
+  .detail-hero{
+    padding-bottom:14px;
+  }
+  .detail-name{
+    font-size:30px;
+  }
+  .panel-title h2{
+    font-size:20px;
+  }
 }
 </style>
 </head>
 <body>
+  <div class="auth-shell" id="auth-shell">
+    <div class="auth-card">
+      <div class="auth-mark">Secure Access</div>
+      <h1 class="auth-title">Dietitian Login</h1>
+      <p class="auth-copy">Open the mobile dashboard with a lightweight admin sign-in first, then review patient records in an app-like interface designed for quick daily use.</p>
+      <div class="auth-form">
+        <div>
+          <div class="auth-label">Username</div>
+          <input class="input" id="login-username" type="text" autocomplete="username" placeholder="Enter your username" />
+        </div>
+        <div>
+          <div class="auth-label">Password</div>
+          <input class="input" id="login-password" type="password" autocomplete="current-password" placeholder="Enter your password" />
+        </div>
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-actions">
+        <button class="auth-btn" id="login-btn" type="button">Open dashboard</button>
+      </div>
+      <div class="auth-hint">Test credentials: <strong>admin</strong> / <strong>adnim123</strong></div>
+    </div>
+  </div>
+
+  <div class="dashboard-app hidden" id="dashboard-app">
   <div class="page">
     <section class="hero">
       <div class="hero-card">
@@ -439,7 +689,10 @@ body{
             <div class="brand">The First Step</div>
             <div class="last-sync" id="last-sync">Waiting for first sync…</div>
           </div>
-          <button class="sync-btn" id="refresh-btn" type="button">Refresh data</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="logout-btn" id="logout-btn" type="button">Log out</button>
+            <button class="sync-btn" id="refresh-btn" type="button">Refresh data</button>
+          </div>
         </div>
         <div class="quick-list">
           <div class="quick-item">
@@ -454,7 +707,7 @@ body{
       </div>
     </section>
 
-    <section class="stats" id="stats-grid">
+    <section class="stats mobile-section active" id="stats-grid">
       <div class="panel stat-card"><div class="stat-label">Patients</div><div class="stat-value">—</div><div class="stat-sub">Total records loaded</div></div>
       <div class="panel stat-card"><div class="stat-label">Average BMI</div><div class="stat-value">—</div><div class="stat-sub">Across available measurements</div></div>
       <div class="panel stat-card"><div class="stat-label">Top Goal</div><div class="stat-value">—</div><div class="stat-sub">Most common nutrition goal</div></div>
@@ -462,7 +715,7 @@ body{
     </section>
 
     <section class="dashboard-grid">
-      <div class="panel">
+      <div class="panel mobile-section active" id="mobile-patients-section">
         <div class="panel-title">
           <h2>Patients</h2>
           <span id="patient-count">0 visible</span>
@@ -483,7 +736,7 @@ body{
         <div class="patient-list" id="patient-list"></div>
       </div>
 
-      <div class="table-panel" id="details-host">
+      <div class="table-panel mobile-section active" id="details-host">
         <div class="empty-state">
           <div>
             <h3>Select a patient</h3>
@@ -492,16 +745,32 @@ body{
         </div>
       </div>
     </section>
+    <nav class="mobile-nav" id="mobile-nav">
+      <button class="mobile-nav-btn active" type="button" data-target="stats-grid">Overview</button>
+      <button class="mobile-nav-btn" type="button" data-target="mobile-patients-section">Patients</button>
+      <button class="mobile-nav-btn" type="button" data-target="details-host">Details</button>
+    </nav>
+  </div>
   </div>
 
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
+const DASHBOARD_AUTH_KEY = "the-first-step-dashboard-auth";
+const DASHBOARD_USER = "admin";
+const DASHBOARD_PASS = "adnim123";
 
 let allPatients = [];
 let filteredPatients = [];
 let selectedPatientEmail = "";
 
 const els = {
+  authShell: document.getElementById('auth-shell'),
+  dashboardApp: document.getElementById('dashboard-app'),
+  loginBtn: document.getElementById('login-btn'),
+  logoutBtn: document.getElementById('logout-btn'),
+  authError: document.getElementById('auth-error'),
+  loginUsername: document.getElementById('login-username'),
+  loginPassword: document.getElementById('login-password'),
   statsGrid: document.getElementById('stats-grid'),
   patientCount: document.getElementById('patient-count'),
   patientList: document.getElementById('patient-list'),
@@ -512,8 +781,49 @@ const els = {
   search: document.getElementById('search-input'),
   language: document.getElementById('language-filter'),
   goal: document.getElementById('goal-filter'),
-  login: document.getElementById('login-filter')
+  login: document.getElementById('login-filter'),
+  mobileNav: document.getElementById('mobile-nav')
 };
+
+function isMobileViewport(){
+  return window.matchMedia('(max-width: 760px)').matches;
+}
+
+function showMobileSection(targetId){
+  document.querySelectorAll('.mobile-section').forEach(section => {
+    section.classList.toggle('active', section.id === targetId);
+  });
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.target === targetId);
+  });
+}
+
+function setDashboardAuthed(isAuthed){
+  if(isAuthed){
+    sessionStorage.setItem(DASHBOARD_AUTH_KEY, 'yes');
+    els.authShell.classList.add('hidden');
+    els.dashboardApp.classList.remove('hidden');
+    if(isMobileViewport()) showMobileSection('stats-grid');
+    if(!allPatients.length) loadDashboard();
+  } else {
+    sessionStorage.removeItem(DASHBOARD_AUTH_KEY);
+    els.dashboardApp.classList.add('hidden');
+    els.authShell.classList.remove('hidden');
+    els.authError.style.display = 'none';
+    els.loginPassword.value = '';
+  }
+}
+
+function tryLogin(){
+  const username = norm(els.loginUsername.value);
+  const password = norm(els.loginPassword.value);
+  if(username === DASHBOARD_USER && password === DASHBOARD_PASS){
+    setDashboardAuthed(true);
+    return;
+  }
+  els.authError.textContent = 'Incorrect login. Use admin / adnim123 for testing.';
+  els.authError.style.display = 'block';
+}
 
 function norm(value){
   return value == null ? "" : String(value).trim();
@@ -707,6 +1017,7 @@ function renderPatientList(){
       selectedPatientEmail = btn.dataset.email || "";
       renderPatientList();
       renderDetails(filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail));
+      if(isMobileViewport()) showMobileSection('details-host');
     });
   });
 }
@@ -875,8 +1186,32 @@ els.language.addEventListener('change', filterPatients);
 els.goal.addEventListener('change', filterPatients);
 els.login.addEventListener('change', filterPatients);
 els.refreshBtn.addEventListener('click', loadDashboard);
+els.loginBtn.addEventListener('click', tryLogin);
+els.logoutBtn.addEventListener('click', () => setDashboardAuthed(false));
+els.loginPassword.addEventListener('keydown', event => {
+  if(event.key === 'Enter') tryLogin();
+});
+els.loginUsername.addEventListener('keydown', event => {
+  if(event.key === 'Enter') tryLogin();
+});
+document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => showMobileSection(btn.dataset.target));
+});
+window.addEventListener('resize', () => {
+  if(!isMobileViewport()){
+    document.querySelectorAll('.mobile-section').forEach(section => section.classList.add('active'));
+    document.querySelectorAll('.mobile-nav-btn').forEach((btn, idx) => btn.classList.toggle('active', idx === 0));
+  } else if(!document.querySelector('.mobile-section.active')) {
+    showMobileSection('stats-grid');
+  }
+});
 
-loadDashboard();
+if(sessionStorage.getItem(DASHBOARD_AUTH_KEY) === 'yes'){
+  setDashboardAuthed(true);
+} else {
+  setDashboardAuthed(false);
+  if(isMobileViewport()) showMobileSection('stats-grid');
+}
 </script>
 </body>
 </html>
