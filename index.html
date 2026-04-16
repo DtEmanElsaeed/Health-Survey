@@ -1889,7 +1889,7 @@ body.rtl .question-bg-mark{
 </div>
 <script>
 // ---------- TRANSLATIONS ----------
-const T={en:{back:'←',next:'Continue',submit:'Compose My Portrait',skip:'Skip',optional:'Optional',step_of:'of',err:'Please make a selection.',errTxt:'Please share your response.',errDual:'Please complete both fields.',female_note:'This section is composed exclusively for our female guests.'},ar:{back:'→',next:'متابعة',submit:'أكمل بورتريهي',skip:'تخطَّ',optional:'اختياري',step_of:'من',err:'يرجى اختيار إجابة.',errTxt:'يرجى مشاركة إجابتك.',errDual:'يرجى ملء الحقلين.',female_note:'هذا القسم مُعدّ حصراً لضيفاتنا من السيدات.'}};
+const T={en:{back:'←',next:'Continue',submit:'Compose My Portrait',skip:'Skip',optional:'Optional',step_of:'of',err:'Please make a selection.',errTxt:'Please share your response.',errDual:'Please complete both fields.',errOther:'Please specify your other answer.',female_note:'This section is composed exclusively for our female guests.'},ar:{back:'→',next:'متابعة',submit:'أكمل بورتريهي',skip:'تخطَّ',optional:'اختياري',step_of:'من',err:'يرجى اختيار إجابة.',errTxt:'يرجى مشاركة إجابتك.',errDual:'يرجى ملء الحقلين.',errOther:'يرجى كتابة الإجابة الأخرى.',female_note:'هذا القسم مُعدّ حصراً لضيفاتنا من السيدات.'}};
 let lang='en', step=0, answers={};
 // ---------- GOOGLE SHEETS WEB APP (YOUR PROVIDED URL) ----------
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
@@ -1900,10 +1900,49 @@ function hasReportedCondition(){
   return vals.some(v => v && v !== 'none');
 }
 
+function questionHasOtherOption(q){
+  return !!q?.options?.some(opt=>opt.val==='other');
+}
+
+function getOtherAnswerKey(questionId){
+  return `${questionId}_other`;
+}
+
+function getOtherInputPlaceholder(q){
+  return lang==='ar'
+    ? 'يرجى كتابة الإجابة الأخرى…'
+    : 'Please type your other answer…';
+}
+
+function parseStoredChoiceValue(raw){
+  const value = String(raw || '').trim();
+  if (!value) return { value:'', otherText:'' };
+  const match = value.match(/^other\s*:\s*(.+)$/i);
+  if (match) return { value:'other', otherText:match[1].trim() };
+  return { value, otherText:'' };
+}
+
+function parseStoredMultiValues(raw){
+  const parsed = { vals:[], otherText:'' };
+  String(raw || '')
+    .split(',')
+    .map(v => v.trim())
+    .filter(Boolean)
+    .forEach(token => {
+      const item = parseStoredChoiceValue(token);
+      if (item.value === 'other') {
+        parsed.vals.push('other');
+        if (item.otherText) parsed.otherText = item.otherText;
+      } else {
+        parsed.vals.push(item.value);
+      }
+    });
+  return parsed;
+}
+
 const QUESTIONS=[
   {id:'measurements', section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, checkpoint:{en:'Let us start with your medical background.',ar:'لنبدأ بتاريخك الصحي.'}, type:'dual-text', q:{en:'Your physical measurements',ar:'قياساتك الجسدية'}, sub:{en:'Used to calculate your BMI accurately.',ar:'تُستخدم لحساب مؤشر كتلة جسمك بدقة.'}, fields:[{key:'height',label:{en:'Height (cm)',ar:'الطول (سم)'},placeholder:{en:'e.g. 170',ar:'مثلاً 170'}},{key:'weight',label:{en:'Weight (kg)',ar:'الوزن (كجم)'},placeholder:{en:'e.g. 70',ar:'مثلاً 70'}}]},
   {id:'conditions', section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, type:'multi', q:{en:'Do you have any chronic conditions?',ar:'هل لديك أي أمراض مزمنة؟'}, sub:{en:'Select all that apply.',ar:'اختر كل ما ينطبق.'}, options:[{icon:'',en:'Diabetes (DM)',ar:'السكري',val:'dm'},{icon:'',en:'Hypertension (HTN)',ar:'ارتفاع ضغط الدم',val:'htn'},{icon:'',en:'Thyroid disorder',ar:'مشاكل الغدة الدرقية',val:'thyroid'},{icon:'',en:'PCOS',ar:'تكيس المبايض (PCOS)',val:'pcos'},{icon:'',en:'None',ar:'لا يوجد',val:'none'},{icon:'',en:'Other',ar:'أخرى',val:'other'}]},
-  {id:'conditions_other', condition:()=>(getAnswer('conditions')?.vals||[]).includes('other'), section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, type:'text', optional:true, q:{en:'Please specify the other condition(s)',ar:'يرجى تحديد الحالة الأخرى'}, placeholder:{en:'Describe your condition…',ar:'اذكر حالتك الصحية…'}},
   {id:'thyroid_type', condition:()=>(getAnswer('conditions')?.vals||[]).includes('thyroid'), section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, type:'single', q:{en:'Type of thyroid disorder',ar:'نوع مشكلة الغدة الدرقية'}, options:[{icon:'',en:'Hypothyroidism (underactive)',ar:'قصور الغدة الدرقية',val:'hypo'},{icon:'',en:'Hyperthyroidism (overactive)',ar:'فرط نشاط الغدة الدرقية',val:'hyper'},{icon:'',en:'Not sure',ar:'غير محدد',val:'unsure'}]},
   {id:'past_diet_regime', condition:()=>hasReportedCondition(), section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, type:'text', optional:true, q:{en:'Have you tried any diet regime to help manage this condition before?',ar:'هل جرّبت أي نظام غذائي سابقًا للمساعدة في التعامل مع هذه الحالة؟'}, sub:{en:'Only if relevant.',ar:'إذا كان ذلك ينطبق عليك.'}, placeholder:{en:'e.g. Low carb, intermittent fasting, low sodium…',ar:'مثلاً: لو كارب، صيام متقطع، قليل الملح…'}},
   {id:'medications_yn', section:{en:'MEDICAL BACKGROUND',ar:'التاريخ الصحي'}, type:'single', q:{en:'Are you currently taking any medications?',ar:'هل تتناول أي أدوية حاليًا؟'}, options:[{icon:'',en:'Yes',ar:'نعم',val:'yes'},{icon:'',en:'No',ar:'لا',val:'no'}]},
@@ -2077,8 +2116,16 @@ function buildSubmissionPayload(){
   // ── Survey answers ────────────────────────────────
   QUESTIONS.forEach((q,idx)=>{
     const ans=answers[idx];if(!ans)return;
-    if(q.type==='single')      payload[q.id]=ans.val||'';
-    else if(q.type==='multi')  payload[q.id]=(ans.vals||[]).join(', ');
+    const otherKey=getOtherAnswerKey(q.id);
+    if(q.type==='single'){
+      payload[q.id]=ans.val==='other'&&ans.otherText?`Other: ${ans.otherText}`:(ans.val||'');
+      if(questionHasOtherOption(q)) payload[otherKey]=ans.val==='other'?(ans.otherText||''):'';
+    }
+    else if(q.type==='multi'){
+      payload[q.id]=(ans.vals||[]).map(v=>v==='other'&&ans.otherText?`Other: ${ans.otherText}`:v).join(', ');
+      if(questionHasOtherOption(q)) payload[otherKey]=(ans.vals||[]).includes('other')?(ans.otherText||''):'';
+      if(q.id==='conditions') payload.conditions_other=(ans.vals||[]).includes('other')?(ans.otherText||''):'';
+    }
     else if(q.type==='text')   payload[q.id]=ans.text||'';
     else if(q.type==='dual-text'){payload.height=ans.fields?.height||'';payload.weight=ans.fields?.weight||'';}
   });
@@ -2141,6 +2188,10 @@ function renderStep(){
     html+=`<div class="options ${cols}">`;
     q.options.forEach((opt,idx)=>{const sel=isSelected(step,opt.val)?'selected':'';const mc=q.type==='multi'?'multi':'';html+=`<div class="option ${mc} ${sel}" onclick="selectOption(${idx})"><span class="option-icon">${opt.icon}</span><span class="option-text"><span class="option-en">${opt.en}</span><span class="option-ar">${opt.ar}</span></span><span class="option-indicator"></span></div>`;});
     html+='</div>';
+    const shouldShowOther=questionHasOtherOption(q)&&(q.type==='single'?answers[step]?.val==='other':(answers[step]?.vals||[]).includes('other'));
+    if(shouldShowOther){
+      html+=`<div class="other-followup"><label class="field-label">${lang==='ar'?'يرجى تحديد الإجابة الأخرى':'Please specify your other answer'}</label><input type="text" class="text-input" id="other-ans" value="${(answers[step]?.otherText||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}" placeholder="${getOtherInputPlaceholder(q)}" oninput="saveOtherText(this.value)"></div>`;
+    }
   }else if(q.type==='text'){
     const saved=answers[step]?.text||'';
     html+=`<textarea class="text-input" id="text-ans" rows="4" placeholder="${q.placeholder?.[lang]||''}" oninput="answers[${step}]={text:this.value}">${saved}</textarea>`;
@@ -2157,10 +2208,11 @@ function renderStep(){
   card.style.animation='revealUp 0.45s cubic-bezier(0.22,1,0.36,1) both';
 }
 function isSelected(s,val){if(!answers[s])return false;const q=QUESTIONS[s];if(q.type==='single')return answers[s].val===val;if(q.type==='multi')return(answers[s].vals||[]).includes(val);return false;}
-function selectOption(idx){const q=QUESTIONS[step],val=q.options[idx].val;if(q.type==='single'){answers[step]={val};document.querySelectorAll('.option').forEach(el=>el.classList.remove('selected'));document.querySelectorAll('.option')[idx].classList.add('selected');}else{if(!answers[step])answers[step]={vals:[]};let vals=answers[step].vals;if(val==='none'){vals=vals.includes('none')?[]:['none'];}else{if(vals.includes('none'))vals=vals.filter(v=>v!=='none');const i=vals.indexOf(val);i===-1?vals.push(val):vals.splice(i,1);}answers[step]={vals};document.querySelectorAll('.option').forEach((el,i)=>{el.classList.toggle('selected',(answers[step].vals||[]).includes(q.options[i].val));});}document.getElementById('err-msg').classList.remove('show');showSelectionToast();updateStoryPanel(QUESTIONS[step],totalVisible(),visibleIndex(),Math.round((visibleIndex()/totalVisible())*100));}
+function selectOption(idx){const q=QUESTIONS[step],val=q.options[idx].val,prev=answers[step]||{};if(q.type==='single'){answers[step]={val,otherText:prev.otherText||''};document.querySelectorAll('.option').forEach(el=>el.classList.remove('selected'));document.querySelectorAll('.option')[idx].classList.add('selected');}else{if(!answers[step])answers[step]={vals:[],otherText:''};let vals=[...(answers[step].vals||[])];if(val==='none'){vals=vals.includes('none')?[]:['none'];}else{if(vals.includes('none'))vals=vals.filter(v=>v!=='none');const i=vals.indexOf(val);i===-1?vals.push(val):vals.splice(i,1);}answers[step]={vals,otherText:prev.otherText||answers[step].otherText||''};document.querySelectorAll('.option').forEach((el,i)=>{el.classList.toggle('selected',(answers[step].vals||[]).includes(q.options[i].val));});}document.getElementById('err-msg').classList.remove('show');renderStep();showSelectionToast();updateStoryPanel(QUESTIONS[step],totalVisible(),visibleIndex(),Math.round((visibleIndex()/totalVisible())*100));}
+function saveOtherText(val){if(!answers[step])return;answers[step].otherText=val;}
 function saveDual(key,val){if(!answers[step])answers[step]={fields:{}};if(!answers[step].fields)answers[step].fields={};answers[step].fields[key]=val;}
 function saveText(){if(QUESTIONS[step].type==='text'){const v=document.getElementById('text-ans')?.value?.trim();if(v)answers[step]={text:v};}}
-function validateStep(){const q=QUESTIONS[step],err=document.getElementById('err-msg');if(q.optional)return true;if(q.type==='single'){if(!answers[step]?.val){err.textContent=T[lang].err;err.classList.add('show');return false}}else if(q.type==='multi'){if(!answers[step]?.vals?.length){err.textContent=T[lang].err;err.classList.add('show');return false}}else if(q.type==='text'){const v=document.getElementById('text-ans')?.value?.trim();if(!v){err.textContent=T[lang].errTxt;err.classList.add('show');return false}answers[step]={text:v};}else if(q.type==='dual-text'){const f=answers[step]?.fields||{};if(!QUESTIONS[step].fields.every(x=>f[x.key]&&String(f[x.key]).trim())){err.textContent=T[lang].errDual;err.classList.add('show');return false;}}return true;}
+function validateStep(){const q=QUESTIONS[step],err=document.getElementById('err-msg');if(q.optional)return true;if(q.type==='single'){if(!answers[step]?.val){err.textContent=T[lang].err;err.classList.add('show');return false}if(questionHasOtherOption(q)&&answers[step]?.val==='other'&&!String(answers[step]?.otherText||'').trim()){err.textContent=T[lang].errOther;err.classList.add('show');return false}}else if(q.type==='multi'){if(!answers[step]?.vals?.length){err.textContent=T[lang].err;err.classList.add('show');return false}if(questionHasOtherOption(q)&&(answers[step]?.vals||[]).includes('other')&&!String(answers[step]?.otherText||'').trim()){err.textContent=T[lang].errOther;err.classList.add('show');return false}}else if(q.type==='text'){const v=document.getElementById('text-ans')?.value?.trim();if(!v){err.textContent=T[lang].errTxt;err.classList.add('show');return false}answers[step]={text:v};}else if(q.type==='dual-text'){const f=answers[step]?.fields||{};if(!QUESTIONS[step].fields.every(x=>f[x.key]&&String(f[x.key]).trim())){err.textContent=T[lang].errDual;err.classList.add('show');return false;}}return true;}
 async function goNext(){if(!validateStep())return;const total=totalVisible();const currentVis=visibleIndex();if(currentVis===total){await submitSurvey();return;}let n=step+1;while(n<QUESTIONS.length&&!isVisible(n))n++;if(n>=QUESTIONS.length){await submitSurvey();return;}const nextQ=QUESTIONS[n];const nextSection=nextQ?.section?.en;const currentSection=QUESTIONS[step]?.section?.en;if(nextQ.checkpoint&&nextSection!==currentSection){showCheckpoint(nextQ.checkpoint[lang],nextSection,()=>{step=n;renderStep();});}else{step=n;renderStep();}}
 function skipStep(){saveText();answers[step]=answers[step]||{skipped:true};let n=step+1;while(n<QUESTIONS.length&&!isVisible(n))n++;if(n>=QUESTIONS.length)submitSurvey();else{step=n;renderStep();}}
 function goBack(){let p=step-1;while(p>=0&&!isVisible(p))p--;if(p>=0){step=p;renderStep();}}
@@ -2312,6 +2364,12 @@ function _showEditBanner(name) {
 }
 
 function _loadAnswersFromSheet(sheetRow) {
+  let rawJson = {};
+  try {
+    rawJson = JSON.parse(_normalizeSheetValue(sheetRow['Raw JSON']) || '{}');
+  } catch (_) {
+    rawJson = {};
+  }
   const colToId = {
     'Age': 'age',
     'Gender': 'gender',
@@ -2348,14 +2406,18 @@ function _loadAnswersFromSheet(sheetRow) {
 
   QUESTIONS.forEach((q, idx) => {
     const colName = Object.keys(colToId).find(k => colToId[k] === q.id);
-    if (!colName) return;
-    const raw = _normalizeSheetValue(sheetRow[colName]);
-    if (!raw) return;
+    const raw = colName ? _normalizeSheetValue(sheetRow[colName]) : '';
+    const rawOther = _normalizeSheetValue(rawJson[getOtherAnswerKey(q.id)] || '');
+    const conditionOther = q.id === 'conditions' ? _normalizeSheetValue(sheetRow['Conditions Other']) : '';
+
+    if (!raw && !rawOther && !conditionOther && q.type !== 'dual-text') return;
 
     if (q.type === 'single') {
-      answers[idx] = { val: raw };
+      const parsed = parseStoredChoiceValue(raw);
+      answers[idx] = { val: parsed.value || raw, otherText: rawOther || parsed.otherText || '' };
     } else if (q.type === 'multi') {
-      answers[idx] = { vals: raw.split(',').map(v => v.trim()).filter(Boolean) };
+      const parsed = parseStoredMultiValues(raw);
+      answers[idx] = { vals: parsed.vals, otherText: rawOther || conditionOther || parsed.otherText || '' };
     } else if (q.type === 'text') {
       answers[idx] = { text: raw };
     } else if (q.type === 'dual-text') {
