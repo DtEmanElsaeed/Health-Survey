@@ -3,14 +3,45 @@ function initSheet() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
   var headers = [
     "Timestamp", "Language",
-    "Full Name", "Email", "Phone", "DOB", "Gender (Profile)", "City", "Login Via",
-    "Age", "Gender", "Height", "Weight", "BMI",
-    "Diet", "Activity", "Meals/Day", "Breakfast", "Late Night", "TV Snack",
-    "Sweets", "Beverages", "Water", "Conditions", "Thyroid Type",
-    "Doctor Followup", "Medications", "Allergies", "Digestive",
-    "Surgery", "Surgery Details", "Sleep", "Stress", "Stress Eat",
-    "Exercise", "Goal", "Dislikes", "Weakness", "Fav Meal",
-    "Pregnant", "Period", "Past Diet", "Notes", "Raw JSON"
+    // Profile
+    "Full Name", "Email", "Phone", "DOB", "Gender (Profile)", "City", "Login Via", "Age",
+    // Measurements
+    "Height", "Weight", "BMI",
+    // Medical Background
+    "Conditions", "Conditions Other", "Thyroid Type",
+    "Medications YN", "Medications",
+    "Allergies",
+    "Digestive", "Digestive Duration",
+    "Surgery", "Surgery Details", "Injury",
+    // Daily Routine
+    "Wake Time", "Morning Intake",
+    "Breakfast YN", "Breakfast What", "Breakfast Skip Reason", "After Breakfast",
+    "Lunch Time", "Lunch What",
+    "Morning Snacks YN", "Morning Snacks What",
+    "Dinner Time", "Dinner What",
+    "After Dinner YN", "After Dinner What",
+    // Nutrition Habits
+    "Meals/Day",
+    "Eating Out Breakfast", "Eating Out Lunch", "Eating Out Dinner", "Eating Out Places",
+    "Fruits/Day", "Veggies/Day",
+    "Red Meat/Week", "Chicken/Week", "Fish/Week", "Cereal/Week",
+    // Beverages
+    "Beverages", "Beverages Amount", "Water",
+    // Lifestyle
+    "Exercise YN", "Exercise Type", "Exercise Freq", "Gym",
+    "Sleep", "Stress", "Stress Eat", "TV Snack", "TV Hours",
+    // Behavior
+    "Late Night", "Sweets",
+    // Goals
+    "Goal", "Goal Timeline",
+    // Preferences
+    "Dislikes", "Diet Type",
+    // Open
+    "Past Diet Barrier", "Notes",
+    // Her Portrait
+    "Pregnant", "Period",
+    // Raw
+    "Raw JSON"
   ];
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
 }
@@ -19,6 +50,7 @@ function buildRow(data) {
   return [
     new Date(),
     data.language || "",
+    // Profile
     data.full_name || "",
     data.email || "",
     data.phone || "",
@@ -27,39 +59,79 @@ function buildRow(data) {
     data.city || "",
     data.login_via || "",
     data.age || "",
-    data.gender || "",
+    // Measurements
     data.height || "",
     data.weight || "",
     data.bmi || "",
-    data.diet || "",
-    data.activity || "",
-    data.meals || "",
-    data.breakfast || "",
-    data.latenight || "",
-    data.tvsnack || "",
-    data.sweets || "",
-    Array.isArray(data.beverages) ? data.beverages.join(", ") : (data.beverages || ""),
-    data.water || "",
-    Array.isArray(data.conditions) ? data.conditions.join(", ") : (data.conditions || ""),
+    // Medical
+    data.conditions || "",
+    data.conditions_other || "",
     data.thyroid_type || "",
-    data.doctor_followup || "",
+    data.medications_yn || "",
     data.medications || "",
     data.allergies || "",
-    Array.isArray(data.digestive) ? data.digestive.join(", ") : (data.digestive || ""),
+    data.digestive || "",
+    data.digestive_duration || "",
     data.surgery || "",
     data.surgery_details || "",
+    data.injury || "",
+    // Daily Routine
+    data.wake_time || "",
+    data.morning_intake || "",
+    data.breakfast_yn || "",
+    data.breakfast_what || "",
+    data.breakfast_skip_reason || "",
+    data.after_breakfast || "",
+    data.lunch_time || "",
+    data.lunch_what || "",
+    data.morning_snacks_yn || "",
+    data.morning_snacks_what || "",
+    data.dinner_time || "",
+    data.dinner_what || "",
+    data.after_dinner_yn || "",
+    data.after_dinner_what || "",
+    // Nutrition Habits
+    data.meals || "",
+    data.eating_out_breakfast || "",
+    data.eating_out_lunch || "",
+    data.eating_out_dinner || "",
+    data.eating_out_places || "",
+    data.fruits_daily || "",
+    data.veggies_daily || "",
+    data.red_meat_weekly || "",
+    data.chicken_weekly || "",
+    data.fish_weekly || "",
+    data.cereal_weekly || "",
+    // Beverages
+    data.beverages || "",
+    data.beverages_amount || "",
+    data.water || "",
+    // Lifestyle
+    data.exercise_yn || "",
+    data.exercise_type || "",
+    data.exercise || "",
+    data.gym || "",
     data.sleep || "",
     data.stress || "",
     data.stress_eat || "",
-    data.exercise || "",
+    data.tvsnack || "",
+    data.tv_hours || "",
+    // Behavior
+    data.latenight || "",
+    data.sweets || "",
+    // Goals
     data.goal || "",
+    data.goal_timeline || "",
+    // Preferences
     data.dislikes || "",
-    data.weakness || "",
-    data.fav_meal || "",
+    data.diet_type || "",
+    // Open
+    data.past_diet_barrier || "",
+    data.notes || "",
+    // Her Portrait
     data.pregnant || "",
     data.period || "",
-    data.past_diet || "",
-    data.notes || "",
+    // Raw
     JSON.stringify(data)
   ];
 }
