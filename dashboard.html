@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The First Step — Dietitian Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4efe4;
+  --paper:#fbf7ef;
+  --paper-strong:#fffdfa;
+  --line:rgba(126,100,42,.18);
+  --text:#292418;
+  --muted:#786d57;
+  --forest:#304d23;
+  --forest-soft:#49693a;
+  --gold:#b18944;
+  --gold-soft:rgba(177,137,68,.14);
+  --shadow:0 18px 50px rgba(53,39,16,.09);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%}
+body{
+  font-family:'Inter',sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(177,137,68,.18), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(48,77,35,.10), transparent 28%),
+    linear-gradient(180deg, #f9f4ea 0%, #f3ede1 100%);
+}
+.page{
+  width:min(1600px, calc(100vw - 28px));
+  margin:14px auto;
+  min-height:calc(100svh - 28px);
+  border:1px solid rgba(95,73,25,.09);
+  border-radius:24px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,255,255,.78)),
+    radial-gradient(circle at 10% 15%, rgba(177,137,68,.10), transparent 22%),
+    radial-gradient(circle at 90% 20%, rgba(48,77,35,.08), transparent 24%),
+    var(--paper);
+  box-shadow:var(--shadow);
+  padding:28px;
+}
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
+  gap:22px;
+  align-items:stretch;
+  margin-bottom:22px;
+}
+.hero-card,.panel,.table-panel,.empty-state{
+  border:1px solid var(--line);
+  border-radius:26px;
+  background:linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,252,247,.92));
+  box-shadow:0 12px 28px rgba(58,44,18,.05);
+}
+.hero-card{
+  padding:32px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(177,137,68,.14), transparent 22%),
+    radial-gradient(circle at 82% 82%, rgba(48,77,35,.10), transparent 26%);
+  pointer-events:none;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  font-size:12px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:18px;
+}
+.eyebrow::before,.eyebrow::after{
+  content:"";
+  width:42px;
+  height:1px;
+  background:currentColor;
+  opacity:.6;
+}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(38px,4.2vw,64px);
+  line-height:.95;
+  margin:0 0 16px;
+  max-width:10ch;
+}
+.hero p{
+  margin:0;
+  max-width:58ch;
+  font-size:18px;
+  line-height:1.75;
+  color:var(--muted);
+}
+.hero-side{
+  padding:26px;
+  display:grid;
+  gap:14px;
+}
+.hero-side-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.brand{
+  font-size:13px;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.last-sync{
+  color:var(--muted);
+  font-size:13px;
+}
+.sync-btn{
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--forest),var(--forest-soft));
+  color:#fff;
+  padding:12px 18px;
+  font:600 14px 'Inter',sans-serif;
+  cursor:pointer;
+  box-shadow:0 12px 20px rgba(48,77,35,.18);
+}
+.sync-btn:disabled{opacity:.65;cursor:wait}
+.quick-list{
+  display:grid;
+  gap:10px;
+}
+.quick-item{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px 16px;
+  background:rgba(255,252,247,.82);
+}
+.quick-k{
+  font-size:12px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:8px;
+}
+.quick-v{
+  font-size:16px;
+  color:var(--text);
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:22px;
+}
+.stat-card{
+  padding:20px 18px;
+}
+.stat-label{
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:12px;
+}
+.stat-value{
+  font-size:36px;
+  font-weight:700;
+  color:var(--forest);
+  line-height:1;
+}
+.stat-sub{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+}
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:minmax(340px,.95fr) minmax(0,1.55fr);
+  gap:20px;
+}
+.panel{
+  padding:20px;
+}
+.panel-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+.panel-title h2{
+  margin:0;
+  font-size:22px;
+  font-family:'Playfair Display',serif;
+  font-weight:600;
+}
+.panel-title span{
+  color:var(--muted);
+  font-size:14px;
+}
+.filters{
+  display:grid;
+  grid-template-columns:1.25fr repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.input,.select{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.82);
+  color:var(--text);
+  font:500 14px 'Inter',sans-serif;
+  padding:14px 15px;
+  outline:none;
+}
+.input:focus,.select:focus{
+  border-color:rgba(48,77,35,.38);
+  box-shadow:0 0 0 4px rgba(48,77,35,.08);
+}
+.patient-list{
+  display:grid;
+  gap:10px;
+  max-height:760px;
+  overflow:auto;
+  padding-right:4px;
+}
+.patient-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,252,247,.84);
+  padding:16px;
+  cursor:pointer;
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.patient-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(48,77,35,.24);
+  box-shadow:0 10px 18px rgba(52,42,18,.08);
+}
+.patient-card.active{
+  border-color:rgba(48,77,35,.4);
+  box-shadow:0 0 0 4px rgba(48,77,35,.08);
+}
+.patient-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.patient-name{
+  font-size:18px;
+  font-weight:700;
+  margin:0 0 4px;
+}
+.patient-email,.patient-meta{
+  color:var(--muted);
+  font-size:13px;
+}
+.patient-chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:var(--gold-soft);
+  color:#6f5628;
+  font-size:12px;
+  font-weight:600;
+}
+.table-panel{
+  padding:24px;
+  min-height:760px;
+}
+.detail-shell{
+  display:grid;
+  gap:18px;
+}
+.detail-hero{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.detail-name{
+  margin:0 0 8px;
+  font-size:34px;
+  font-family:'Playfair Display',serif;
+  line-height:1;
+}
+.detail-sub{
+  color:var(--muted);
+  line-height:1.7;
+  font-size:15px;
+}
+.detail-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+.detail-card{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(255,252,247,.88);
+  padding:18px;
+}
+.detail-card h3{
+  margin:0 0 14px;
+  font-size:16px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.detail-row{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  padding:10px 0;
+  border-bottom:1px dashed rgba(126,100,42,.18);
+}
+.detail-row:last-child{border-bottom:none;padding-bottom:0}
+.detail-row:first-of-type{padding-top:0}
+.detail-key{color:var(--muted);font-size:14px}
+.detail-val{text-align:right;font-weight:600;font-size:14px;max-width:58%}
+.notes-box{
+  border:1px dashed rgba(126,100,42,.28);
+  border-radius:18px;
+  padding:16px;
+  background:rgba(255,255,255,.6);
+  color:var(--text);
+  line-height:1.75;
+  white-space:pre-wrap;
+}
+.empty-state{
+  min-height:760px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:26px;
+}
+.empty-state h3{
+  margin:0 0 10px;
+  font-family:'Playfair Display',serif;
+  font-size:34px;
+}
+.empty-state p{
+  margin:0;
+  max-width:46ch;
+  color:var(--muted);
+  line-height:1.8;
+}
+.danger{
+  color:#8f2c2c;
+  background:rgba(154,40,40,.08);
+  border:1px solid rgba(154,40,40,.16);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:14px;
+}
+@media (max-width: 1180px){
+  .hero,
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
+  .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width: 760px){
+  .page{
+    width:min(100vw, calc(100vw - 12px));
+    margin:6px auto;
+    min-height:calc(100svh - 12px);
+    padding:16px;
+    border-radius:18px;
+  }
+  .hero-card,.hero-side,.panel,.table-panel,.empty-state{
+    border-radius:20px;
+  }
+  .hero-card{
+    padding:24px 18px;
+  }
+  .hero h1{
+    font-size:40px;
+  }
+  .stats,
+  .filters,
+  .detail-grid{
+    grid-template-columns:1fr;
+  }
+  .detail-hero,
+  .patient-head,
+  .panel-title{
+    flex-direction:column;
+  }
+  .detail-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .detail-val{
+    max-width:100%;
+    text-align:left;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Dietitian Interface</div>
+        <h1>The First Step Dashboard</h1>
+        <p>See all patients in one place, review their medical and nutrition details, and spot patterns quickly through a calm clinical overview.</p>
+      </div>
+      <div class="hero-side hero-card">
+        <div class="hero-side-top">
+          <div>
+            <div class="brand">The First Step</div>
+            <div class="last-sync" id="last-sync">Waiting for first sync…</div>
+          </div>
+          <button class="sync-btn" id="refresh-btn" type="button">Refresh data</button>
+        </div>
+        <div class="quick-list">
+          <div class="quick-item">
+            <div class="quick-k">What this page does</div>
+            <div class="quick-v">Reads all submitted patient rows from your Google Sheet and turns them into a searchable patient dashboard.</div>
+          </div>
+          <div class="quick-item">
+            <div class="quick-k">Best use</div>
+            <div class="quick-v">Search by name, filter by language or goal, then open any patient to review profile, medical context, lifestyle, and goals.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" id="stats-grid">
+      <div class="panel stat-card"><div class="stat-label">Patients</div><div class="stat-value">—</div><div class="stat-sub">Total records loaded</div></div>
+      <div class="panel stat-card"><div class="stat-label">Average BMI</div><div class="stat-value">—</div><div class="stat-sub">Across available measurements</div></div>
+      <div class="panel stat-card"><div class="stat-label">Top Goal</div><div class="stat-value">—</div><div class="stat-sub">Most common nutrition goal</div></div>
+      <div class="panel stat-card"><div class="stat-label">High Stress</div><div class="stat-value">—</div><div class="stat-sub">Patients reporting high stress</div></div>
+    </section>
+
+    <section class="dashboard-grid">
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Patients</h2>
+          <span id="patient-count">0 visible</span>
+        </div>
+        <div id="dashboard-error" class="danger" style="display:none"></div>
+        <div class="filters">
+          <input class="input" id="search-input" type="search" placeholder="Search name, email, phone, city…" />
+          <select class="select" id="language-filter">
+            <option value="">All languages</option>
+          </select>
+          <select class="select" id="goal-filter">
+            <option value="">All goals</option>
+          </select>
+          <select class="select" id="login-filter">
+            <option value="">All login types</option>
+          </select>
+        </div>
+        <div class="patient-list" id="patient-list"></div>
+      </div>
+
+      <div class="table-panel" id="details-host">
+        <div class="empty-state">
+          <div>
+            <h3>Select a patient</h3>
+            <p>The selected patient’s submission details, medical context, daily routine, and key notes will appear here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
+
+let allPatients = [];
+let filteredPatients = [];
+let selectedPatientEmail = "";
+
+const els = {
+  statsGrid: document.getElementById('stats-grid'),
+  patientCount: document.getElementById('patient-count'),
+  patientList: document.getElementById('patient-list'),
+  detailsHost: document.getElementById('details-host'),
+  error: document.getElementById('dashboard-error'),
+  lastSync: document.getElementById('last-sync'),
+  refreshBtn: document.getElementById('refresh-btn'),
+  search: document.getElementById('search-input'),
+  language: document.getElementById('language-filter'),
+  goal: document.getElementById('goal-filter'),
+  login: document.getElementById('login-filter')
+};
+
+function norm(value){
+  return value == null ? "" : String(value).trim();
+}
+
+function safeLower(value){
+  return norm(value).toLowerCase();
+}
+
+function titleCase(value){
+  const raw = norm(value);
+  if(!raw) return "—";
+  return raw
+    .replace(/[_-]+/g, " ")
+    .split(/\s+/)
+    .map(part => part ? part[0].toUpperCase() + part.slice(1) : "")
+    .join(" ");
+}
+
+function fmtNumber(value, digits = 1){
+  const num = parseFloat(value);
+  return Number.isFinite(num) ? num.toFixed(digits) : "—";
+}
+
+function splitList(value){
+  return norm(value)
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function fmtDate(value){
+  const raw = norm(value);
+  if(!raw) return "—";
+  const date = new Date(raw);
+  if(Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat(undefined, { year:"numeric", month:"short", day:"numeric" }).format(date);
+}
+
+function fmtTimestamp(value){
+  const raw = norm(value);
+  if(!raw) return "—";
+  const date = new Date(raw);
+  if(Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat(undefined, {
+    year:"numeric",
+    month:"short",
+    day:"numeric",
+    hour:"numeric",
+    minute:"2-digit"
+  }).format(date);
+}
+
+function oneOf(row, keys){
+  for(const key of keys){
+    const value = norm(row[key]);
+    if(value) return value;
+  }
+  return "";
+}
+
+function buildStatCards(rows){
+  const bmiValues = rows.map(r => parseFloat(r["BMI"])).filter(n => Number.isFinite(n));
+  const highStress = rows.filter(r => safeLower(r["Stress"]) === "high").length;
+  const topGoal = mostCommon(rows.map(r => norm(r["Goal"])).filter(Boolean));
+  const recentPatients = rows.filter(r => {
+    const raw = norm(r["Timestamp"]);
+    if(!raw) return false;
+    const date = new Date(raw);
+    if(Number.isNaN(date.getTime())) return false;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return date.getTime() >= sevenDaysAgo;
+  }).length;
+
+  const cards = [
+    { label:"Patients", value:String(rows.length), sub:`${recentPatients} added in the last 7 days` },
+    { label:"Average BMI", value:bmiValues.length ? (bmiValues.reduce((a,b)=>a+b,0) / bmiValues.length).toFixed(1) : "—", sub:`${bmiValues.length} records with BMI` },
+    { label:"Top Goal", value:topGoal ? titleCase(topGoal) : "—", sub:"Most common nutrition goal" },
+    { label:"High Stress", value:rows.length ? `${Math.round((highStress / rows.length) * 100)}%` : "—", sub:`${highStress} patient${highStress === 1 ? "" : "s"} report high stress` }
+  ];
+
+  els.statsGrid.innerHTML = cards.map(card => `
+    <div class="panel stat-card">
+      <div class="stat-label">${card.label}</div>
+      <div class="stat-value">${card.value}</div>
+      <div class="stat-sub">${card.sub}</div>
+    </div>
+  `).join("");
+}
+
+function mostCommon(values){
+  if(!values.length) return "";
+  const counts = new Map();
+  values.forEach(value => counts.set(value, (counts.get(value) || 0) + 1));
+  return [...counts.entries()].sort((a,b) => b[1] - a[1])[0][0];
+}
+
+function uniqueValues(rows, key){
+  return [...new Set(rows.map(row => norm(row[key])).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+}
+
+function populateFilters(rows){
+  const configs = [
+    { el: els.language, key: "Language", placeholder: "All languages" },
+    { el: els.goal, key: "Goal", placeholder: "All goals" },
+    { el: els.login, key: "Login Via", placeholder: "All login types" }
+  ];
+
+  configs.forEach(({ el, key, placeholder }) => {
+    const current = el.value;
+    const options = uniqueValues(rows, key);
+    el.innerHTML = `<option value="">${placeholder}</option>` + options.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(titleCase(value))}</option>`).join("");
+    el.value = options.includes(current) ? current : "";
+  });
+}
+
+function filterPatients(){
+  const search = safeLower(els.search.value);
+  const language = els.language.value;
+  const goal = els.goal.value;
+  const login = els.login.value;
+
+  filteredPatients = allPatients.filter(row => {
+    const haystack = [
+      row["Full Name"],
+      row["Email"],
+      row["Phone"],
+      row["City"],
+      row["Goal"],
+      row["Conditions"]
+    ].map(safeLower).join(" ");
+
+    return (!search || haystack.includes(search))
+      && (!language || norm(row["Language"]) === language)
+      && (!goal || norm(row["Goal"]) === goal)
+      && (!login || norm(row["Login Via"]) === login);
+  });
+
+  renderPatientList();
+
+  if(filteredPatients.length && !filteredPatients.some(row => norm(row["Email"]) === selectedPatientEmail)){
+    selectedPatientEmail = norm(filteredPatients[0]["Email"]);
+  }
+
+  if(filteredPatients.length){
+    renderDetails(filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail) || filteredPatients[0]);
+  } else {
+    selectedPatientEmail = "";
+    els.detailsHost.innerHTML = `
+      <div class="empty-state">
+        <div>
+          <h3>No matching patients</h3>
+          <p>Try clearing one of the filters or broadening your search to bring patient records back into view.</p>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderPatientList(){
+  els.patientCount.textContent = `${filteredPatients.length} visible`;
+  els.patientList.innerHTML = filteredPatients.map(row => {
+    const email = norm(row["Email"]);
+    const conditions = splitList(row["Conditions"]).slice(0, 3);
+    const chips = [
+      norm(row["Goal"]) && titleCase(row["Goal"]),
+      norm(row["Language"]) && norm(row["Language"]).toUpperCase(),
+      norm(row["Login Via"]),
+      ...conditions.map(titleCase)
+    ].filter(Boolean).slice(0, 5);
+
+    return `
+      <button class="patient-card ${email === selectedPatientEmail ? "active" : ""}" type="button" data-email="${escapeAttr(email)}">
+        <div class="patient-head">
+          <div>
+            <div class="patient-name">${escapeHtml(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}</div>
+            <div class="patient-email">${escapeHtml(norm(row["Email"]) || "No email provided")}</div>
+          </div>
+          <div class="patient-meta">${escapeHtml(fmtTimestamp(row["Timestamp"]))}</div>
+        </div>
+        <div class="patient-meta" style="margin-top:8px">${escapeHtml(oneOf(row, ["Phone", "City"]) || "No extra profile details")}</div>
+        <div class="patient-chip-row">
+          ${chips.map(chip => `<span class="chip">${escapeHtml(chip)}</span>`).join("")}
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  [...els.patientList.querySelectorAll('.patient-card')].forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedPatientEmail = btn.dataset.email || "";
+      renderPatientList();
+      renderDetails(filteredPatients.find(row => norm(row["Email"]) === selectedPatientEmail));
+    });
+  });
+}
+
+function renderDetails(row){
+  if(!row){
+    els.detailsHost.innerHTML = `
+      <div class="empty-state">
+        <div>
+          <h3>Select a patient</h3>
+          <p>The selected patient’s submission details, medical context, daily routine, and key notes will appear here.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const conditions = splitList(row["Conditions"]).map(titleCase).join(", ") || "None noted";
+  const digestive = splitList(row["Digestive"]).map(titleCase).join(", ") || "None noted";
+  const beverages = splitList(row["Beverages"]).map(titleCase).join(", ") || "—";
+  const eatingOut = [row["Eating Out Breakfast"], row["Eating Out Lunch"], row["Eating Out Dinner"]].map(norm).filter(Boolean).join(" / ") || "—";
+
+  els.detailsHost.innerHTML = `
+    <div class="detail-shell">
+      <div class="detail-hero">
+        <div>
+          <div class="eyebrow" style="margin-bottom:10px">Patient record</div>
+          <h2 class="detail-name">${escapeHtml(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}</h2>
+          <div class="detail-sub">
+            ${escapeHtml(norm(row["Email"]) || "No email")} ·
+            ${escapeHtml(norm(row["Phone"]) || "No phone")} ·
+            ${escapeHtml(norm(row["City"]) || "No city")}<br>
+            Last saved ${escapeHtml(fmtTimestamp(row["Timestamp"]))}
+          </div>
+        </div>
+        <div class="detail-tags">
+          ${[
+            norm(row["Goal"]) && titleCase(row["Goal"]),
+            norm(row["Language"]) && norm(row["Language"]).toUpperCase(),
+            norm(row["Login Via"]),
+            norm(row["BMI"]) && `BMI ${fmtNumber(row["BMI"])}`
+          ].filter(Boolean).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-card">
+          <h3>Profile</h3>
+          ${detailRow("Date of birth", fmtDate(row["DOB"]))}
+          ${detailRow("Gender", titleCase(row["Gender (Profile)"]))}
+          ${detailRow("Age range", row["Age"] || "—")}
+          ${detailRow("Height / Weight", `${norm(row["Height"]) || "—"} cm / ${norm(row["Weight"]) || "—"} kg`)}
+          ${detailRow("BMI", fmtNumber(row["BMI"]))}
+        </div>
+
+        <div class="detail-card">
+          <h3>Medical Context</h3>
+          ${detailRow("Conditions", conditions)}
+          ${detailRow("Condition details", row["Conditions Other"] || "—")}
+          ${detailRow("Thyroid type", titleCase(row["Thyroid Type"]))}
+          ${detailRow("Medications", row["Medications"] || "—")}
+          ${detailRow("Digestive issues", digestive)}
+          ${detailRow("Surgery", titleCase(row["Surgery"]))}
+        </div>
+
+        <div class="detail-card">
+          <h3>Lifestyle</h3>
+          ${detailRow("Wake time", row["Wake Time"] || "—")}
+          ${detailRow("Meals / day", row["Meals/Day"] || "—")}
+          ${detailRow("Water", row["Water"] || "—")}
+          ${detailRow("Sleep", row["Sleep"] || "—")}
+          ${detailRow("Stress", titleCase(row["Stress"]))}
+          ${detailRow("Exercise", oneOf(row, ["Exercise Freq", "Exercise YN"]) || "—")}
+        </div>
+
+        <div class="detail-card">
+          <h3>Nutrition Goals</h3>
+          ${detailRow("Main goal", titleCase(row["Goal"]))}
+          ${detailRow("Goal timeline", row["Goal Timeline"] || "—")}
+          ${detailRow("Past diet regime", row["Past Diet Regime"] || "—")}
+          ${detailRow("Diet barrier", row["Past Diet Barrier"] || "—")}
+          ${detailRow("Dislikes", row["Dislikes"] || "—")}
+          ${detailRow("Eating out", eatingOut)}
+        </div>
+
+        <div class="detail-card">
+          <h3>Food Pattern</h3>
+          ${detailRow("Breakfast", row["Breakfast What"] || titleCase(row["Breakfast YN"]))}
+          ${detailRow("Lunch", row["Lunch What"] || "—")}
+          ${detailRow("Dinner", row["Dinner What"] || "—")}
+          ${detailRow("Beverages", beverages)}
+          ${detailRow("Beverage amount", row["Beverages Amount"] || "—")}
+          ${detailRow("Sweets", row["Sweets"] || "—")}
+        </div>
+
+        <div class="detail-card">
+          <h3>Additional Notes</h3>
+          <div class="notes-box">${escapeHtml(oneOf(row, ["Notes", "Raw JSON"]) || "No extra notes shared.")}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function detailRow(key, value){
+  return `<div class="detail-row"><div class="detail-key">${escapeHtml(key)}</div><div class="detail-val">${escapeHtml(value || "—")}</div></div>`;
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escapeAttr(value){
+  return escapeHtml(value).replace(/"/g, "&quot;");
+}
+
+async function loadDashboard(){
+  els.refreshBtn.disabled = true;
+  els.error.style.display = "none";
+
+  try {
+    const response = await fetch(WEB_APP_URL, { method: "GET" });
+    const payload = await response.json();
+    if(!payload || payload.success === false){
+      throw new Error(payload?.message || "Unable to load dashboard data.");
+    }
+
+    allPatients = Array.isArray(payload.data) ? payload.data.filter(row => norm(row["Email"]) || norm(row["Full Name"])) : [];
+    allPatients.sort((a, b) => {
+      const da = new Date(norm(a["Timestamp"]));
+      const db = new Date(norm(b["Timestamp"]));
+      return (Number.isNaN(db.getTime()) ? 0 : db.getTime()) - (Number.isNaN(da.getTime()) ? 0 : da.getTime());
+    });
+
+    buildStatCards(allPatients);
+    populateFilters(allPatients);
+    filteredPatients = [...allPatients];
+    selectedPatientEmail = filteredPatients[0] ? norm(filteredPatients[0]["Email"]) : "";
+    renderPatientList();
+    renderDetails(filteredPatients[0]);
+    els.lastSync.textContent = `Last sync ${new Intl.DateTimeFormat(undefined, { hour:"numeric", minute:"2-digit", day:"numeric", month:"short" }).format(new Date())}`;
+  } catch (error) {
+    els.error.textContent = error.message || "Something went wrong while loading patient data.";
+    els.error.style.display = "block";
+    els.patientList.innerHTML = "";
+    els.detailsHost.innerHTML = `
+      <div class="empty-state">
+        <div>
+          <h3>Dashboard unavailable</h3>
+          <p>We could not load the patient list from the sheet right now. Try refreshing the data or check the Apps Script deployment.</p>
+        </div>
+      </div>
+    `;
+  } finally {
+    els.refreshBtn.disabled = false;
+  }
+}
+
+els.search.addEventListener('input', filterPatients);
+els.language.addEventListener('change', filterPatients);
+els.goal.addEventListener('change', filterPatients);
+els.login.addEventListener('change', filterPatients);
+els.refreshBtn.addEventListener('click', loadDashboard);
+
+loadDashboard();
+</script>
+</body>
+</html>
