@@ -23,7 +23,7 @@ var HEADERS = [
   "Sleep", "Stress", "Stress Eat", "TV Snack", "TV Hours",
   "Late Night", "Sweets",
   "Goal", "Goal Timeline",
-  "Dislikes", "Diet Type",
+  "Dislikes", "Past Diet Regime",
   "Past Diet Barrier", "Notes",
   "Pregnant", "Period",
   "Raw JSON"
@@ -150,7 +150,7 @@ function buildRow(data) {
     data.goal_timeline || "",
     // Preferences
     data.dislikes || "",
-    data.diet_type || "",
+    data.past_diet_regime || "",
     // Open
     data.past_diet_barrier || "",
     data.notes || "",
