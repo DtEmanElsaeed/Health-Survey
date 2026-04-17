@@ -929,11 +929,15 @@ body{
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
 const DASHBOARD_AUTH_KEY = "the-first-step-dashboard-auth";
 const DASHBOARD_USER = "admin";
 const DASHBOARD_PASS = "adnim123";
+const AES_SECRET_KEY = "Eman";
+const PLAINTEXT_FIELDS = new Set(["language", "email", "login_via", "mode", "action", "deleted", "welcome_name", "patient_id"]);
 
 let allPatients = [];
 let filteredPatients = [];
@@ -1005,6 +1009,44 @@ function tryLogin(){
 
 function norm(value){
   return value == null ? "" : String(value).trim();
+}
+
+function decryptValue(value){
+  const raw = value == null ? "" : String(value);
+  if(!raw || !raw.startsWith("enc:")) return raw;
+  try{
+    const bytes = CryptoJS.AES.decrypt(raw.slice(4), AES_SECRET_KEY);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    return decrypted || raw;
+  }catch(_){
+    return raw;
+  }
+}
+
+function decryptRawJsonValue(value){
+  const raw = value == null ? "" : String(value);
+  if(!raw) return raw;
+  try{
+    const parsed = JSON.parse(raw);
+    const decrypted = {};
+    Object.keys(parsed || {}).forEach(key => {
+      decrypted[key] = PLAINTEXT_FIELDS.has(key) ? parsed[key] : decryptValue(parsed[key]);
+    });
+    return JSON.stringify(decrypted);
+  }catch(_){
+    return raw;
+  }
+}
+
+function decryptRowObject(row){
+  const decrypted = {};
+  Object.keys(row || {}).forEach(key => {
+    const value = row[key];
+    if(key === "Raw JSON") decrypted[key] = decryptRawJsonValue(value);
+    else if(key === "Email" || key === "Language" || key === "Login Via" || key === "Deleted" || key === "Timestamp" || key === "Patient ID") decrypted[key] = value;
+    else decrypted[key] = decryptValue(value);
+  });
+  return decrypted;
 }
 
 function safeLower(value){
@@ -1242,6 +1284,7 @@ function renderDetails(row){
           <div class="eyebrow" style="margin-bottom:10px">Patient record</div>
           <h2 class="detail-name">${escapeHtml(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}</h2>
           <div class="detail-sub">
+            ID ${escapeHtml(norm(row["Patient ID"]) || "—")} ·
             ${escapeHtml(norm(row["Email"]) || "No email")} ·
             ${escapeHtml(norm(row["Phone"]) || "No phone")} ·
             ${escapeHtml(norm(row["City"]) || "No city")}<br>
@@ -1268,6 +1311,7 @@ function renderDetails(row){
       <div class="detail-grid">
         <div class="detail-card">
           <h3>Profile</h3>
+          ${detailRow("Patient ID", row["Patient ID"] || "—")}
           ${detailRow("Date of birth", fmtDate(row["DOB"]))}
           ${detailRow("Gender", titleCase(row["Gender (Profile)"]))}
           ${detailRow("Age range", row["Age"] || "—")}
@@ -1339,8 +1383,9 @@ async function openPatientDetails(email){
     const response = await fetch(WEB_APP_URL + '?email=' + encodeURIComponent(email), { method: 'GET' });
     const payload = await response.json();
     if(payload && payload.found && payload.data){
-      patientDetailsCache[email] = payload.data;
-      renderDetails(payload.data);
+      const decryptedRow = decryptRowObject(payload.data);
+      patientDetailsCache[email] = decryptedRow;
+      renderDetails(decryptedRow);
       return;
     }
   }catch(_){}
@@ -1355,7 +1400,19 @@ function cleanReportValue(value){
   return norm(value) || "—";
 }
 
+function isArabicContentRow(row){
+  const language = norm(row["Language"]).toLowerCase();
+  if (language === "ar") return true;
+  const text = [
+    row["Full Name"], row["City"], row["Notes"], row["Conditions Other"],
+    row["Past Diet Barrier"], row["Past Diet Regime"], row["Breakfast What"],
+    row["Lunch What"], row["Dinner What"]
+  ].map(norm).join(" ");
+  return /[\u0600-\u06FF]/.test(text);
+}
+
 function buildPatientReportSections(row){
+  const isArabic = isArabicContentRow(row);
   const conditions = splitList(row["Conditions"]).map(titleCase).join(", ") || "None noted";
   const digestive = splitList(row["Digestive"]).map(titleCase).join(", ") || "None noted";
   const beverages = splitList(row["Beverages"]).map(titleCase).join(", ") || "—";
@@ -1363,69 +1420,70 @@ function buildPatientReportSections(row){
 
   return [
     {
-      title: "Profile",
+      title: isArabic ? "الملف الشخصي" : "Profile",
       rows: [
-        ["Full name", oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"],
-        ["Email", cleanReportValue(row["Email"])],
-        ["Phone", cleanReportValue(row["Phone"])],
-        ["City", cleanReportValue(row["City"])],
-        ["Date of birth", fmtDate(row["DOB"])],
-        ["Gender", titleCase(row["Gender (Profile)"])],
-        ["Age range", cleanReportValue(row["Age"])],
-        ["Height / Weight", `${cleanReportValue(row["Height"])} cm / ${cleanReportValue(row["Weight"])} kg`],
+        [isArabic ? "رقم المريض" : "Patient ID", cleanReportValue(row["Patient ID"])],
+        [isArabic ? "الاسم" : "Full name", oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"],
+        [isArabic ? "البريد الإلكتروني" : "Email", cleanReportValue(row["Email"])],
+        [isArabic ? "الهاتف" : "Phone", cleanReportValue(row["Phone"])],
+        [isArabic ? "المدينة" : "City", cleanReportValue(row["City"])],
+        [isArabic ? "تاريخ الميلاد" : "Date of birth", fmtDate(row["DOB"])],
+        [isArabic ? "الجنس" : "Gender", titleCase(row["Gender (Profile)"])],
+        [isArabic ? "الفئة العمرية" : "Age range", cleanReportValue(row["Age"])],
+        [isArabic ? "الطول / الوزن" : "Height / Weight", `${cleanReportValue(row["Height"])} cm / ${cleanReportValue(row["Weight"])} kg`],
         ["BMI", fmtNumber(row["BMI"])]
       ]
     },
     {
-      title: "Medical Context",
+      title: isArabic ? "السياق الطبي" : "Medical Context",
       rows: [
-        ["Conditions", conditions],
-        ["Condition details", cleanReportValue(row["Conditions Other"])],
-        ["Thyroid type", titleCase(row["Thyroid Type"])],
-        ["Medications", cleanReportValue(row["Medications"])],
-        ["Digestive issues", digestive],
-        ["Surgery", titleCase(row["Surgery"])],
-        ["Surgery details", cleanReportValue(row["Surgery Details"])]
+        [isArabic ? "الحالات المرضية" : "Conditions", conditions],
+        [isArabic ? "تفاصيل الحالة" : "Condition details", cleanReportValue(row["Conditions Other"])],
+        [isArabic ? "نوع اضطراب الغدة" : "Thyroid type", titleCase(row["Thyroid Type"])],
+        [isArabic ? "الأدوية" : "Medications", cleanReportValue(row["Medications"])],
+        [isArabic ? "مشاكل الهضم" : "Digestive issues", digestive],
+        [isArabic ? "العمليات" : "Surgery", titleCase(row["Surgery"])],
+        [isArabic ? "تفاصيل العملية" : "Surgery details", cleanReportValue(row["Surgery Details"])]
       ]
     },
     {
-      title: "Lifestyle",
+      title: isArabic ? "نمط الحياة" : "Lifestyle",
       rows: [
-        ["Wake time", cleanReportValue(row["Wake Time"])],
-        ["Meals / day", cleanReportValue(row["Meals/Day"])],
-        ["Water", cleanReportValue(row["Water"])],
-        ["Sleep", cleanReportValue(row["Sleep"])],
-        ["Stress", titleCase(row["Stress"])],
-        ["Stress eating", titleCase(row["Stress Eat"])],
-        ["Exercise", oneOf(row, ["Exercise Freq", "Exercise YN"]) || "—"]
+        [isArabic ? "وقت الاستيقاظ" : "Wake time", cleanReportValue(row["Wake Time"])],
+        [isArabic ? "عدد الوجبات" : "Meals / day", cleanReportValue(row["Meals/Day"])],
+        [isArabic ? "الماء" : "Water", cleanReportValue(row["Water"])],
+        [isArabic ? "النوم" : "Sleep", cleanReportValue(row["Sleep"])],
+        [isArabic ? "التوتر" : "Stress", titleCase(row["Stress"])],
+        [isArabic ? "الأكل مع التوتر" : "Stress eating", titleCase(row["Stress Eat"])],
+        [isArabic ? "الرياضة" : "Exercise", oneOf(row, ["Exercise Freq", "Exercise YN"]) || "—"]
       ]
     },
     {
-      title: "Nutrition Goals",
+      title: isArabic ? "الأهداف الغذائية" : "Nutrition Goals",
       rows: [
-        ["Main goal", titleCase(row["Goal"])],
-        ["Goal timeline", cleanReportValue(row["Goal Timeline"])],
-        ["Past diet regime", cleanReportValue(row["Past Diet Regime"])],
-        ["Diet barrier", cleanReportValue(row["Past Diet Barrier"])],
-        ["Dislikes", cleanReportValue(row["Dislikes"])],
-        ["Eating out", eatingOut]
+        [isArabic ? "الهدف الأساسي" : "Main goal", titleCase(row["Goal"])],
+        [isArabic ? "الإطار الزمني" : "Goal timeline", cleanReportValue(row["Goal Timeline"])],
+        [isArabic ? "النظام السابق" : "Past diet regime", cleanReportValue(row["Past Diet Regime"])],
+        [isArabic ? "العائق" : "Diet barrier", cleanReportValue(row["Past Diet Barrier"])],
+        [isArabic ? "الأطعمة غير المفضلة" : "Dislikes", cleanReportValue(row["Dislikes"])],
+        [isArabic ? "الأكل خارج المنزل" : "Eating out", eatingOut]
       ]
     },
     {
-      title: "Food Pattern",
+      title: isArabic ? "النمط الغذائي" : "Food Pattern",
       rows: [
-        ["Breakfast", cleanReportValue(row["Breakfast What"] || titleCase(row["Breakfast YN"]))],
-        ["Lunch", cleanReportValue(row["Lunch What"])],
-        ["Dinner", cleanReportValue(row["Dinner What"])],
-        ["Beverages", beverages],
-        ["Beverage amount", cleanReportValue(row["Beverages Amount"])],
-        ["Sweets", cleanReportValue(row["Sweets"])]
+        [isArabic ? "الإفطار" : "Breakfast", cleanReportValue(row["Breakfast What"] || titleCase(row["Breakfast YN"]))],
+        [isArabic ? "الغداء" : "Lunch", cleanReportValue(row["Lunch What"])],
+        [isArabic ? "العشاء" : "Dinner", cleanReportValue(row["Dinner What"])],
+        [isArabic ? "المشروبات" : "Beverages", beverages],
+        [isArabic ? "كمية المشروبات" : "Beverage amount", cleanReportValue(row["Beverages Amount"])],
+        [isArabic ? "الحلويات" : "Sweets", cleanReportValue(row["Sweets"])]
       ]
     },
     {
-      title: "Additional Notes",
+      title: isArabic ? "ملاحظات إضافية" : "Additional Notes",
       rows: [
-        ["Notes", oneOf(row, ["Notes", "Raw JSON"]) || "No extra notes shared."]
+        [isArabic ? "الملاحظات" : "Notes", oneOf(row, ["Notes", "Raw JSON"]) || "No extra notes shared."]
       ]
     }
   ];
@@ -1439,86 +1497,99 @@ function safeFilePart(value){
     .slice(0, 48) || "patient";
 }
 
-function downloadCurrentPatientPdf(){
+function escapeReportText(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildPatientReportMarkup(row){
+  const isArabic = isArabicContentRow(row);
+  const sections = buildPatientReportSections(row);
+  const direction = isArabic ? "rtl" : "ltr";
+  const align = isArabic ? "right" : "left";
+  const title = isArabic ? "تقرير المتابعة الغذائية" : "Patient Nutrition Report";
+  const generated = isArabic ? "تاريخ الإنشاء" : "Generated";
+  const patientLabel = isArabic ? "المريض" : "Patient";
+  const detailsLine = isArabic
+    ? `${escapeReportText(cleanReportValue(row["City"]))} • ${escapeReportText(cleanReportValue(row["Phone"]))} • ${escapeReportText(cleanReportValue(row["Email"]))}`
+    : `${escapeReportText(cleanReportValue(row["Email"]))} • ${escapeReportText(cleanReportValue(row["Phone"]))} • ${escapeReportText(cleanReportValue(row["City"]))}`;
+
+  return `
+    <div id="pdf-report-capture" style="width:794px;background:#fbf7ef;padding:36px;font-family:${isArabic ? "'Cairo',sans-serif" : "'Inter',sans-serif"};color:#292418;direction:${direction};text-align:${align};">
+      <div style="background:linear-gradient(135deg,#304d23,#49693a);border-radius:24px;padding:28px 30px;color:#fff;margin-bottom:26px;">
+        <div style="font-size:12px;letter-spacing:.28em;text-transform:uppercase;opacity:.82;margin-bottom:12px;">THE FIRST STEP</div>
+        <div style="font-family:'Playfair Display',serif;font-size:34px;line-height:1.1;margin-bottom:12px;">${escapeReportText(title)}</div>
+        <div style="font-size:13px;opacity:.88;">${escapeReportText(generated)}: ${escapeReportText(new Date().toLocaleString())}</div>
+      </div>
+      <div style="margin-bottom:22px;">
+        <div style="font-family:'Playfair Display',serif;font-size:30px;line-height:1.1;margin-bottom:10px;">${escapeReportText(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}</div>
+        <div style="font-size:14px;color:#786d57;line-height:1.8;"><strong>${escapeReportText(patientLabel)}:</strong> ${detailsLine}</div>
+      </div>
+      ${sections.map(section => `
+        <div style="margin-bottom:18px;border:1px solid rgba(126,100,42,.18);border-radius:20px;background:rgba(255,255,255,.72);padding:18px 20px;">
+          <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#b18944;margin-bottom:14px;font-weight:700;">${escapeReportText(section.title)}</div>
+          ${section.rows.map(([label, value]) => `
+            <div style="display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-bottom:1px dashed rgba(126,100,42,.18);${isArabic ? "flex-direction:row-reverse;" : ""}">
+              <div style="font-size:13px;color:#786d57;min-width:170px;font-weight:600;">${escapeReportText(label)}</div>
+              <div style="font-size:13px;color:#292418;line-height:1.8;flex:1;">${escapeReportText(value)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function downloadCurrentPatientPdf(){
   const row = currentDetailRow;
   if(!row) return;
   const jspdfApi = window.jspdf;
-  if(!jspdfApi || !jspdfApi.jsPDF){
+  if(!jspdfApi || !jspdfApi.jsPDF || typeof html2canvas === 'undefined'){
     alert("PDF export is not available right now. Please refresh and try again.");
     return;
   }
 
   const { jsPDF } = jspdfApi;
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-99999px';
+  wrapper.style.top = '0';
+  wrapper.style.zIndex = '-1';
+  wrapper.innerHTML = buildPatientReportMarkup(row);
+  document.body.appendChild(wrapper);
+
+  const capture = wrapper.firstElementChild;
+  const canvas = await html2canvas(capture, {
+    scale: 2,
+    backgroundColor: '#fbf7ef',
+    useCORS: true
+  });
+
+  const imgData = canvas.toDataURL('image/png');
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginX = 48;
-  const maxTextWidth = pageWidth - marginX * 2;
-  let y = 56;
+  const margin = 24;
+  const usableWidth = pageWidth - margin * 2;
+  const imgHeight = canvas.height * usableWidth / canvas.width;
+  let remainingHeight = imgHeight;
+  let position = margin;
 
-  const addPageIfNeeded = (needed = 24) => {
-    if (y + needed <= pageHeight - 48) return;
+  doc.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
+  remainingHeight -= (pageHeight - margin * 2);
+
+  while (remainingHeight > 0) {
+    position = remainingHeight - imgHeight + margin;
     doc.addPage();
-    y = 56;
-  };
+    doc.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
+    remainingHeight -= (pageHeight - margin * 2);
+  }
 
-  const writeWrapped = (text, x, fontSize, color, gapAfter = 14, weight = "normal") => {
-    doc.setFont("helvetica", weight);
-    doc.setFontSize(fontSize);
-    doc.setTextColor(color);
-    const lines = doc.splitTextToSize(String(text), maxTextWidth - (x - marginX));
-    lines.forEach(line => {
-      addPageIfNeeded(fontSize + 8);
-      doc.text(line, x, y);
-      y += fontSize + 6;
-    });
-    y += gapAfter;
-  };
-
-  doc.setFillColor(48, 77, 35);
-  doc.roundedRect(marginX, y, pageWidth - marginX * 2, 84, 18, 18, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("THE FIRST STEP", marginX + 22, y + 24);
-  doc.setFont("times", "italic");
-  doc.setFontSize(28);
-  doc.text("Patient Nutrition Report", marginX + 22, y + 54);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(12);
-  doc.text(`Generated ${new Date().toLocaleString()}`, marginX + 22, y + 74);
-  y += 112;
-
-  writeWrapped(`Patient: ${oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"}`, marginX, 18, "#292418", 6, "bold");
-  writeWrapped(`Email: ${cleanReportValue(row["Email"])}   •   Phone: ${cleanReportValue(row["Phone"])}   •   Last saved: ${fmtTimestamp(row["Timestamp"])}`, marginX, 11, "#786d57", 18);
-
-  buildPatientReportSections(row).forEach(section => {
-    addPageIfNeeded(42);
-    doc.setDrawColor(177, 137, 68);
-    doc.setLineWidth(1);
-    doc.line(marginX, y + 3, marginX + 24, y + 3);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor("#b18944");
-    doc.text(section.title.toUpperCase(), marginX + 34, y + 8);
-    y += 24;
-
-    section.rows.forEach(([label, value]) => {
-      const textValue = String(value || "—");
-      addPageIfNeeded(30);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.setTextColor("#304d23");
-      doc.text(`${label}:`, marginX, y);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor("#292418");
-      const lines = doc.splitTextToSize(textValue, maxTextWidth - 120);
-      doc.text(lines, marginX + 120, y);
-      y += Math.max(18, lines.length * 15);
-    });
-
-    y += 12;
-  });
+  wrapper.remove();
 
   const filename = `${safeFilePart(oneOf(row, ["Full Name", "Email"]))}-report.pdf`;
   doc.save(filename);
@@ -1646,7 +1717,9 @@ async function loadDashboard(){
       throw new Error(payload?.message || "Unable to load dashboard data.");
     }
 
-    allPatients = Array.isArray(payload.data) ? payload.data.filter(row => norm(row["Email"]) || norm(row["Full Name"])) : [];
+    allPatients = Array.isArray(payload.data)
+      ? payload.data.map(decryptRowObject).filter(row => norm(row["Email"]) || norm(row["Full Name"]))
+      : [];
     allPatients.sort((a, b) => {
       const da = new Date(norm(a["Timestamp"]));
       const db = new Date(norm(b["Timestamp"]));

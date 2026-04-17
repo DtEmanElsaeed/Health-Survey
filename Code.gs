@@ -27,13 +27,14 @@ var HEADERS = [
   "Past Diet Barrier", "Notes",
   "Pregnant", "Period",
   "Deleted",
-  "Raw JSON"
+  "Raw JSON",
+  "Patient ID"
 ];
 var DASHBOARD_CACHE_KEY = "dashboard_summary_v1";
 var DASHBOARD_CACHE_TTL = 120;
 var DASHBOARD_FIELDS = [
   "Timestamp", "Language", "Full Name", "Email", "Phone", "City", "Login Via",
-  "Age", "BMI", "Conditions", "Goal", "Stress"
+  "Age", "BMI", "Conditions", "Goal", "Stress", "Patient ID"
 ];
 
 function getSheet_() {
@@ -76,10 +77,13 @@ function ensureHeaders_(sheet) {
 
 // Run this ONCE manually to set or repair column headers
 function initSheet() {
-  ensureHeaders_(getSheet_());
+  var sheet = getSheet_();
+  ensureHeaders_(sheet);
+  ensurePatientIds_(sheet);
 }
 
 function buildRow(data) {
+  var storedData = sanitizeRawJson_(data);
   return [
     new Date(),
     data.language || "",
@@ -166,12 +170,73 @@ function buildRow(data) {
     data.period || "",
     data.deleted || "0",
     // Raw
-    JSON.stringify(data)
+    JSON.stringify(storedData),
+    data.patient_id || ""
   ];
+}
+
+function sanitizeRawJson_(data) {
+  var copy = {};
+  Object.keys(data || {}).forEach(function(key) {
+    if (key === "welcome_name") return;
+    copy[key] = data[key];
+  });
+  return copy;
 }
 
 function getHeaderIndex_(headers, name) {
   return headers.indexOf(name);
+}
+
+function generateUniquePatientId_(sheet, headers) {
+  var patientIdCol = getHeaderIndex_(headers, "Patient ID");
+  var existingIds = {};
+  if (patientIdCol !== -1) {
+    var values = sheet.getDataRange().getDisplayValues();
+    for (var i = 1; i < values.length; i++) {
+      var existing = (values[i][patientIdCol] || "").toString().trim();
+      if (existing) existingIds[existing] = true;
+    }
+  }
+
+  var candidate = "";
+  do {
+    candidate = "PTS-" + Utilities.getUuid().replace(/-/g, "").slice(0, 12).toUpperCase();
+  } while (existingIds[candidate]);
+
+  return candidate;
+}
+
+function ensurePatientIds_(sheet) {
+  var values = sheet.getDataRange().getDisplayValues();
+  if (values.length < 2) return;
+
+  var headers = values[0];
+  var patientIdCol = getHeaderIndex_(headers, "Patient ID");
+  var emailCol = getHeaderIndex_(headers, "Email");
+  var nameCol = getHeaderIndex_(headers, "Full Name");
+  if (patientIdCol === -1) return;
+
+  var existingIds = {};
+  for (var i = 1; i < values.length; i++) {
+    var existingId = (values[i][patientIdCol] || "").toString().trim();
+    if (existingId) existingIds[existingId] = true;
+  }
+
+  for (var row = 1; row < values.length; row++) {
+    var hasIdentity = (emailCol !== -1 && values[row][emailCol]) || (nameCol !== -1 && values[row][nameCol]);
+    var currentId = (values[row][patientIdCol] || "").toString().trim();
+    if (!hasIdentity || currentId) continue;
+
+    var candidate = "";
+    do {
+      candidate = "PTS-" + Utilities.getUuid().replace(/-/g, "").slice(0, 12).toUpperCase();
+    } while (existingIds[candidate]);
+
+    existingIds[candidate] = true;
+    sheet.getRange(row + 1, patientIdCol + 1).setValue(candidate);
+    values[row][patientIdCol] = candidate;
+  }
 }
 
 function findRowByEmail(sheet, email) {
@@ -238,7 +303,7 @@ function sendWelcomeEmail(data) {
   if (!email) return;
 
   var isArabic = (data.language || "").toString().toLowerCase() === "ar";
-  var rawName = (data.full_name || "").toString().trim();
+  var rawName = (data.welcome_name || data.full_name || "").toString().trim();
   var firstName = rawName ? rawName.split(/\s+/)[0] : (isArabic ? "صديقي" : "there");
 
   var subject = isArabic
@@ -346,6 +411,7 @@ function doGet(e) {
   try {
     var sheet = getSheet_();
     ensureHeaders_(sheet);
+    ensurePatientIds_(sheet);
     var values = sheet.getDataRange().getDisplayValues();
     var headers = values[0];
     var emailCol = headers.indexOf("Email");
@@ -395,10 +461,12 @@ function doPost(e) {
   try {
     var sheet = getSheet_();
     ensureHeaders_(sheet);
+    ensurePatientIds_(sheet);
     var data = JSON.parse(e.postData.contents);
     var values = sheet.getDataRange().getDisplayValues();
     var headers = values[0];
     var deletedCol = getHeaderIndex_(headers, "Deleted");
+    var patientIdCol = getHeaderIndex_(headers, "Patient ID");
 
     if (data.action === "send_goal_reminder") {
       sendGoalReminderEmail(data);
@@ -430,6 +498,14 @@ function doPost(e) {
         data.deleted = values[existingRow - 1][deletedCol] || "0";
       } else {
         data.deleted = "0";
+      }
+    }
+
+    if (patientIdCol !== -1 && !data.patient_id) {
+      if (existingRow !== -1) {
+        data.patient_id = values[existingRow - 1][patientIdCol] || generateUniquePatientId_(sheet, headers);
+      } else {
+        data.patient_id = generateUniquePatientId_(sheet, headers);
       }
     }
 

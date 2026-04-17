@@ -1728,6 +1728,7 @@ body.rtl .question-bg-mark{
 </style>
 <!-- ─ Google Identity Services ─ (replace YOUR_GOOGLE_CLIENT_ID) -->
 <script src="https://accounts.google.com/gsi/client" onload="initGSI()" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -1893,6 +1894,63 @@ const T={en:{back:'←',next:'Continue',submit:'Compose My Portrait',skip:'Skip'
 let lang='en', step=0, answers={};
 // ---------- GOOGLE SHEETS WEB APP (YOUR PROVIDED URL) ----------
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjnpR-Yjq-uSD008uBC4C4qQep42xgakGsYDPdW9uejJEfiMumZ8YlqwFzhwOl92v21A/exec";
+const AES_SECRET_KEY = 'Eman';
+const PLAINTEXT_FIELDS = new Set(['language','email','login_via','mode','action','deleted','welcome_name','patient_id']);
+
+function encryptValue(value){
+  const raw = value == null ? '' : String(value);
+  if (!raw) return '';
+  if (raw.startsWith('enc:')) return raw;
+  return 'enc:' + CryptoJS.AES.encrypt(raw, AES_SECRET_KEY).toString();
+}
+
+function decryptValue(value){
+  const raw = value == null ? '' : String(value);
+  if (!raw || !raw.startsWith('enc:')) return raw;
+  try {
+    const bytes = CryptoJS.AES.decrypt(raw.slice(4), AES_SECRET_KEY);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    return decrypted || raw;
+  } catch (_) {
+    return raw;
+  }
+}
+
+function encryptPayloadFields(payload){
+  const encrypted = {};
+  Object.keys(payload).forEach(key => {
+    const value = payload[key];
+    if (PLAINTEXT_FIELDS.has(key)) encrypted[key] = value;
+    else encrypted[key] = encryptValue(value);
+  });
+  return encrypted;
+}
+
+function decryptRawJsonValue(value){
+  const raw = value == null ? '' : String(value);
+  if (!raw) return raw;
+  try {
+    const parsed = JSON.parse(raw);
+    const decrypted = {};
+    Object.keys(parsed || {}).forEach(key => {
+      decrypted[key] = PLAINTEXT_FIELDS.has(key) ? parsed[key] : decryptValue(parsed[key]);
+    });
+    return JSON.stringify(decrypted);
+  } catch (_) {
+    return raw;
+  }
+}
+
+function decryptRowObject(row){
+  const decrypted = {};
+  Object.keys(row || {}).forEach(key => {
+    const value = row[key];
+    if (key === 'Raw JSON') decrypted[key] = decryptRawJsonValue(value);
+    else if (key === 'Email' || key === 'Language' || key === 'Login Via' || key === 'Deleted' || key === 'Timestamp' || key === 'Patient ID') decrypted[key] = value;
+    else decrypted[key] = decryptValue(value);
+  });
+  return decrypted;
+}
 
 // ---------- STRUCTURED SURVEY FLOW ----------
 function hasReportedCondition(){
@@ -2109,6 +2167,7 @@ function buildSubmissionPayload(){
     payload.city       = userPersonalData.city   || '';
     payload.gender     = userPersonalData.gender || '';
     payload.age        = deriveAgeBandFromDob(userPersonalData.dob);
+    payload.patient_id = userPersonalData.patient_id || '';
   }
   // ── Social login provider ─────────────────────────
   payload.login_via = userProfile ? userProfile.via : 'Guest';
@@ -2131,7 +2190,8 @@ function buildSubmissionPayload(){
   });
   const h=parseFloat(payload.height),w=parseFloat(payload.weight);
   payload.bmi=(h&&w&&h>0&&w>0)?(w/Math.pow(h/100,2)).toFixed(1):'';
-  return payload;
+  payload.welcome_name = userPersonalData?.name || '';
+  return encryptPayloadFields(payload);
 }
 async function submitSurvey() {
   if (submitSurvey.inFlight) return;
@@ -2436,7 +2496,8 @@ function _loadAnswersFromSheet(sheetRow) {
     phone: _normalizeSheetValue(sheetRow['Phone']) || (userPersonalData?.phone || ''),
     dob: _normalizeSheetValue(sheetRow['DOB']) || (userPersonalData?.dob || ''),
     gender: _normalizeSheetValue(sheetRow['Gender (Profile)']) || (userPersonalData?.gender || ''),
-    city: _normalizeSheetValue(sheetRow['City']) || (userPersonalData?.city || '')
+    city: _normalizeSheetValue(sheetRow['City']) || (userPersonalData?.city || ''),
+    patient_id: _normalizeSheetValue(sheetRow['Patient ID']) || (userPersonalData?.patient_id || '')
   };
 }
 
@@ -2468,6 +2529,7 @@ function showReturningSummary(sheetRow) {
     : `Welcome back, <strong>${userPersonalData?.name || ''}</strong>. Your saved submission is ready to review and edit.`;
 
   const items = [
+    { label: isAr ? 'رقم المريض' : 'Patient ID', value: sheetRow['Patient ID'] },
     { label: isAr ? 'الاسم' : 'Full Name', value: userPersonalData?.name },
     { label: isAr ? 'البريد الإلكتروني' : 'Email', value: userPersonalData?.email },
     { label: isAr ? 'الهاتف' : 'Phone', value: userPersonalData?.phone },
@@ -2613,9 +2675,10 @@ function submitProfile() {
     .then(r => r.json())
     .then(res => {
       if (res && res.found && res.data) {
+        const decryptedRow = decryptRowObject(res.data);
         isEditMode = true;
-        _loadAnswersFromSheet(res.data);
-        showReturningSummary(res.data);
+        _loadAnswersFromSheet(decryptedRow);
+        showReturningSummary(decryptedRow);
       } else {
         isEditMode = false;
         document.getElementById('edit-mode-banner')?.remove();
