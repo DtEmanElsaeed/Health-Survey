@@ -26,6 +26,7 @@ var HEADERS = [
   "Dislikes", "Past Diet Regime",
   "Past Diet Barrier", "Notes",
   "Pregnant", "Period",
+  "Deleted",
   "Raw JSON"
 ];
 var DASHBOARD_CACHE_KEY = "dashboard_summary_v1";
@@ -163,9 +164,14 @@ function buildRow(data) {
     // Her Portrait
     data.pregnant || "",
     data.period || "",
+    data.deleted || "0",
     // Raw
     JSON.stringify(data)
   ];
+}
+
+function getHeaderIndex_(headers, name) {
+  return headers.indexOf(name);
 }
 
 function findRowByEmail(sheet, email) {
@@ -208,10 +214,13 @@ function getDashboardSummaries_(sheet) {
   if (!values.length) return [];
 
   var headers = values[0];
+  var deletedIdx = headers.indexOf("Deleted");
   var rows = values.slice(1).filter(function(row) {
     var emailIdx = headers.indexOf("Email");
     var nameIdx = headers.indexOf("Full Name");
-    return (emailIdx !== -1 && row[emailIdx]) || (nameIdx !== -1 && row[nameIdx]);
+    var hasIdentity = (emailIdx !== -1 && row[emailIdx]) || (nameIdx !== -1 && row[nameIdx]);
+    var isDeleted = deletedIdx !== -1 && String(row[deletedIdx] || "").trim() === "1";
+    return hasIdentity && !isDeleted;
   }).map(function(row) {
     return rowToObject_(headers, row, DASHBOARD_FIELDS);
   });
@@ -261,6 +270,65 @@ function sendWelcomeEmail(data) {
         "There is no need to feel overwhelmed by the process. We will take it one step at a time.",
         "",
         "You have already taken the hardest part: the first step.",
+        "",
+        "Warmly,",
+        "The First Step"
+      ].join("\n");
+
+  MailApp.sendEmail({
+    to: email,
+    subject: subject,
+    body: body,
+    name: "The First Step"
+  });
+}
+
+function humanizeGoal_(goal) {
+  var value = (goal || "").toString().trim().toLowerCase();
+  var map = {
+    lose: "weight loss",
+    gain: "healthy weight gain",
+    maintain: "weight maintenance",
+    healthy: "better health",
+    muscle: "muscle building"
+  };
+  return map[value] || (goal || "your goal");
+}
+
+function sendGoalReminderEmail(data) {
+  var email = (data.email || "").toString().trim();
+  if (!email) throw new Error("Email is required to send a reminder.");
+
+  var isArabic = (data.language || "").toString().toLowerCase() === "ar";
+  var rawName = (data.full_name || "").toString().trim();
+  var firstName = rawName ? rawName.split(/\s+/)[0] : (isArabic ? "صديقي" : "there");
+  var goalLabel = humanizeGoal_(data.goal);
+
+  var subject = isArabic
+    ? "تذكير لطيف بهدفك الغذائي"
+    : "A gentle reminder of your nutrition goal";
+
+  var body = isArabic
+    ? [
+        "مرحباً " + firstName + "،",
+        "",
+        "نذكّرك اليوم بهدفك الحالي: " + goalLabel + ".",
+        "كل خطوة صغيرة وثابتة تقرّبك أكثر من النتيجة التي تريدها.",
+        "",
+        "حاول اليوم أن تختار قراراً واحداً بسيطاً يخدم هدفك، حتى لو كان شيئاً صغيراً جداً.",
+        "الاستمرار أهم من المثالية، ونحن معك في هذه الرحلة خطوة بخطوة.",
+        "",
+        "مع تمنياتنا لك بالتوفيق،",
+        "The First Step"
+      ].join("\n")
+    : [
+        "Hi " + firstName + ",",
+        "",
+        "This is a gentle reminder of your current goal: " + goalLabel + ".",
+        "Small, steady choices still count, even on busy or imperfect days.",
+        "",
+        "Try to make one simple decision today that supports your goal.",
+        "Consistency matters more than perfection, and you are still moving forward.",
         "",
         "Warmly,",
         "The First Step"
@@ -328,8 +396,44 @@ function doPost(e) {
     var sheet = getSheet_();
     ensureHeaders_(sheet);
     var data = JSON.parse(e.postData.contents);
-    var newRow = buildRow(data);
+    var values = sheet.getDataRange().getDisplayValues();
+    var headers = values[0];
+    var deletedCol = getHeaderIndex_(headers, "Deleted");
+
+    if (data.action === "send_goal_reminder") {
+      sendGoalReminderEmail(data);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, mode: "goal_reminder_sent" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var existingRow = findRowByEmail(sheet, data.email);
+
+    if (data.action === "delete_patient") {
+      if (existingRow === -1) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ success: false, message: "Patient not found." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      if (deletedCol === -1) {
+        throw new Error('Deleted column was not found.');
+      }
+      sheet.getRange(existingRow, deletedCol + 1).setValue("1");
+      clearDashboardCache_();
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, mode: "deleted", row: existingRow }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (deletedCol !== -1 && !data.deleted) {
+      if (existingRow !== -1) {
+        data.deleted = values[existingRow - 1][deletedCol] || "0";
+      } else {
+        data.deleted = "0";
+      }
+    }
+
+    var newRow = buildRow(data);
 
     // Email is the account identity, so any existing row should be updated.
     if (existingRow !== -1) {
