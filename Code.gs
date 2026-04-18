@@ -1,4 +1,5 @@
-var SHEET_NAME = "Sheet1";
+var SPREADSHEET_ID = "1YKj5TecslomTbYks0zq-h_lszkGc-MLsVq6c4wixuJ4";
+var SHEET_NAME = "patient_Data";
 var HEADERS = [
   "Timestamp", "Language",
   "Full Name", "Email", "Phone", "DOB", "Gender (Profile)", "City", "Login Via", "Age",
@@ -38,7 +39,22 @@ var DASHBOARD_FIELDS = [
 ];
 
 function getSheet_() {
-  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (sheet) return sheet;
+
+  // Fallback: search for sheet matching ignoring case and spaces
+  var target = SHEET_NAME.toLowerCase().replace(/\s+/g, '');
+  var sheets = ss.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    var s = sheets[i];
+    var sName = s.getName().toLowerCase().replace(/\s+/g, '');
+    if (sName === target) {
+      return s;
+    }
+  }
+
+  throw new Error('Sheet "' + SHEET_NAME + '" not found in spreadsheet.');
 }
 
 function rowLooksLikeAnyHeader_(row) {
@@ -258,6 +274,28 @@ function findRowByEmail(sheet, email) {
   return -1;
 }
 
+function resolvePreferredLanguage_(data, sheet) {
+  var incoming = (data && data.language || "").toString().toLowerCase().trim();
+  if (incoming === "ar" || incoming === "en") return incoming;
+
+  var email = (data && data.email || "").toString().trim();
+  if (!email) return "en";
+
+  sheet = sheet || getSheet_();
+  if (!sheet) return "en";
+
+  var rowIndex = findRowByEmail(sheet, email);
+  if (rowIndex === -1) return "en";
+
+  var values = sheet.getDataRange().getDisplayValues();
+  var headers = values[0] || [];
+  var languageCol = headers.indexOf("Language");
+  if (languageCol === -1) return "en";
+
+  var saved = (values[rowIndex - 1][languageCol] || "").toString().toLowerCase().trim();
+  return saved === "ar" ? "ar" : "en";
+}
+
 function rowToObject_(headers, row, fields) {
   var obj = {};
   var keys = fields && fields.length ? fields : headers;
@@ -298,52 +336,154 @@ function clearDashboardCache_() {
   CacheService.getScriptCache().remove(DASHBOARD_CACHE_KEY);
 }
 
+function buildEmailHtml_(opts) {
+  var isRtl   = opts.isRtl || false;
+  var dir     = isRtl ? "rtl" : "ltr";
+  var align   = isRtl ? "right" : "left";
+  var serif   = isRtl ? "'Cairo',Arial,sans-serif" : "Georgia,'Times New Roman',serif";
+  var sans    = isRtl ? "'Cairo',Arial,sans-serif" : "Arial,Helvetica,sans-serif";
+  var headingStyle = isRtl ? "normal" : "italic";
+  var journeyLabel = isRtl ? "رحلتك الغذائية" : "Your Nutritional Journey";
+  var tagline      = isRtl ? "صورة غذائية مخصصة لك" : "A curated nutritional portrait";
+  var quoteText    = opts.quote || (isRtl
+    ? '"سرّ التقدم هو البدء."'
+    : '"The secret of getting ahead is getting started."');
+  var quoteAuthor  = opts.quoteAuthor || (isRtl ? "— مارك توين" : "— Mark Twain");
+  var footerNote   = isRtl
+    ? "تلقيت هذا البريد لأنه تم إرساله من لوحة التحكم الخاصة بك."
+    : "You are receiving this because a reminder was sent from your dashboard.";
+
+  var confettiOverlay = '';
+  if (opts.confetti) {
+    confettiOverlay =
+      '<div style="padding:16px 24px 0;text-align:center;color:#c9993a;">' +
+      '<div style="font-size:16px;line-height:1;letter-spacing:8px;">&#10023; &#10023; &#9670; &#10023; &#10023;</div>' +
+      '<div style="width:120px;height:1px;background:#d8c29b;margin:12px auto 0;"></div>' +
+      '</div>';
+  }
+
+  var headerLabel = opts.confetti
+    ? (isRtl ? '🎉 أهلاً وسهلاً بك 🎉' : '🎉 Welcome Aboard 🎉')
+    : journeyLabel;
+
+  var header = [
+    '<td style="background:linear-gradient(160deg,#1a2e10 0%,#243d17 45%,#2e4d1c 100%);padding:44px 40px 36px;text-align:center;position:relative;overflow:hidden;">',
+    '  <div style="position:absolute;inset:0;opacity:.04;background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:18px 18px;pointer-events:none;"></div>',
+    '  <div style="position:absolute;top:16px;left:20px;opacity:.22;font-size:28px;color:#a0782a;line-height:1;">&#10023;</div>',
+    '  <div style="position:absolute;top:16px;right:20px;opacity:.22;font-size:28px;color:#a0782a;line-height:1;transform:scaleX(-1);">&#10023;</div>',
+    '  <div style="font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:#8ba67a;font-family:' + sans + ';margin-bottom:18px;">' + headerLabel + '</div>',
+    '  <div style="font-size:34px;margin-bottom:12px;line-height:1;">🌿</div>',
+    '  <div style="font-family:' + serif + ';font-size:32px;font-weight:600;font-style:' + headingStyle + ';color:#fdfaf5;letter-spacing:.02em;line-height:1.2;margin-bottom:4px;">The First Step</div>',
+    '  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:16px auto 0;max-width:200px;">',
+    '    <div style="height:1px;flex:1;background:linear-gradient(90deg,transparent,#a0782a);"></div>',
+    '    <div style="color:#a0782a;font-size:10px;">&#9670;</div>',
+    '    <div style="height:1px;flex:1;background:linear-gradient(90deg,#a0782a,transparent);"></div>',
+    '  </div>',
+    '  <div style="font-size:11px;color:#8ba67a;font-family:' + sans + ';margin-top:12px;letter-spacing:.08em;font-style:italic;">' + tagline + '</div>',
+    '</td>'
+  ].join('');
+
+  var hero = [
+    '<td style="padding:44px 48px 0;text-align:center;">',
+    '  <div style="font-size:13px;color:#c9993a;letter-spacing:8px;margin-bottom:20px;opacity:.7;">&middot; &middot; &middot;</div>',
+    '  <div style="font-family:' + serif + ';font-size:26px;font-weight:600;font-style:' + headingStyle + ';color:#1a1912;margin:0 0 8px;line-height:1.35;">' + opts.headline + '</div>',
+    '  <div style="width:40px;height:2px;background:linear-gradient(90deg,#a0782a,#c9993a);margin:16px auto 0;border-radius:2px;"></div>',
+    '</td>'
+  ].join('');
+
+  var body = [
+    '<td style="padding:32px 48px 0;text-align:' + align + ';direction:' + dir + ';">',
+    '  <div style="font-family:' + sans + ';font-size:15px;line-height:1.9;color:#3a3830;">',
+    opts.bodyHtml,
+    '  </div>',
+    '</td>'
+  ].join('');
+
+  var quote = [
+    '<td style="padding:0 48px 32px;">',
+    '  <div style="background:linear-gradient(135deg,#e4ede0,#edf3e9);border-left:3px solid #a0782a;border-radius:0 4px 4px 0;padding:20px 24px;">',
+    '    <div style="font-family:' + serif + ';font-size:15px;font-style:italic;color:#243d17;line-height:1.7;margin:0 0 8px;">' + quoteText + '</div>',
+    '    <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8ba67a;font-family:' + sans + ';">' + quoteAuthor + '</div>',
+    '  </div>',
+    '</td>'
+  ].join('');
+
+  var footer = [
+    '<td style="padding:0 40px 8px;">',
+    '  <div style="display:flex;align-items:center;gap:12px;">',
+    '    <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,#d5ccc1);"></div>',
+    '    <div style="font-size:12px;color:#c9993a;letter-spacing:6px;">&#10023; &#9670; &#10023;</div>',
+    '    <div style="flex:1;height:1px;background:linear-gradient(90deg,#d5ccc1,transparent);"></div>',
+    '  </div>',
+    '</td>',
+    '<td style="padding:20px 40px 32px;text-align:center;">',
+    '  <div style="font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#968f84;font-family:' + sans + ';margin-bottom:8px;">The First Step</div>',
+    '  <div style="font-size:11px;color:#b8b2aa;font-family:' + sans + ';font-style:italic;line-height:1.6;">A curated assessment of your dietary philosophy,<br>daily rituals, and nutritional aspirations.</div>',
+    '  <div style="margin-top:14px;font-size:10px;color:#c8c2ba;font-family:' + sans + ';letter-spacing:.04em;">' + footerNote + '</div>',
+    '</td>'
+  ].join('');
+
+  return '<!DOCTYPE html>' +
+    '<html lang="' + (isRtl ? 'ar' : 'en') + '" dir="' + dir + '">' +
+    '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cairo:wght@400;600&display=swap" rel="stylesheet">' +
+    '</head>' +
+    '<body style="margin:0;padding:0;background-color:#ede8df;">' +
+    '<div style="background-color:#ede8df;padding:32px 16px;">' +
+    '<div style="max-width:600px;margin:0 auto;background:#fdfaf5;border:1px solid #d5ccc1;border-radius:6px;overflow:hidden;box-shadow:0 8px 40px rgba(26,25,18,.10),0 2px 8px rgba(26,25,18,.06);position:relative;">' +
+    confettiOverlay +
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' + header + '</tr></table>' +
+    '<div style="height:3px;background:linear-gradient(90deg,#243d17 0%,#a0782a 50%,#243d17 100%);"></div>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' + hero + '</tr></table>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' + body + '</tr></table>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' + quote + '</tr></table>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' + footer + '</tr></table>' +
+    '</div></div>' +
+    '</body></html>';
+}
+
 function sendWelcomeEmail(data) {
   var email = (data.email || "").toString().trim();
   if (!email) return;
 
-  var isArabic = (data.language || "").toString().toLowerCase() === "ar";
+  var isArabic = resolvePreferredLanguage_(data) === "ar";
   var rawName = (data.welcome_name || data.full_name || "").toString().trim();
   var firstName = rawName ? rawName.split(/\s+/)[0] : (isArabic ? "صديقي" : "there");
 
   var subject = isArabic
-    ? "مرحباً بك في The First Step"
+    ? "أهلاً بيك في The First Step"
     : "Welcome to The First Step";
 
-  var body = isArabic
-    ? [
-        "مرحباً " + firstName + "،",
-        "",
-        "أهلاً بك في The First Step.",
-        "يسعدنا أن تبدأ هذه الرحلة معنا، خطوة بخطوة، وبهدوء وثقة.",
-        "",
-        "لقد استلمنا بياناتك، وسنستخدمها لبناء صورة غذائية أكثر دقة وخصوصية لك.",
-        "لا تقلق من كثرة الأسئلة، فكل إجابة تقرّبنا من توصيات تناسبك فعلاً.",
-        "",
-        "نحن سعداء بوجودك هنا، ونتطلع لمرافقتك في هذه البداية.",
-        "",
-        "مع أطيب التمنيات،",
-        "The First Step"
-      ].join("\n")
-    : [
-        "Hi " + firstName + ",",
-        "",
-        "Welcome to The First Step.",
-        "We are really glad you are here and excited to be part of your journey.",
-        "",
-        "Your details have been received, and each answer you share helps us build a more personal and thoughtful nutritional portrait for you.",
-        "There is no need to feel overwhelmed by the process. We will take it one step at a time.",
-        "",
-        "You have already taken the hardest part: the first step.",
-        "",
-        "Warmly,",
-        "The First Step"
-      ].join("\n");
+  var plainBody = isArabic
+    ? "أهلاً يا " + firstName + "،\n\nنورت The First Step.\nإحنا مبسوطين إنك بدأت الرحلة معانا، وصدقنا أول خطوة دي هي أهم خطوة فعلاً.\n\nبياناتك وصلت، ومن هنا هنبتدي نبني لك صورة غذائية تناسبك أنت، من غير تعقيد ولا كلام كبير.\n\nواحدة واحدة كده، وهتلاقي الدنيا بقت أظبط، والأكل بقى صاحبك مش خصمك.\n\nيلا بينا نبدأها بشياكة... ومن غير دراما ميزان كتير.\n\nبحب وتشجيع،\nThe First Step"
+    : "Hi " + firstName + ",\n\nWelcome to The First Step.\nWe are so happy you are here.\n\nYour details are in, and that means you have already done the hardest part: you started.\n\nFrom here, we will help make things feel simpler, more personal, and a lot less overwhelming.\n\nOne small step at a time, and yes, we are cheering for you.\n\nWarmly,\nThe First Step";
+
+  var htmlBody = isArabic
+    ? '<p style="margin:0 0 16px;">أهلاً يا ' + firstName + '،</p>' +
+      '<p style="margin:0 0 16px;">نورت <strong style="color:#243d17;">The First Step</strong>.<br>إحنا مبسوطين قوي إنك بدأت الرحلة معانا، لأن أول خطوة دي هي أهم خطوة فعلاً.</p>' +
+      '<p style="margin:0 0 16px;">بياناتك وصلت، وكل إجابة كتبتها بتساعدنا نفهمك أكتر ونجهز لك توصيات مناسبة ليك أنت.<br>من غير تعقيد، ومن غير إحساس إن الموضوع امتحان أحياء آخر السنة.</p>' +
+      '<p style="margin:0 0 24px;">واحدة واحدة كده، وهتلاقي الدنيا بقت أهدى وأوضح، والأكل بقى ألطف من ما كنت متخيل.</p>' +
+      '<p style="margin:0;color:#5e5a52;font-style:italic;">بحب وتشجيع،<br><strong style="color:#243d17;font-style:normal;">The First Step</strong></p>'
+    : '<p style="margin:0 0 16px;">Hi ' + firstName + ',</p>' +
+      '<p style="margin:0 0 16px;">Welcome to <strong style="color:#243d17;">The First Step</strong>.<br>We are genuinely excited to have you here.</p>' +
+      '<p style="margin:0 0 16px;">Your details are in, and every answer helps us shape something more thoughtful and personal for you.<br>No pressure, no perfection, and definitely no need to panic over every meal.</p>' +
+      '<p style="margin:0 0 24px;">You have already done the brave part by starting. We will handle the next steps together, one calm win at a time.</p>' +
+      '<p style="margin:0;color:#5e5a52;font-style:italic;">Warmly,<br><strong style="color:#243d17;font-style:normal;">The First Step</strong></p>';
+
+  var html = buildEmailHtml_({
+    isRtl: isArabic,
+    confetti: true,
+    quote: isArabic ? '"بهدوء كده... خطوة ورا خطوة، وهتوصل."' : '"Small steps still count. They count a lot."',
+    quoteAuthor: isArabic ? '— فريق The First Step' : '— The First Step Team',
+    headline: isArabic ? ("أهلاً بيك، " + firstName) : ("Welcome, " + firstName),
+    bodyHtml: htmlBody
+  });
 
   MailApp.sendEmail({
     to: email,
     subject: subject,
-    body: body,
+    body: plainBody,
+    htmlBody: html,
     name: "The First Step"
   });
 }
@@ -364,45 +504,46 @@ function sendGoalReminderEmail(data) {
   var email = (data.email || "").toString().trim();
   if (!email) throw new Error("Email is required to send a reminder.");
 
-  var isArabic = (data.language || "").toString().toLowerCase() === "ar";
+  var isArabic = resolvePreferredLanguage_(data) === "ar";
   var rawName = (data.full_name || "").toString().trim();
   var firstName = rawName ? rawName.split(/\s+/)[0] : (isArabic ? "صديقي" : "there");
   var goalLabel = humanizeGoal_(data.goal);
 
   var subject = isArabic
-    ? "تذكير لطيف بهدفك الغذائي"
-    : "A gentle reminder of your nutrition goal";
+    ? "رسالة لطيفة تفكرك بهدفك"
+    : "A little reminder for your goal";
 
-  var body = isArabic
-    ? [
-        "مرحباً " + firstName + "،",
-        "",
-        "نذكّرك اليوم بهدفك الحالي: " + goalLabel + ".",
-        "كل خطوة صغيرة وثابتة تقرّبك أكثر من النتيجة التي تريدها.",
-        "",
-        "حاول اليوم أن تختار قراراً واحداً بسيطاً يخدم هدفك، حتى لو كان شيئاً صغيراً جداً.",
-        "الاستمرار أهم من المثالية، ونحن معك في هذه الرحلة خطوة بخطوة.",
-        "",
-        "مع تمنياتنا لك بالتوفيق،",
-        "The First Step"
-      ].join("\n")
-    : [
-        "Hi " + firstName + ",",
-        "",
-        "This is a gentle reminder of your current goal: " + goalLabel + ".",
-        "Small, steady choices still count, even on busy or imperfect days.",
-        "",
-        "Try to make one simple decision today that supports your goal.",
-        "Consistency matters more than perfection, and you are still moving forward.",
-        "",
-        "Warmly,",
-        "The First Step"
-      ].join("\n");
+  var plainBody = isArabic
+    ? "أهلاً يا " + firstName + "،\n\nبس جايين نفكرك على خفيف بهدفك الحالي: " + goalLabel + ".\nمش لازم تعمل انقلاب كوني النهارده، قرار صغير مظبوط يكفي جداً.\n\nاشرب مية زيادة، كل أكلك بهدوء، أو قاوم السناك اللي بيظهر فجأة كده من العدم.\nالاستمرار أهم من المثالية، واليوم الحلو يبدأ أحياناً من قرار بسيط جداً.\n\nيلا شد حيلك... وإحنا معاك من غير صفارة حكم.\n\nThe First Step"
+    : "Hi " + firstName + ",\n\nJust a quick and friendly reminder about your current goal: " + goalLabel + ".\nYou do not need a perfect day to make progress. One good decision still counts.\n\nDrink a little more water, build one balanced meal, or ignore that dramatic snack craving for five minutes.\nConsistency beats perfection, every single time.\n\nWe are rooting for you,\nThe First Step";
+
+  var goalBadge = '<div style="text-align:center;margin:0 0 28px;"><div style="display:inline-block;background:linear-gradient(135deg,#f5ead4 0%,#fdf3e0 50%,#f5ead4 100%);border:1.5px solid #c9993a;border-radius:4px;padding:14px 32px;font-size:13px;font-weight:700;color:#a0782a;letter-spacing:0.18em;text-transform:uppercase;font-family:Arial,sans-serif;position:relative;"><span style="position:absolute;top:4px;left:6px;font-size:8px;color:#c9993a;opacity:.6;">&#9670;</span><span style="position:absolute;top:4px;right:6px;font-size:8px;color:#c9993a;opacity:.6;">&#9670;</span>' + goalLabel + '</div></div>';
+
+  var htmlBody = isArabic
+    ? '<p style="margin:0 0 16px;">أهلاً يا ' + firstName + '،</p>' +
+      '<p style="margin:0 0 16px;">جايين نفكرك على خفيف بهدفك الحالي:</p>' +
+      goalBadge +
+      '<p style="margin:0 0 16px;">مش لازم تعمل معجزة النهارده. خطوة صغيرة بس مظبوطة تفرق جداً.</p>' +
+      '<p style="margin:0 0 24px;">اشرب مية زيادة، كل بهدوء، أو سيب السناك المستعجل يزعل لوحده.<br>الاستمرار أهم من المثالية، وإحنا معاك خطوة بخطوة ومن غير أي جلد ذات.</p>' +
+      '<p style="margin:0;color:#5e5a52;font-style:italic;">يلا كمّلها بشويّة حماس،<br><strong style="color:#243d17;font-style:normal;">The First Step</strong></p>'
+    : '<p style="margin:0 0 16px;">Hi ' + firstName + ',</p>' +
+      '<p style="margin:0 0 4px;">Here is your friendly little reminder:</p>' +
+      goalBadge +
+      '<p style="margin:0 0 16px;">You do not need a perfect day to stay on track. One steady choice still matters.</p>' +
+      '<p style="margin:0 0 24px;">Pick one simple win today that supports your goal.<br>Drink the water, build the balanced plate, and do not let one random craving act like it runs the whole day.</p>' +
+      '<p style="margin:0;color:#5e5a52;font-style:italic;">Cheering you on,<br><strong style="color:#243d17;font-style:normal;">The First Step</strong></p>';
+
+  var html = buildEmailHtml_({
+    isRtl: isArabic,
+    headline: isArabic ? ("فاكرينك يا " + firstName) : ("A little reminder, " + firstName),
+    bodyHtml: htmlBody
+  });
 
   MailApp.sendEmail({
     to: email,
     subject: subject,
-    body: body,
+    body: plainBody,
+    htmlBody: html,
     name: "The First Step"
   });
 }
@@ -472,6 +613,13 @@ function doPost(e) {
       sendGoalReminderEmail(data);
       return ContentService
         .createTextOutput(JSON.stringify({ success: true, mode: "goal_reminder_sent" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (data.action === "send_welcome_email") {
+      sendWelcomeEmail(data);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, mode: "welcome_email_sent" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
