@@ -2244,6 +2244,9 @@ async function submitSurvey() {
     }
   } catch (e) {
     console.warn('Submit request could not be confirmed:', e.message);
+    showMilestoneToast(lang === 'ar'
+      ? '⚠ تعذّر حفظ بياناتك. تحقق من اتصالك وحاول مجدداً.'
+      : '⚠ Could not save your data. Please check your connection.');
   } finally {
     submitSurvey.inFlight = false;
   }
@@ -2702,6 +2705,11 @@ function showProfileScreen() {
   document.getElementById('returning-screen').classList.add('hidden');
   const isAr = lang === 'ar';
 
+  // Set max date: must be at least 16 years old
+  const maxDob = new Date();
+  maxDob.setFullYear(maxDob.getFullYear() - 16);
+  document.getElementById('pf-dob').max = maxDob.toISOString().split('T')[0];
+
   // Translate labels
   document.getElementById('profile-section-label').textContent = isAr ? 'ملفك الشخصي' : 'YOUR PROFILE';
   document.getElementById('profile-headline').textContent      = isAr ? 'أخبرنا قليلاً عن نفسك' : 'Tell us a little about yourself';
@@ -2772,6 +2780,7 @@ function submitProfile() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showPfErr(errEl, isAr?'يرجى إدخال بريد إلكتروني صحيح.':'Please enter a valid email address.'); return; }
   if (!phone)  { showPfErr(errEl, isAr?'يرجى إدخال رقم هاتفك.':'Please enter your phone number.'); return; }
   if (!dob)    { showPfErr(errEl, isAr?'يرجى إدخال تاريخ ميلادك.':'Please enter your date of birth.'); return; }
+  { const _d=new Date(dob),_t=new Date(); let _a=_t.getFullYear()-_d.getFullYear(); const _m=_t.getMonth()-_d.getMonth(); if(_m<0||(_m===0&&_t.getDate()<_d.getDate()))_a--; if(_a<16){showPfErr(errEl,isAr?'يجب أن يكون عمرك 16 سنة على الأقل للمشاركة.':'You must be at least 16 years old to participate.');return;} }
   if (!gender) { showPfErr(errEl, isAr?'يرجى اختيار الجنس.':'Please select your gender.'); return; }
   errEl.classList.remove('show');
 

@@ -637,6 +637,35 @@ body{
   padding:14px 16px;
   margin-bottom:14px;
 }
+/* ── Toast notifications ── */
+#dash-toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:#1a1912;color:#fdfaf5;font-size:13px;font-family:Arial,sans-serif;
+  padding:12px 22px;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,.22);
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+  z-index:9999;white-space:nowrap;max-width:90vw;text-align:center;
+}
+#dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+#dash-toast.success{background:#243d17;border:1px solid #4a7a28;}
+#dash-toast.error{background:#5a1a1a;border:1px solid #9a2828;}
+/* ── Confirm modal ── */
+#dash-confirm-overlay{
+  position:fixed;inset:0;background:rgba(26,25,18,.55);z-index:10000;
+  display:none;align-items:center;justify-content:center;
+}
+#dash-confirm-overlay.show{display:flex;}
+#dash-confirm-box{
+  background:#fdfaf5;border:1px solid #d5ccc1;border-radius:10px;
+  padding:32px 28px 24px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.18);
+  font-family:Arial,sans-serif;
+}
+#dash-confirm-box h3{margin:0 0 10px;font-size:16px;color:#1a1912;font-weight:700;}
+#dash-confirm-box p{margin:0 0 24px;font-size:13px;color:#5e5a52;line-height:1.6;}
+#dash-confirm-box .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+#dash-confirm-box .confirm-cancel{padding:9px 18px;border:1px solid #d5ccc1;border-radius:6px;background:#fff;color:#5e5a52;font-size:13px;cursor:pointer;}
+#dash-confirm-box .confirm-ok{padding:9px 18px;border:none;border-radius:6px;background:#8f2c2c;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+#dash-confirm-box .confirm-cancel:hover{background:#f5f0eb;}
+#dash-confirm-box .confirm-ok:hover{background:#7a2222;}
 .mobile-nav{
   display:none;
 }
@@ -1629,9 +1658,9 @@ async function sendGoalReminder(){
     if(!result || result.success === false){
       throw new Error(result?.message || 'Unable to send the reminder email.');
     }
-    alert(`Goal reminder sent to ${payload.full_name}.`);
+    showDashToast(`✓ Goal reminder sent to ${payload.full_name}.`, 'success');
   }catch(error){
-    alert(error.message || 'Unable to send the reminder email right now.');
+    showDashToast(error.message || 'Unable to send the reminder email right now.', 'error');
   }finally{
     if(btn){
       btn.disabled = false;
@@ -1663,9 +1692,9 @@ async function sendWelcomeEmailToPatient(){
     });
     const result = await response.json();
     if(!result || result.success === false) throw new Error(result?.message || 'Failed to send.');
-    alert(`Welcome email sent to ${payload.full_name}.`);
+    showDashToast(`✓ Welcome email sent to ${payload.full_name}.`, 'success');
   }catch(error){
-    alert(error.message || 'Unable to send the welcome email right now.');
+    showDashToast(error.message || 'Unable to send the welcome email right now.', 'error');
   }finally{
     if(btn){ btn.disabled = false; btn.textContent = originalText || 'Resend Welcome Email'; }
   }
@@ -1676,9 +1705,14 @@ async function deleteCurrentPatient(){
   if(!row) return;
 
   const patientName = oneOf(row, ["Full Name", "Email"]) || "this patient";
-  const confirmed = confirm(`Hide ${patientName} from the dashboard? The record will stay in the sheet but will no longer appear in the visible patient list.`);
-  if(!confirmed) return;
+  showDashConfirm(
+    'Hide Patient',
+    `Hide ${patientName} from the dashboard? The record stays in the sheet but won't appear in the patient list.`,
+    async function() { await _doDeletePatient(row, patientName); }
+  );
+}
 
+async function _doDeletePatient(row, patientName) {
   const btn = document.getElementById('delete-patient-btn');
   const originalText = btn ? btn.textContent : '';
   if(btn){
@@ -1718,9 +1752,9 @@ async function deleteCurrentPatient(){
       currentDetailRow = null;
       renderDetails(null);
     }
-    alert(`${patientName} was hidden from the dashboard.`);
+    showDashToast(`✓ ${patientName} was hidden from the dashboard.`, 'success');
   }catch(error){
-    alert(error.message || 'Unable to hide the patient right now.');
+    showDashToast(error.message || 'Unable to hide the patient right now.', 'error');
   }finally{
     if(btn){
       btn.disabled = false;
@@ -1822,6 +1856,44 @@ if(sessionStorage.getItem(DASHBOARD_AUTH_KEY) === 'yes'){
   setDashboardAuthed(false);
   if(isMobileViewport()) showMobileSection('stats-grid');
 }
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+var _toastTimer = null;
+function showDashToast(msg, type) {
+  var t = document.getElementById('dash-toast');
+  if (!t) return;
+  clearTimeout(_toastTimer);
+  t.textContent = msg;
+  t.className = 'show ' + (type || '');
+  _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
+}
+
+// ── Confirm modal ─────────────────────────────────────────────────────────────
+function showDashConfirm(title, message, onConfirm) {
+  var overlay = document.getElementById('dash-confirm-overlay');
+  document.getElementById('dash-confirm-title').textContent = title;
+  document.getElementById('dash-confirm-msg').textContent = message;
+  overlay.classList.add('show');
+  document.getElementById('dash-confirm-ok').onclick = function() {
+    overlay.classList.remove('show');
+    onConfirm();
+  };
+  document.getElementById('dash-confirm-cancel').onclick = function() {
+    overlay.classList.remove('show');
+  };
+}
 </script>
+
+<div id="dash-toast"></div>
+<div id="dash-confirm-overlay">
+  <div id="dash-confirm-box">
+    <h3 id="dash-confirm-title"></h3>
+    <p id="dash-confirm-msg"></p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" id="dash-confirm-cancel">Cancel</button>
+      <button class="confirm-ok" id="dash-confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
