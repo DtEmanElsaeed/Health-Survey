@@ -1380,7 +1380,10 @@ async function openPatientDetails(email){
   }
   renderDetailsLoading(summaryRow);
   try{
-    const response = await fetch(WEB_APP_URL + '?email=' + encodeURIComponent(email), { method: 'GET' });
+    const response = await fetch(
+      WEB_APP_URL + '?email=' + encodeURIComponent(email) + '&_ts=' + Date.now(),
+      { method: 'GET', cache: 'no-store' }
+    );
     const payload = await response.json();
     if(payload && payload.found && payload.data){
       const decryptedRow = decryptRowObject(payload.data);
@@ -1615,8 +1618,9 @@ async function sendGoalReminder(){
       goal: norm(row["Goal"])
     };
 
-    const response = await fetch(WEB_APP_URL, {
+    const response = await fetch(WEB_APP_URL + '?_ts=' + Date.now(), {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify(payload)
     });
@@ -1656,8 +1660,9 @@ async function deleteCurrentPatient(){
       email: norm(row["Email"])
     };
 
-    const response = await fetch(WEB_APP_URL, {
+    const response = await fetch(WEB_APP_URL + '?_ts=' + Date.now(), {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify(payload)
     });
@@ -1711,7 +1716,10 @@ async function loadDashboard(){
 
   try {
     patientDetailsCache = {};
-    const response = await fetch(WEB_APP_URL + '?view=dashboard', { method: "GET" });
+    const response = await fetch(
+      WEB_APP_URL + '?view=dashboard&_ts=' + Date.now(),
+      { method: "GET", cache: "no-store" }
+    );
     const payload = await response.json();
     if(!payload || payload.success === false){
       throw new Error(payload?.message || "Unable to load dashboard data.");
