@@ -1295,6 +1295,7 @@ function renderDetails(row){
           <div class="detail-action-row">
             <button class="delete-btn" id="delete-patient-btn" type="button" onclick="deleteCurrentPatient()">Hide Patient</button>
             <button class="reminder-btn" id="goal-reminder-btn" type="button" onclick="sendGoalReminder()">Send Goal Reminder</button>
+            <button class="reminder-btn" id="welcome-email-btn" type="button" onclick="sendWelcomeEmailToPatient()">Resend Welcome Email</button>
             <button class="pdf-btn" type="button" onclick="downloadCurrentPatientPdf()">Download PDF Report</button>
           </div>
           <div class="detail-tags">
@@ -1636,6 +1637,37 @@ async function sendGoalReminder(){
       btn.disabled = false;
       btn.textContent = originalText || 'Send Goal Reminder';
     }
+  }
+}
+
+async function sendWelcomeEmailToPatient(){
+  const row = currentDetailRow;
+  if(!row) return;
+
+  const btn = document.getElementById('welcome-email-btn');
+  const originalText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try{
+    const payload = {
+      action: 'send_welcome_email',
+      email: norm(row["Email"]),
+      full_name: oneOf(row, ["Full Name", "Email"]),
+      language: norm(row["Language"]) || 'en'
+    };
+    const response = await fetch(WEB_APP_URL + '?_ts=' + Date.now(), {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if(!result || result.success === false) throw new Error(result?.message || 'Failed to send.');
+    alert(`Welcome email sent to ${payload.full_name}.`);
+  }catch(error){
+    alert(error.message || 'Unable to send the welcome email right now.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = originalText || 'Resend Welcome Email'; }
   }
 }
 

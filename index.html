@@ -1898,6 +1898,31 @@ let lang='en', step=0, answers={};
 // ---------- GOOGLE SHEETS WEB APP (YOUR PROVIDED URL) ----------
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxL23IzucXGA-OFAFa2PlGP5zWJCectYFuZ83sJ8W4uHMCRlmv3zyn_6IMITGB5W0/exec";
 const AES_SECRET_KEY = 'Eman';
+
+function safeFetch(url, options) {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (!isIOS) return fetch(url, options);
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open((options && options.method) || 'GET', url, true);
+    if (options && options.headers) {
+      Object.entries(options.headers).forEach(function(kv) { xhr.setRequestHeader(kv[0], kv[1]); });
+    }
+    xhr.onload = function() {
+      var responseText = xhr.responseText;
+      resolve({
+        ok: xhr.status >= 200 && xhr.status < 300,
+        status: xhr.status,
+        text: function() { return Promise.resolve(responseText); },
+        json: function() { return Promise.resolve(JSON.parse(responseText)); }
+      });
+    };
+    xhr.onerror = function() { reject(new TypeError('Network request failed')); };
+    xhr.timeout = 30000;
+    xhr.ontimeout = function() { reject(new TypeError('Request timed out')); };
+    xhr.send((options && options.body) || null);
+  });
+}
 const PLAINTEXT_FIELDS = new Set(['language','email','login_via','mode','action','deleted','welcome_name','patient_id']);
 
 function encryptValue(value){
@@ -2206,7 +2231,7 @@ async function submitSurvey() {
   const payload = buildSubmissionPayload();
 
   try {
-    const resp = await fetch(WEB_APP_URL, {
+    const resp = await safeFetch(WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify(payload)
@@ -2316,6 +2341,23 @@ function setGoogleButtonBusy(isBusy) {
   btn.querySelector('.login-btn-label').textContent = isBusy ? 'Connecting to Google…' : 'Continue with Google';
 }
 
+function isIOSSafari() {
+  var ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+}
+
+// On iOS, Google redirects back here with #access_token=... in the hash.
+// This runs once at page load, picks up the token, and signs the user in.
+function checkOAuthRedirect() {
+  if (!window.location.hash || window.location.hash.indexOf('access_token') === -1) return;
+  var params = new URLSearchParams(window.location.hash.substring(1));
+  var token = params.get('access_token');
+  var state = params.get('state');
+  if (!token || state !== 'gios') return;
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  handleGoogleToken({ access_token: token });
+}
+
 function renderGoogleButton() {
   const wrap = document.getElementById('google-btn-wrap');
   if (!wrap) return;
@@ -2334,6 +2376,7 @@ function renderGoogleButton() {
 
 function initGSI() {
   if (typeof google === 'undefined') return;
+  checkOAuthRedirect();
   renderGoogleButton();
   googleTokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
@@ -2375,6 +2418,19 @@ async function handleGoogleToken(response) {
 
 function startGoogleLogin() {
   setLoginError('');
+  if (isIOSSafari()) {
+    var redirectUri = window.location.href.split('#')[0].split('?')[0];
+    var params = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: redirectUri,
+      response_type: 'token',
+      scope: 'openid email profile',
+      state: 'gios',
+      prompt: 'select_account'
+    });
+    window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+    return;
+  }
   if (!googleTokenClient) {
     setLoginError('Google sign-in is still loading. Please try again in a moment.');
     return;
@@ -2725,7 +2781,7 @@ function submitProfile() {
   btn.disabled = true;
   btn.textContent = isAr ? 'جارٍ التحقق…' : 'Checking…';
 
-  fetch(WEB_APP_URL + '?email=' + encodeURIComponent(email))
+  safeFetch(WEB_APP_URL + '?email=' + encodeURIComponent(email))
     .then(r => r.json())
     .then(res => {
       if (res && res.found && res.data) {

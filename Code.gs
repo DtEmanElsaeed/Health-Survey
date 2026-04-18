@@ -350,8 +350,8 @@ function buildEmailHtml_(opts) {
     : '"The secret of getting ahead is getting started."');
   var quoteAuthor  = opts.quoteAuthor || (isRtl ? "— مارك توين" : "— Mark Twain");
   var footerNote   = isRtl
-    ? "تلقيت هذا البريد لأنه تم إرساله من لوحة التحكم الخاصة بك."
-    : "You are receiving this because a reminder was sent from your dashboard.";
+    ? "تلقيت هذا البريد لأنه تم إرساله من لوحة التحكم الخاصة بك. لضمان وصول رسائلنا لك، يرجى إضافة هذا البريد إلى جهات الاتصال. للإلغاء، يرجى الرد بـ Unsubscribe."
+    : "You are receiving this because of your assessment. To ensure delivery, please add this email to your contacts. To unsubscribe, reply 'Unsubscribe'.";
 
   var confettiOverlay = '';
   if (opts.confetti) {
@@ -426,7 +426,6 @@ function buildEmailHtml_(opts) {
   return '<!DOCTYPE html>' +
     '<html lang="' + (isRtl ? 'ar' : 'en') + '" dir="' + dir + '">' +
     '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cairo:wght@400;600&display=swap" rel="stylesheet">' +
     '</head>' +
     '<body style="margin:0;padding:0;background-color:#ede8df;">' +
     '<div style="background-color:#ede8df;padding:32px 16px;">' +
@@ -455,8 +454,8 @@ function sendWelcomeEmail(data) {
     : "Welcome to The First Step";
 
   var plainBody = isArabic
-    ? "أهلاً يا " + firstName + "،\n\nنورت The First Step.\nإحنا مبسوطين إنك بدأت الرحلة معانا، وصدقنا أول خطوة دي هي أهم خطوة فعلاً.\n\nبياناتك وصلت، ومن هنا هنبتدي نبني لك صورة غذائية تناسبك أنت، من غير تعقيد ولا كلام كبير.\n\nواحدة واحدة كده، وهتلاقي الدنيا بقت أظبط، والأكل بقى صاحبك مش خصمك.\n\nيلا بينا نبدأها بشياكة... ومن غير دراما ميزان كتير.\n\nبحب وتشجيع،\nThe First Step"
-    : "Hi " + firstName + ",\n\nWelcome to The First Step.\nWe are so happy you are here.\n\nYour details are in, and that means you have already done the hardest part: you started.\n\nFrom here, we will help make things feel simpler, more personal, and a lot less overwhelming.\n\nOne small step at a time, and yes, we are cheering for you.\n\nWarmly,\nThe First Step";
+    ? "أهلاً يا " + firstName + "،\n\nنورت The First Step.\nإحنا مبسوطين إنك بدأت الرحلة معانا، وصدقنا أول خطوة دي هي أهم خطوة فعلاً.\n\nبياناتك وصلت، ومن هنا هنبتدي نبني لك صورة غذائية تناسبك أنت، من غير تعقيد ولا كلام كبير.\n\nواحدة واحدة كده، وهتلاقي الدنيا بقت أظبط، والأكل بقى صاحبك مش خصمك.\n\nيلا بينا نبدأها بشياكة... ومن غير دراما ميزان كتير.\n\nبحب وتشجيع،\nThe First Step\n\n---\nلتحسين وصول الإيميلات، يرجى حفظ هذا الإيميل في جهات الاتصال. للإلغاء، يرجى الرد بـ Unsubscribe."
+    : "Hi " + firstName + ",\n\nWelcome to The First Step.\nWe are so happy you are here.\n\nYour details are in, and that means you have already done the hardest part: you started.\n\nFrom here, we will help make things feel simpler, more personal, and a lot less overwhelming.\n\nOne small step at a time, and yes, we are cheering for you.\n\nWarmly,\nThe First Step\n\n---\nTo ensure delivery, please add this email to your contacts. To unsubscribe, reply 'Unsubscribe'.";
 
   var htmlBody = isArabic
     ? '<p style="margin:0 0 16px;">أهلاً يا ' + firstName + '،</p>' +
@@ -479,12 +478,14 @@ function sendWelcomeEmail(data) {
     bodyHtml: htmlBody
   });
 
+  var senderEmail = Session.getEffectiveUser().getEmail();
   MailApp.sendEmail({
     to: email,
+    replyTo: senderEmail,
     subject: subject,
     body: plainBody,
     htmlBody: html,
-    name: "The First Step"
+    name: "The First Step | " + senderEmail
   });
 }
 
@@ -514,8 +515,8 @@ function sendGoalReminderEmail(data) {
     : "A little reminder for your goal";
 
   var plainBody = isArabic
-    ? "أهلاً يا " + firstName + "،\n\nبس جايين نفكرك على خفيف بهدفك الحالي: " + goalLabel + ".\nمش لازم تعمل انقلاب كوني النهارده، قرار صغير مظبوط يكفي جداً.\n\nاشرب مية زيادة، كل أكلك بهدوء، أو قاوم السناك اللي بيظهر فجأة كده من العدم.\nالاستمرار أهم من المثالية، واليوم الحلو يبدأ أحياناً من قرار بسيط جداً.\n\nيلا شد حيلك... وإحنا معاك من غير صفارة حكم.\n\nThe First Step"
-    : "Hi " + firstName + ",\n\nJust a quick and friendly reminder about your current goal: " + goalLabel + ".\nYou do not need a perfect day to make progress. One good decision still counts.\n\nDrink a little more water, build one balanced meal, or ignore that dramatic snack craving for five minutes.\nConsistency beats perfection, every single time.\n\nWe are rooting for you,\nThe First Step";
+    ? "أهلاً يا " + firstName + "،\n\nبس جايين نفكرك على خفيف بهدفك الحالي: " + goalLabel + ".\nمش لازم تعمل انقلاب كوني النهارده، قرار صغير مظبوط يكفي جداً.\n\nاشرب مية زيادة، كل أكلك بهدوء، أو قاوم السناك اللي بيظهر فجأة كده من العدم.\nالاستمرار أهم من المثالية، واليوم الحلو يبدأ أحياناً من قرار بسيط جداً.\n\nيلا شد حيلك... وإحنا معاك من غير صفارة حكم.\n\nThe First Step\n\n---\nلتحسين وصول الإيميلات، يرجى حفظ هذا الإيميل في جهات الاتصال. للإلغاء، يرجى الرد بـ Unsubscribe."
+    : "Hi " + firstName + ",\n\nJust a quick and friendly reminder about your current goal: " + goalLabel + ".\nYou do not need a perfect day to make progress. One good decision still counts.\n\nDrink a little more water, build one balanced meal, or ignore that dramatic snack craving for five minutes.\nConsistency beats perfection, every single time.\n\nWe are rooting for you,\nThe First Step\n\n---\nTo ensure delivery, please add this email to your contacts. To unsubscribe, reply 'Unsubscribe'.";
 
   var goalBadge = '<div style="text-align:center;margin:0 0 28px;"><div style="display:inline-block;background:linear-gradient(135deg,#f5ead4 0%,#fdf3e0 50%,#f5ead4 100%);border:1.5px solid #c9993a;border-radius:4px;padding:14px 32px;font-size:13px;font-weight:700;color:#a0782a;letter-spacing:0.18em;text-transform:uppercase;font-family:Arial,sans-serif;position:relative;"><span style="position:absolute;top:4px;left:6px;font-size:8px;color:#c9993a;opacity:.6;">&#9670;</span><span style="position:absolute;top:4px;right:6px;font-size:8px;color:#c9993a;opacity:.6;">&#9670;</span>' + goalLabel + '</div></div>';
 
@@ -539,12 +540,14 @@ function sendGoalReminderEmail(data) {
     bodyHtml: htmlBody
   });
 
+  var senderEmail = Session.getEffectiveUser().getEmail();
   MailApp.sendEmail({
     to: email,
+    replyTo: senderEmail,
     subject: subject,
     body: plainBody,
     htmlBody: html,
-    name: "The First Step"
+    name: "The First Step | " + senderEmail
   });
 }
 
@@ -596,6 +599,29 @@ function doGet(e) {
       .createTextOutput(JSON.stringify({ success: false, message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// ── Test: run this from the Apps Script editor to verify both email types ────
+function runEmailTest() {
+  var to   = "muhammad9farid@gmail.com";
+  var from = Session.getEffectiveUser().getEmail();
+  var name = "The First Step | " + from;
+
+  MailApp.sendEmail({
+    to:      to,
+    subject: "Welcome to The First Step",
+    body:    "Hi Muhammad,\n\nWelcome to The First Step! Your nutritional portrait is ready.\n\nWarmly,\nThe First Step",
+    name:    name
+  });
+  Logger.log("✓ Welcome email sent to " + to);
+
+  MailApp.sendEmail({
+    to:      to,
+    subject: "A little reminder for your goal",
+    body:    "Hi Muhammad,\n\nJust a friendly reminder about your weight loss goal. Keep going, one step at a time.\n\nCheering you on,\nThe First Step",
+    name:    name
+  });
+  Logger.log("✓ Goal reminder sent to " + to);
 }
 
 function doPost(e) {
@@ -670,13 +696,22 @@ function doPost(e) {
 
     sheet.appendRow(newRow);
     clearDashboardCache_();
+    var welcomeSent = false;
+    var welcomeError = "";
     try {
       sendWelcomeEmail(data);
+      welcomeSent = true;
     } catch (mailErr) {
-      Logger.log("Welcome email skipped: " + mailErr);
+      welcomeError = String(mailErr);
+      Logger.log("Welcome email skipped: " + welcomeError);
     }
     return ContentService
-      .createTextOutput(JSON.stringify({ success: true, mode: "inserted" }))
+      .createTextOutput(JSON.stringify({
+        success: true,
+        mode: "inserted",
+        welcome_email_sent: welcomeSent,
+        welcome_email_error: welcomeError
+      }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
