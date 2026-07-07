@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The First Step — Dietitian Dashboard</title>
+<link rel="icon" type="image/png" href="icon.png"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<meta name="theme-color" content="#243d17"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -858,6 +861,7 @@ body{
 
   <div class="auth-shell" id="auth-shell">
     <div class="auth-card">
+      <img src="logo.png" alt="Your Nutritional Portrait" style="display:block;width:min(190px,62%);height:auto;margin:0 auto 22px;" />
       <div class="auth-mark">Secure Access</div>
       <h1 class="auth-title">Dietitian Login</h1>
       <p class="auth-copy">Open the mobile dashboard with a lightweight admin sign-in first, then review patient records in an app-like interface designed for quick daily use.</p>
@@ -890,6 +894,7 @@ body{
       <div class="hero-side hero-card">
         <div class="hero-side-top">
           <div>
+            <img src="logo.png" alt="Your Nutritional Portrait" style="display:block;width:130px;height:auto;margin-bottom:10px;" />
             <div class="brand">The First Step</div>
             <div class="last-sync" id="last-sync">Waiting for first sync…</div>
           </div>
@@ -966,7 +971,7 @@ const DASHBOARD_AUTH_KEY = "the-first-step-dashboard-auth";
 const DASHBOARD_USER = "admin";
 const DASHBOARD_PASS = "adnim123";
 const AES_SECRET_KEY = "Eman";
-const PLAINTEXT_FIELDS = new Set(["language", "email", "login_via", "mode", "action", "deleted", "welcome_name", "patient_id"]);
+const PLAINTEXT_FIELDS = new Set(["language", "email", "login_via", "mode", "action", "deleted", "welcome_name", "patient_id", "profile_for"]);
 
 let allPatients = [];
 let filteredPatients = [];
@@ -1238,6 +1243,10 @@ function renderPatientList(){
   els.patientCount.textContent = `${filteredPatients.length} visible`;
   els.patientList.innerHTML = filteredPatients.map(row => {
     const email = norm(row["Email"]);
+    const isChild = norm(row["Profile For"]).toLowerCase() === "child";
+    const childBadge = isChild
+      ? ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#7a4d00;background:#fbe7c2;border:1px solid #e6c98a;border-radius:99px;padding:1px 8px;vertical-align:middle;">👶 Child</span>'
+      : '';
     const conditions = splitList(row["Conditions"]).slice(0, 3);
     const chips = [
       norm(row["Goal"]) && titleCase(row["Goal"]),
@@ -1250,7 +1259,7 @@ function renderPatientList(){
       <button class="patient-card ${email === selectedPatientEmail ? "active" : ""}" type="button" data-email="${escapeAttr(email)}">
         <div class="patient-head">
           <div>
-            <div class="patient-name">${escapeHtml(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}</div>
+            <div class="patient-name">${escapeHtml(oneOf(row, ["Full Name", "Email"]) || "Unnamed patient")}${childBadge}</div>
             <div class="patient-email">${escapeHtml(norm(row["Email"]) || "No email provided")}</div>
           </div>
           <div class="patient-meta">${escapeHtml(fmtTimestamp(row["Timestamp"]))}</div>
@@ -1446,6 +1455,7 @@ function isArabicContentRow(row){
 
 function buildPatientReportSections(row){
   const isArabic = isArabicContentRow(row);
+  const isChildRow = norm(row["Profile For"]).toLowerCase() === "child";
   const conditions = splitList(row["Conditions"]).map(titleCase).join(", ") || "None noted";
   const digestive = splitList(row["Digestive"]).map(titleCase).join(", ") || "None noted";
   const beverages = splitList(row["Beverages"]).map(titleCase).join(", ") || "—";
@@ -1456,7 +1466,12 @@ function buildPatientReportSections(row){
       title: isArabic ? "الملف الشخصي" : "Profile",
       rows: [
         [isArabic ? "رقم المريض" : "Patient ID", cleanReportValue(row["Patient ID"])],
-        [isArabic ? "الاسم" : "Full name", oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"],
+        ...(isChildRow ? [
+          [isArabic ? "نوع الملف" : "Profile for", isArabic ? "طفل (وضع الأبوين)" : "Child (parenting mode)"],
+          [isArabic ? "ولي الأمر" : "Parent / Guardian", cleanReportValue(row["Guardian Name"])],
+          [isArabic ? "صلة القرابة" : "Relationship", titleCase(row["Guardian Relationship"]) || "—"]
+        ] : []),
+        [isChildRow ? (isArabic ? "اسم الطفل" : "Child's name") : (isArabic ? "الاسم" : "Full name"), oneOf(row, ["Full Name", "Email"]) || "Unnamed patient"],
         [isArabic ? "البريد الإلكتروني" : "Email", cleanReportValue(row["Email"])],
         [isArabic ? "الهاتف" : "Phone", cleanReportValue(row["Phone"])],
         [isArabic ? "المدينة" : "City", cleanReportValue(row["City"])],

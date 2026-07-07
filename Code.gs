@@ -29,13 +29,15 @@ var HEADERS = [
   "Pregnant", "Period",
   "Deleted",
   "Raw JSON",
-  "Patient ID"
+  "Patient ID",
+  "Profile For", "Guardian Name", "Guardian Relationship"
 ];
 var DASHBOARD_CACHE_KEY = "dashboard_summary_v1";
 var DASHBOARD_CACHE_TTL = 120;
 var DASHBOARD_FIELDS = [
   "Timestamp", "Language", "Full Name", "Email", "Phone", "City", "Login Via",
-  "Age", "BMI", "Conditions", "Goal", "Stress", "Patient ID"
+  "Age", "BMI", "Conditions", "Goal", "Stress", "Patient ID",
+  "Profile For"
 ];
 
 function getSheet_() {
@@ -187,7 +189,11 @@ function buildRow(data) {
     data.deleted || "0",
     // Raw
     JSON.stringify(storedData),
-    data.patient_id || ""
+    data.patient_id || "",
+    // Parenting mode
+    data.profile_for || "self",
+    data.guardian_name || "",
+    data.guardian_relationship || ""
   ];
 }
 
@@ -372,7 +378,9 @@ function buildEmailHtml_(opts) {
     '  <div style="position:absolute;top:16px;left:20px;opacity:.22;font-size:28px;color:#a0782a;line-height:1;">&#10023;</div>',
     '  <div style="position:absolute;top:16px;right:20px;opacity:.22;font-size:28px;color:#a0782a;line-height:1;transform:scaleX(-1);">&#10023;</div>',
     '  <div style="font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:#8ba67a;font-family:' + sans + ';margin-bottom:18px;">' + headerLabel + '</div>',
-    '  <div style="font-size:34px;margin-bottom:12px;line-height:1;">🌿</div>',
+    '  <div style="background:#fdfaf5;border-radius:16px;padding:14px 22px;display:inline-block;margin:0 auto 14px;box-shadow:0 6px 16px rgba(0,0,0,0.20);">',
+    '    <img src="https://dtemanelsaeed.github.io/Health-Survey/logo.png" alt="Your Nutritional Portrait" width="160" style="display:block;width:160px;max-width:220px;height:auto;" />',
+    '  </div>',
     '  <div style="font-family:' + serif + ';font-size:32px;font-weight:600;font-style:' + headingStyle + ';color:#fdfaf5;letter-spacing:.02em;line-height:1.2;margin-bottom:4px;">The First Step</div>',
     '  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:16px auto 0;max-width:200px;">',
     '    <div style="height:1px;flex:1;background:linear-gradient(90deg,transparent,#a0782a);"></div>',

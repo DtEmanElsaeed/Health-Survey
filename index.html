@@ -4,6 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The First Step — Your Nutritional Portrait</title>
+<link rel="icon" type="image/png" href="icon.png"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<meta name="theme-color" content="#243d17"/>
+<meta name="description" content="Your Nutritional Portrait — a calm, personalised nutrition assessment. Take the first step."/>
+<meta property="og:title" content="The First Step — Your Nutritional Portrait"/>
+<meta property="og:description" content="A calm, personalised nutrition assessment, made for you."/>
+<meta property="og:image" content="logo.png"/>
+<meta property="og:type" content="website"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════
@@ -1727,6 +1735,56 @@ body.rtl .question-bg-mark{
     padding:16px 14px;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE CONTAINMENT  (added)
+   Phone  : full-bleed single column (unchanged).
+   Desktop: a readable, centered column so form fields
+            stop stretching edge-to-edge on wide screens.
+═══════════════════════════════════════════════════ */
+.stage-side #login-screen .card,
+.stage-side #profile-screen .card,
+.stage-side #returning-screen .card,
+.stage-side #survey-screen .card,
+.stage-side #result-screen .card{
+  max-width:640px;
+  margin-left:auto;
+  margin-right:auto;
+}
+@media(min-width:760px){
+  /* Survey and result run a touch wider for the two-column option grid */
+  .stage-side #survey-screen .card,
+  .stage-side #result-screen .card{
+    max-width:720px;
+    margin-top:clamp(20px,4vh,52px);
+    margin-bottom:clamp(20px,4vh,52px);
+  }
+  /* Plain forms read as an intentional floating card on desktop */
+  .stage-side #login-screen .card,
+  .stage-side #profile-screen .card,
+  .stage-side #returning-screen .card{
+    margin-top:clamp(20px,5vh,56px);
+    margin-bottom:clamp(20px,5vh,56px);
+    padding:clamp(30px,3vw,46px);
+    background:linear-gradient(180deg, rgba(253,250,245,0.98), rgba(248,244,237,0.96));
+    border:1px solid rgba(213,204,193,0.65);
+    border-radius:26px;
+    box-shadow:0 26px 64px rgba(26,25,18,0.10), 0 2px 10px rgba(26,25,18,0.05);
+  }
+}
+/* Small phones: stack the two-up field row (DOB + Gender) so neither is cramped */
+@media(max-width:400px){
+  .field-group{grid-template-columns:1fr;gap:14px;}
+}
+
+/* ═══ BRAND LOGO ═══ */
+.brand-logo{display:block;height:auto;max-width:100%;margin-left:auto;margin-right:auto;}
+.brand-logo-lg{width:min(230px,60vw);margin-bottom:16px;}
+.brand-logo-md{width:min(170px,46vw);margin:0 auto 20px;}
+@media(max-width:520px){
+  .brand-logo-lg{width:min(190px,58vw);}
+  .brand-logo-md{width:min(150px,52vw);}
+}
 </style>
 <!-- ─ Google Identity Services ─ (replace YOUR_GOOGLE_CLIENT_ID) -->
 <script src="https://accounts.google.com/gsi/client" onload="initGSI()" async defer></script>
@@ -1779,7 +1837,7 @@ body.rtl .question-bg-mark{
       <!-- ══ LOGIN SCREEN ══ -->
       <div id="login-screen">
         <div class="card login-card">
-          <span class="login-ornament">🌿</span>
+          <img class="brand-logo brand-logo-lg" src="logo.png" alt="Your Nutritional Portrait" />
           <div class="login-headline">Welcome to The First Step</div>
           <div class="login-sub">Sign in to pre-fill your personal details and save your nutritional portrait to your account.</div>
           <div class="login-btns">
@@ -1796,7 +1854,7 @@ body.rtl .question-bg-mark{
       <div id="lang-screen" class="hidden">
         <div class="card">
           <div class="brand-mark">The First Step</div>
-          <span class="lang-ornament">🌿</span>
+          <img class="brand-logo brand-logo-md" src="logo.png" alt="Your Nutritional Portrait" />
           <div class="lang-headline">Your Nutritional Portrait</div>
           <div class="lang-headline-ar">بورتريه غذائي خاص بك</div>
           <div class="lang-tagline">A curated assessment of your dietary philosophy, daily rituals, and nutritional aspirations.</div>
@@ -1816,6 +1874,28 @@ body.rtl .question-bg-mark{
             <div class="question-sub" id="profile-subline">This helps us personalise your nutritional portrait. All fields marked <span style="color:var(--forest);font-style:normal;font-weight:600">*</span> are required.</div>
           </div>
           <div class="profile-form" id="profile-form">
+            <!-- Parenting mode toggle -->
+            <div class="pf-group">
+              <label class="field-label" id="lbl-mode">Who is this assessment for?</label>
+              <div class="pf-mode-toggle" id="pf-mode-toggle" style="display:flex;gap:10px">
+                <button type="button" class="pf-mode-btn" id="pf-mode-self" onclick="setProfileMode('self')" style="flex:1;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border-fine);background:transparent;font:inherit;font-size:13px;cursor:pointer;transition:all .18s ease;">🧑 Myself</button>
+                <button type="button" class="pf-mode-btn" id="pf-mode-child" onclick="setProfileMode('child')" style="flex:1;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border-fine);background:transparent;font:inherit;font-size:13px;cursor:pointer;transition:all .18s ease;">👶 My child</button>
+              </div>
+            </div>
+            <!-- Parent / Guardian (child mode only) -->
+            <div class="pf-group pf-child-only" id="pf-guardian-group" style="display:none">
+              <label class="field-label" id="lbl-guardian">Parent / Guardian name <span class="pf-req">*</span></label>
+              <input type="text" class="text-input" id="pf-guardian" placeholder="e.g. Sarah Al-Mansouri" autocomplete="name"/>
+            </div>
+            <div class="pf-group pf-child-only" id="pf-relation-group" style="display:none">
+              <label class="field-label" id="lbl-relation">Relationship to child <span class="pf-req">*</span></label>
+              <select class="text-input" id="pf-relation" style="cursor:pointer">
+                <option value="" id="opt-rel-select">— Select —</option>
+                <option value="mother" id="opt-rel-mother">Mother</option>
+                <option value="father" id="opt-rel-father">Father</option>
+                <option value="guardian" id="opt-rel-guardian">Guardian</option>
+              </select>
+            </div>
             <!-- Full Name -->
             <div class="pf-group">
               <label class="field-label" id="lbl-name">Full Name <span class="pf-req">*</span></label>
@@ -1923,7 +2003,7 @@ function safeFetch(url, options) {
     xhr.send((options && options.body) || null);
   });
 }
-const PLAINTEXT_FIELDS = new Set(['language','email','login_via','mode','action','deleted','welcome_name','patient_id']);
+const PLAINTEXT_FIELDS = new Set(['language','email','login_via','mode','action','deleted','welcome_name','patient_id','profile_for']);
 
 function encryptValue(value){
   const raw = value == null ? '' : String(value);
@@ -2083,8 +2163,8 @@ const QUESTIONS=[
   {id:'dislikes', section:{en:'PREFERENCES',ar:'التفضيلات'}, type:'text', optional:true, q:{en:'Which foods do you dislike or avoid?',ar:'ما الأطعمة التي لا تحبها أو تتجنبها؟'}, placeholder:{en:'e.g. Liver, olives, mushrooms…',ar:'مثلاً: كبد، زيتون، فطر…'}},
   {id:'past_diet_barrier', section:{en:'OPEN QUESTIONS',ar:'أسئلة مفتوحة'}, type:'text', optional:true, q:{en:'What prevented you from sticking to a diet before?',ar:'ما الذي منعك من الاستمرار سابقًا في نظام غذائي؟'}, sub:{en:'Optional.',ar:'اختياري.'}, placeholder:{en:'e.g. Cravings, social events, no time…',ar:'مثلاً: الرغبة في الأكل، المناسبات، لا وقت…'}},
   {id:'notes', section:{en:'OPEN QUESTIONS',ar:'أسئلة مفتوحة'}, type:'text', optional:true, q:{en:'Anything else you would like to add?',ar:'هل ترغب بإضافة أي شيء آخر؟'}, placeholder:{en:'Anything that helps your nutritionist understand you better…',ar:'أي شيء يساعد أخصائي التغذية على فهم وضعك أفضل…'}},
-  {id:'pregnant', condition:()=>getCurrentGenderValue()==='female', section:{en:'HER PORTRAIT',ar:'للإناث فقط'}, checkpoint:{en:'A few questions tailored just for you.',ar:'بعض الأسئلة المخصصة لكِ.'}, female:true, type:'single', q:{en:'Are you currently pregnant or breastfeeding?',ar:'هل أنتِ حامل أو مرضعة حاليًا؟'}, options:[{icon:'',en:'No',ar:'لا',val:'no'},{icon:'',en:'Pregnant',ar:'حامل',val:'pregnant'},{icon:'',en:'Breastfeeding',ar:'مرضعة',val:'breastfeeding'}]},
-  {id:'period', condition:()=>getCurrentGenderValue()==='female', section:{en:'HER PORTRAIT',ar:'للإناث فقط'}, female:true, type:'single', q:{en:'Is your menstrual cycle regular?',ar:'هل دورتك الشهرية منتظمة؟'}, options:[{icon:'',en:'Yes — regular',ar:'نعم — منتظمة',val:'yes'},{icon:'',en:'No — irregular',ar:'لا — غير منتظمة',val:'no'}]}
+  {id:'pregnant', condition:()=>getCurrentGenderValue()==='female'&&!isChildProfile(), section:{en:'HER PORTRAIT',ar:'للإناث فقط'}, checkpoint:{en:'A few questions tailored just for you.',ar:'بعض الأسئلة المخصصة لكِ.'}, female:true, type:'single', q:{en:'Are you currently pregnant or breastfeeding?',ar:'هل أنتِ حامل أو مرضعة حاليًا؟'}, options:[{icon:'',en:'No',ar:'لا',val:'no'},{icon:'',en:'Pregnant',ar:'حامل',val:'pregnant'},{icon:'',en:'Breastfeeding',ar:'مرضعة',val:'breastfeeding'}]},
+  {id:'period', condition:()=>getCurrentGenderValue()==='female'&&!isChildProfile(), section:{en:'HER PORTRAIT',ar:'للإناث فقط'}, female:true, type:'single', q:{en:'Is your menstrual cycle regular?',ar:'هل دورتك الشهرية منتظمة؟'}, options:[{icon:'',en:'Yes — regular',ar:'نعم — منتظمة',val:'yes'},{icon:'',en:'No — irregular',ar:'لا — غير منتظمة',val:'no'}]}
 ];
 
 const SECTION_ART={
@@ -2167,6 +2247,7 @@ function isVisible(i){const q=QUESTIONS[i];return!q.condition||q.condition();}
 function totalVisible(){return QUESTIONS.filter((_,i)=>isVisible(i)).length;}
 function visibleIndex(){let c=0;for(let i=0;i<=step;i++)if(isVisible(i))c++;return c;}
 function getCurrentGenderValue(){return getAnswer('gender')?.val||userPersonalData?.gender||'';}
+function isChildProfile(){return (userPersonalData&&userPersonalData.profile_for==='child')||(typeof profileMode!=='undefined'&&profileMode==='child'&&!userPersonalData);}
 function deriveAgeBandFromDob(dob){if(!dob)return'';const dt=new Date(dob);if(Number.isNaN(dt.getTime()))return'';const age=Math.floor((Date.now()-dt.getTime())/31557600000);return age<18?'u18':age<=25?'18-25':age<=40?'26-40':'40+';}
 function sectionThemeClass(sectionKey){
   const map={
@@ -2196,6 +2277,9 @@ function buildSubmissionPayload(){
     payload.gender     = userPersonalData.gender || '';
     payload.age        = deriveAgeBandFromDob(userPersonalData.dob);
     payload.patient_id = userPersonalData.patient_id || '';
+    payload.profile_for = userPersonalData.profile_for || 'self';
+    payload.guardian_name = userPersonalData.guardian_name || '';
+    payload.guardian_relationship = userPersonalData.guardian_relationship || '';
   }
   // ── Social login provider ─────────────────────────
   payload.login_via = userProfile ? userProfile.via : 'Guest';
@@ -2218,7 +2302,7 @@ function buildSubmissionPayload(){
   });
   const h=parseFloat(payload.height),w=parseFloat(payload.weight);
   payload.bmi=(h&&w&&h>0&&w>0)?(w/Math.pow(h/100,2)).toFixed(1):'';
-  payload.welcome_name = userPersonalData?.name || '';
+  payload.welcome_name = (userPersonalData?.profile_for==='child' ? (userPersonalData?.guardian_name||userPersonalData?.name) : userPersonalData?.name) || '';
   return encryptPayloadFields(payload);
 }
 async function submitSurvey() {
@@ -2603,6 +2687,7 @@ function _loadAnswersFromSheet(sheetRow) {
     }
   });
 
+  const _profileFor = ((_normalizeSheetValue(sheetRow['Profile For']) || (userPersonalData?.profile_for || 'self')).toLowerCase() === 'child') ? 'child' : 'self';
   userPersonalData = {
     name: _normalizeSheetValue(sheetRow['Full Name']) || (userPersonalData?.name || ''),
     email: _normalizeSheetValue(sheetRow['Email']) || (userPersonalData?.email || ''),
@@ -2610,8 +2695,15 @@ function _loadAnswersFromSheet(sheetRow) {
     dob: _normalizeSheetValue(sheetRow['DOB']) || (userPersonalData?.dob || ''),
     gender: _normalizeSheetValue(sheetRow['Gender (Profile)']) || (userPersonalData?.gender || ''),
     city: _normalizeSheetValue(sheetRow['City']) || (userPersonalData?.city || ''),
-    patient_id: _normalizeSheetValue(sheetRow['Patient ID']) || (userPersonalData?.patient_id || '')
+    patient_id: _normalizeSheetValue(sheetRow['Patient ID']) || (userPersonalData?.patient_id || ''),
+    profile_for: _profileFor,
+    guardian_name: _normalizeSheetValue(sheetRow['Guardian Name']) || (userPersonalData?.guardian_name || ''),
+    guardian_relationship: _normalizeSheetValue(sheetRow['Guardian Relationship']) || (userPersonalData?.guardian_relationship || '')
   };
+  profileMode = _profileFor;
+  // Reflect restored mode if the parent returns to the profile screen
+  if (document.getElementById('pf-guardian')) document.getElementById('pf-guardian').value = userPersonalData.guardian_name || '';
+  if (document.getElementById('pf-relation')) document.getElementById('pf-relation').value = userPersonalData.guardian_relationship || '';
 }
 
 function hideIntermediateScreens() {
@@ -2700,6 +2792,42 @@ startSurvey = function(l) {
   showProfileScreen();
 };
 
+let profileMode = 'self';
+
+function styleModeBtn(btn, active){
+  if(!btn) return;
+  btn.style.background  = active ? 'var(--forest)' : 'transparent';
+  btn.style.color       = active ? '#fdfaf5' : '#3a3830';
+  btn.style.borderColor = active ? 'var(--forest)' : 'var(--border-fine)';
+  btn.style.fontWeight  = active ? '600' : '500';
+}
+
+// Toggle the profile screen between "Myself" and "My child" (parenting) modes.
+function setProfileMode(mode){
+  profileMode = mode === 'child' ? 'child' : 'self';
+  const isAr  = lang === 'ar';
+  const child = profileMode === 'child';
+
+  styleModeBtn(document.getElementById('pf-mode-self'),  !child);
+  styleModeBtn(document.getElementById('pf-mode-child'),  child);
+  document.querySelectorAll('.pf-child-only').forEach(el => { el.style.display = child ? '' : 'none'; });
+
+  document.getElementById('profile-headline').textContent = child
+    ? (isAr ? 'أخبرينا عن طفلك' : 'Tell us about your child')
+    : (isAr ? 'أخبرنا قليلاً عن نفسك' : 'Tell us a little about yourself');
+  document.getElementById('lbl-name').innerHTML   = (child ? (isAr ? 'اسم الطفل الكامل' : "Child's Full Name")   : (isAr ? 'الاسم الكامل' : 'Full Name'))        + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-email').innerHTML  = (child ? (isAr ? 'بريد ولي الأمر' : "Parent's Email")        : (isAr ? 'البريد الإلكتروني' : 'Email Address')) + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-phone').innerHTML  = (child ? (isAr ? 'هاتف ولي الأمر' : "Parent's Phone")        : (isAr ? 'رقم الهاتف' : 'Phone Number'))         + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-dob').innerHTML    = (child ? (isAr ? 'تاريخ ميلاد الطفل' : "Child's Date of Birth") : (isAr ? 'تاريخ الميلاد' : 'Date of Birth')) + ' <span class="pf-req">*</span>';
+  document.getElementById('lbl-gender').innerHTML = (child ? (isAr ? 'جنس الطفل' : "Child's Gender")             : (isAr ? 'الجنس' : 'Gender'))                    + ' <span class="pf-req">*</span>';
+  document.getElementById('pf-name').placeholder  = child ? (isAr ? 'مثلاً: يوسف أحمد' : 'e.g. Youssef Ahmed') : (isAr ? 'مثلاً: سارة المنصوري' : 'e.g. Sarah Al-Mansouri');
+
+  // Self mode requires 16+; child mode allows any past date (validated to under 18 on submit).
+  const maxDob = new Date();
+  maxDob.setFullYear(maxDob.getFullYear() - (child ? 0 : 16));
+  document.getElementById('pf-dob').max = maxDob.toISOString().split('T')[0];
+}
+
 function showProfileScreen() {
   document.getElementById('profile-screen').classList.remove('hidden');
   document.getElementById('returning-screen').classList.add('hidden');
@@ -2734,6 +2862,16 @@ function showProfileScreen() {
   document.getElementById('pf-back-btn').textContent = isAr ? '→' : '←';
   document.getElementById('returning-back-btn').textContent = isAr ? 'استخدام بريد آخر' : 'Use another email';
   document.getElementById('returning-edit-btn').textContent = isAr ? 'تعديل الإجابات' : 'Edit Submission';
+  document.getElementById('lbl-mode').textContent      = isAr ? 'لمن هذا التقييم؟' : 'Who is this assessment for?';
+  document.getElementById('pf-mode-self').textContent  = isAr ? '🧑 لنفسي' : '🧑 Myself';
+  document.getElementById('pf-mode-child').textContent = isAr ? '👶 لطفلي' : '👶 My child';
+  document.getElementById('lbl-guardian').innerHTML    = (isAr ? 'اسم ولي الأمر' : 'Parent / Guardian name') + ' <span class="pf-req">*</span>';
+  document.getElementById('pf-guardian').placeholder   = isAr ? 'مثلاً: سارة المنصوري' : 'e.g. Sarah Al-Mansouri';
+  document.getElementById('lbl-relation').innerHTML    = (isAr ? 'صلتك بالطفل' : 'Relationship to child') + ' <span class="pf-req">*</span>';
+  document.getElementById('opt-rel-select').textContent   = isAr ? '— اختر —' : '— Select —';
+  document.getElementById('opt-rel-mother').textContent   = isAr ? 'الأم' : 'Mother';
+  document.getElementById('opt-rel-father').textContent   = isAr ? 'الأب' : 'Father';
+  document.getElementById('opt-rel-guardian').textContent = isAr ? 'ولي أمر' : 'Guardian';
 
   // Pre-fill from social login
   if (userProfile) {
@@ -2754,6 +2892,9 @@ function showProfileScreen() {
     }
   }
 
+  // Sync the Myself / My child toggle (labels, visibility, DOB limit)
+  setProfileMode(profileMode);
+
   // Animate card in
   const card=document.getElementById('profile-card');
   card.style.animation='none'; card.offsetHeight;
@@ -2767,25 +2908,42 @@ function profileGoBack() {
 
 function submitProfile() {
   const isAr  = lang === 'ar';
+  const child = profileMode === 'child';
   const name  = document.getElementById('pf-name').value.trim();
   const email = document.getElementById('pf-email').value.trim();
   const phone = document.getElementById('pf-phone').value.trim();
   const dob   = document.getElementById('pf-dob').value;
   const gender= document.getElementById('pf-gender').value;
   const city  = document.getElementById('pf-city').value.trim();
+  const guardianName = document.getElementById('pf-guardian').value.trim();
+  const relationship = document.getElementById('pf-relation').value;
   const errEl = document.getElementById('pf-err');
   const btn   = document.getElementById('pf-next-btn');
 
-  if (!name)   { showPfErr(errEl, isAr?'يرجى إدخال اسمك الكامل.':'Please enter your full name.'); return; }
+  if (child && !guardianName) { showPfErr(errEl, isAr?'يرجى إدخال اسم ولي الأمر.':'Please enter the parent / guardian name.'); return; }
+  if (child && !relationship) { showPfErr(errEl, isAr?'يرجى اختيار صلتك بالطفل.':'Please select your relationship to the child.'); return; }
+  if (!name)   { showPfErr(errEl, child?(isAr?'يرجى إدخال اسم الطفل.':"Please enter the child's name."):(isAr?'يرجى إدخال اسمك الكامل.':'Please enter your full name.')); return; }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showPfErr(errEl, isAr?'يرجى إدخال بريد إلكتروني صحيح.':'Please enter a valid email address.'); return; }
-  if (!phone)  { showPfErr(errEl, isAr?'يرجى إدخال رقم هاتفك.':'Please enter your phone number.'); return; }
-  if (!dob)    { showPfErr(errEl, isAr?'يرجى إدخال تاريخ ميلادك.':'Please enter your date of birth.'); return; }
-  { const _d=new Date(dob),_t=new Date(); let _a=_t.getFullYear()-_d.getFullYear(); const _m=_t.getMonth()-_d.getMonth(); if(_m<0||(_m===0&&_t.getDate()<_d.getDate()))_a--; if(_a<16){showPfErr(errEl,isAr?'يجب أن يكون عمرك 16 سنة على الأقل للمشاركة.':'You must be at least 16 years old to participate.');return;} }
-  if (!gender) { showPfErr(errEl, isAr?'يرجى اختيار الجنس.':'Please select your gender.'); return; }
+  if (!phone)  { showPfErr(errEl, isAr?'يرجى إدخال رقم الهاتف.':'Please enter a phone number.'); return; }
+  if (!dob)    { showPfErr(errEl, child?(isAr?'يرجى إدخال تاريخ ميلاد الطفل.':"Please enter the child's date of birth."):(isAr?'يرجى إدخال تاريخ ميلادك.':'Please enter your date of birth.')); return; }
+  { const _d=new Date(dob),_t=new Date(); let _a=_t.getFullYear()-_d.getFullYear(); const _m=_t.getMonth()-_d.getMonth(); if(_m<0||(_m===0&&_t.getDate()<_d.getDate()))_a--;
+    if (_d > _t) { showPfErr(errEl, isAr?'تاريخ الميلاد غير صحيح.':'Please enter a valid date of birth.'); return; }
+    if (child) {
+      if (_a >= 18) { showPfErr(errEl, isAr?'وضع الأبوين مخصص للأطفال تحت 18 عامًا. للبالغين اختر «لنفسي».':'Parenting mode is for children under 18. For an adult, choose “Myself”.'); return; }
+    } else {
+      if (_a < 16) { showPfErr(errEl, isAr?'يجب أن يكون عمرك 16 سنة على الأقل للمشاركة. إذا كنت تُدخل بيانات طفلك، اختر «لطفلي».':'You must be at least 16 to participate. If entering your child’s data, choose “My child”.'); return; }
+    }
+  }
+  if (!gender) { showPfErr(errEl, child?(isAr?'يرجى اختيار جنس الطفل.':"Please select the child's gender."):(isAr?'يرجى اختيار الجنس.':'Please select your gender.')); return; }
   errEl.classList.remove('show');
 
   answers = {};
-  userPersonalData = { name, email, phone, dob, gender, city };
+  userPersonalData = {
+    name, email, phone, dob, gender, city,
+    profile_for: child ? 'child' : 'self',
+    guardian_name: child ? guardianName : '',
+    guardian_relationship: child ? relationship : ''
+  };
 
   btn.disabled = true;
   btn.textContent = isAr ? 'جارٍ التحقق…' : 'Checking…';
@@ -2948,6 +3106,16 @@ renderStep=function(){
 const _origShowResults=showResults;
 showResults=function(){
   _origShowResults();
+  // Closing brand moment: append the logo to the result card
+  (function(){
+    var rc=document.getElementById('result-card');
+    if(!rc) return;
+    var foot=document.createElement('div');
+    foot.className='result-logo';
+    foot.style.cssText='text-align:center;margin-top:28px;';
+    foot.innerHTML='<div style="width:44px;height:2px;background:linear-gradient(90deg,#a0782a,#c9993a);border-radius:2px;margin:0 auto 16px;"></div><img src="logo.png" alt="Your Nutritional Portrait" style="display:block;width:min(160px,46vw);height:auto;margin:0 auto;opacity:.92;">';
+    rc.appendChild(foot);
+  })();
   launchConfetti(4500);
   setTimeout(()=>{
     const card=document.getElementById('result-card');
